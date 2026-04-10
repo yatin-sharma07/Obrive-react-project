@@ -1,0 +1,36 @@
+import FONTS from "@/assets/fonts";
+import { FadeInOnLoad } from "@/components/shared/motion/GsapMotion";
+import { buttonVariants } from "@/components/ui/button";
+import { HomeIcon, Sparkles } from "lucide-react";
+import Link from "next/link";
+
+export default function ComingSoon() {
+  return (
+    <div className="min-h-screen bg-none flex flex-col gap-8 items-center justify-center px-4">
+      <FadeInOnLoad delay={0}>
+        <h1
+          className={`${FONTS.microgrammaBold.className} text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-primary text-center`}
+        >
+          Coming Soon
+        </h1>
+        <h2
+          className={`${FONTS.microgrammaBold.className} mt-6 text-2xl sm:text-3xl text-center text-primary`}
+        >
+          Ella is on the way
+        </h2>
+
+        <p className="mt-3 text-sm text-center max-w-xl mx-auto">
+          Our AI assistant is currently in development and will be available
+          soon. Stay tuned for exciting updates!
+        </p>
+      </FadeInOnLoad>
+      <Link
+        href="/"
+        className={buttonVariants({ variant: "default", size: "lg" })}
+      >
+        <HomeIcon className="size-4" />
+        Back to Home
+      </Link>
+    </div>
+  );
+}

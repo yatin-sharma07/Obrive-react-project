@@ -1,0 +1,27 @@
+services:
+  obrive-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NODE_ENV: production
+    image: obrive-project:latest
+    container_name: obrive-web
+    ports:
+      - "3010:3010"
+    environment:
+      NODE_ENV: production
+      PORT: 3010
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3010', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - obrive-network
+
+networks:
+  obrive-network:
+    driver: bridge
