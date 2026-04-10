@@ -77,7 +77,7 @@ const FeaturedIn = () => {
 
       <div className="w-full max-w-7xl overflow-hidden relative px-4">
         <div
-          className="flex transition-transform duration-500 ease-in-out"
+          className="flex transition-transform duration-1500 ease-in-out"
           style={{
             transform: `translateX(-${currentIndex * 100}%)`,
           }}

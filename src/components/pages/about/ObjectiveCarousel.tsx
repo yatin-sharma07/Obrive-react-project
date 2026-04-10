@@ -28,7 +28,7 @@ export default function ObjectiveCarousel() {
   useEffect(() => {
     const autoScroll = setInterval(() => {
       scrollToNext();
-    }, 3000);
+    }, 5000);
 
     return () => clearInterval(autoScroll);
   }, [scrollToNext]);
@@ -37,7 +37,7 @@ export default function ObjectiveCarousel() {
     <div className="bg-gradient flex gap-8 flex-col items-center max-sm:px-4 justify-center py-16">
       <div className="w-full max-w-[1238px] overflow-hidden relative">
         <div
-          className="flex transition-transform duration-500 ease-in-out"
+          className="flex transition-transform duration-1500 ease-in-out"
           style={{
             transform: `translateX(-${currentIndex * 100}%)`,
           }}
