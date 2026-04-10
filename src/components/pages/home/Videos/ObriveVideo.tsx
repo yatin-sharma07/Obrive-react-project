@@ -56,7 +56,7 @@ export default function ObriveVideo() {
   const handleLoadedData = () => {
     setIsLoaded(true);
     if (videoRef.current) {
-      videoRef.current.muted = false;
+      videoRef.current.muted = true; // mute video to allow autoplay in browsers that block unmuted autoplay
     }
     void attemptVideoPlay();
   };
@@ -64,7 +64,7 @@ export default function ObriveVideo() {
   const handleCanPlay = () => {
     // video is ready to play
     if (videoRef.current && shouldLoad) {
-      videoRef.current.muted = false;
+      videoRef.current.muted = true; // ensure video is muted to allow autoplay
       void attemptVideoPlay();
     }
   };
@@ -94,6 +94,7 @@ export default function ObriveVideo() {
         ref={videoRef}
         autoPlay
         loop
+        muted
         playsInline
         preload="auto"
         controls
