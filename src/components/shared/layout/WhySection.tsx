@@ -1,3 +1,4 @@
+"use client";
 import FONTS from "@/assets/fonts";
 import { Button } from "@/components/ui/button";
 import { WHY_SECTION_TYPE } from "@/constants/pages/why-section";
@@ -31,8 +32,18 @@ const WhySection = ({ link,why, title, button, description }: WHY_SECTION_TYPE) 
                 variant={"outline"}
                 size={"lg"}
                 className="relative z-50 text-xs border-primary text-[10px] cursor-pointer text-primary uppercase"
+                 onClick={() => {
+                   document.getElementById("career")?.scrollIntoView({
+      behavior: "smooth",
+    });
+    setTimeout(() => {
+      history.replaceState(null, "", window.location.pathname);
+    }, 500);
+  }}
               >
-                <Link href={link}>{button}</Link>
+               <a href={link}>
+                  {button}
+                </a>
               </Button>
             ) : (
               <Button

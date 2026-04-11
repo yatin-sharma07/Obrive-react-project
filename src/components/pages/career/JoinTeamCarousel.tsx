@@ -35,7 +35,7 @@ export default function JoinTeamCarousel() {
     <div className="flex gap-8 max-sm:px-4 flex-col items-center justify-center py-16">
       <div className="w-full max-w-[1238px] overflow-hidden relative">
         <div
-          className="flex transition-transform duration-500 ease-in-out"
+          className="flex transition-transform duration-1500 ease-in-out"
           style={{
             transform: `translateX(-${currentIndex * 100}%)`,
           }}

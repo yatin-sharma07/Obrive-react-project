@@ -184,7 +184,7 @@ export default function JoinTeamPage() {
       </FullWidthSection>
 
       {/* career section */}
-      <section className="bg-gradient mt-30 flex flex-col gap-20 max-md:gap-10 items-center p-20 max-md:p-8">
+      <section className="bg-gradient mt-30 flex flex-col gap-20 max-md:gap-10 items-center p-20 max-md:p-8" id="career">
         <div className="flex justify-center w-full">
           <h1
             className={`${FONTS.microgrammaBold.className} uppercase text-5xl max-md:text-3xl text-primary`}

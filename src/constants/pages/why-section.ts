@@ -39,6 +39,7 @@ export const TEAM_ABOUT = {
   why: "ABOUT US",
   description: `At Obrive, where digital and physical realms converge through Augmented Reality, Virtual Reality, Mixed Reality, 3D Design, and Spatial Computing. If you're passionate about immersive technology and want to create experiences that redefine how businesses and people interact, you're in the right place.`,
   button: "Join our team",
+  link:"/career#career"
 };
 
 export type WHY_SECTION_TYPE = {

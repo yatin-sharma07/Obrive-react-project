@@ -226,7 +226,7 @@ export default function Home() {
                         variant={"outline"}
                         size={"lg"}
                       >
-                        Our Mission
+                        Know More About Obrive
                       </Button>
                     </Link>
                   </div>
