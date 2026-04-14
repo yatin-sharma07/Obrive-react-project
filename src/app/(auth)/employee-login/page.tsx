@@ -1,11 +1,23 @@
+"use client";
 import FONTS from "@/assets/fonts";
 import RightArrowIcon from "@/components/shared/icons/RightArrowIcon";
 import WhiteLogo from "@/components/shared/logo/WhiteLogo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import React from "react";
 
 export default function EmployeeLogin() {
+  const [loading , setLoading] = React.useState(false);
+
+  const handleLogin=() => {
+    setLoading(true);
+    
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+  };
+
   return (
     <div className="grid grid-cols-[2.5fr_2fr] w-full h-screen">
       <div className="bg-primary flex items-center justify-center">
@@ -58,8 +70,9 @@ export default function EmployeeLogin() {
               size="lg"
               type="button"
               className="cursor-pointer uppercase mt-6 w-fit text-accent text-xs px-10"
+              onClick={handleLogin}
             >
-              Log-In
+            {loading?"Logging in...":"Log-in"}
             </Button>
           </form>
           <div className="text-left mt-20">

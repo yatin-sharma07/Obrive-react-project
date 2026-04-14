@@ -1,0 +1,5 @@
+const bcrypt      = require('bcrypt');
+const SALT_ROUNDS = 12;
+
+exports.hashPassword    = (plain)        => bcrypt.hash(plain, SALT_ROUNDS);
+exports.comparePassword = (plain, hash)  => bcrypt.compare(plain, hash);

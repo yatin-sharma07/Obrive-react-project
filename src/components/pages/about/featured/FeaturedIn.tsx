@@ -92,7 +92,13 @@ const FeaturedIn = () => {
                   slideIndex * cardsPerView,
                   (slideIndex + 1) * cardsPerView
                 ).map((item, cardIndex) => (
-                  <div
+                <a
+                 key={`${slideIndex}-${cardIndex}`}
+  href={item.link}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="flex-1 min-w-0 flex flex-col items-center justify-center gap-4"
+> <div
                     key={`${slideIndex}-${cardIndex}`}
                     className="flex-1 min-w-0 flex flex-col items-center justify-center gap-4"
                   >
@@ -109,7 +115,7 @@ const FeaturedIn = () => {
                     <p className="text-sm text-primary/80 text-left max-w-md mx-auto">
                       {item.description}
                     </p>
-                  </div>
+                  </div></a>
                 ))}
                 {/* Fill empty space if odd number of cards on last slide */}
                 {slideIndex === Math.ceil(totalCards / cardsPerView) - 1 &&
