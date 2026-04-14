@@ -32,20 +32,30 @@ exports.loginUser = async ({ email, password, ip, userAgent }) => {
 };
 
 // Client login
-exports.loginClient = async ({ clientId, password }) => {
-  const client = await prisma.client.findUnique({ where: { clientId } });
-  if (!client || !client.isActive)
-    throw { status: 401, message: 'Invalid client credentials' };
+exports.loginClient = async ({ clientId }) => {
+  const client = await prisma.user.findUnique({
+    where: { userid: clientId }, 
+  });
 
-  const valid = await comparePassword(password, client.password);
-  if (!valid) throw { status: 401, message: 'Invalid credentials' };
+  if (!client || client.role !== "client") {
+    throw { status: 401, message: "Invalid client credentials" };
+  }
 
-  const payload     = { id: client.id, role: 'CLIENT', clientId: client.clientId };
+  const payload = {
+    id: client.id,
+    role: client.role,
+    clientId: client.userid,
+  };
+
   const accessToken = signAccessToken(payload);
 
   return {
     accessToken,
-    client: { id: client.id, clientId: client.clientId, companyName: client.companyName },
+    client: {
+      id: client.id,
+      clientId: client.userid,
+      name: client.name,
+    },
   };
 };
 
