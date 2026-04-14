@@ -22,6 +22,8 @@ app.use('/api/clients',   require('./src/modules/client/client.routes'));
 app.use('/api/hr',        require('./src/modules/hr/hr.routes'));
 app.use('/api/admin',     require('./src/modules/admin/admin.routes'));
 app.use('/api/meetings',  require('./src/modules/meeting/meeting.routes'));
+app.use('/api/onboarding', require('./src/modules/onboarding/onboarding.routes'));
+
 
 // ── Health check ─────────────────────────────────────────────
 app.get('/api/health', (req, res) => res.json({ status: 'OK', timestamp: new Date() }));
@@ -34,7 +36,7 @@ async function bootstrap() {
   try {
     await prisma.$connect();
     console.log('✅ Database connected');
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   } catch (err) {
     console.error('❌ Failed to start:', err);
     process.exit(1);
@@ -45,6 +47,6 @@ bootstrap();
 
 process.on('SIGINT', async () => {
   await prisma.$disconnect();
-  console.log('🔌 DB disconnected. Shutting down.');
+  console.log(' DB disconnected. Shutting down.');
   process.exit(0);
 });
