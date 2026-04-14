@@ -8,37 +8,49 @@ import AddTaskModal from "./Add";
 import { dummyTasks } from "../data/dummyData";
 import { getNext3Days } from "../constants/dates";
 
+type Task = {
+  id: string;
+  title: string;
+  duration: string;
+  column: string;
+  color: string;
+};
 export default function Board() {
   const columns = getNext3Days();
 
-  const [tasks, setTasks] = useState(dummyTasks);
-  const [draggedTask, setDraggedTask] = useState(null);
+  const [tasks, setTasks] = useState<Task[]>(dummyTasks);
+const [draggedTask, setDraggedTask] = useState<Task | null>(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleDragStart = (e, task) => {
-    setDraggedTask(task);
-  };
+const handleDragStart = (
+  e: React.DragEvent<HTMLDivElement>,
+  task: Task
+) => {
+  setDraggedTask(task);
+};
 
-  const handleDrop = (e, column) => {
-    e.preventDefault();
+const handleDrop = (
+  e: React.DragEvent<HTMLDivElement>,
+  column: { id: string }
+) => {
+  e.preventDefault();
 
-    setTasks((prev) =>
-      prev.map((t) =>
-        t.id === draggedTask.id
-          ? { ...t, column: column.id }
-          : t
-      )
-    );
-  };
+  if (!draggedTask) return; // safety
+
+  setTasks((prev) =>
+    prev.map((t) =>
+      t.id === draggedTask.id
+        ? { ...t, column: column.id }
+        : t
+    )
+  );
+};
 
   //  ADD TASK FUNCTION
-  const handleAddTask = (newTask) => {
-    setTasks((prev) => [...prev, newTask]);
-
-    //  BACKEND CALL (later)
-    // await createTask(newTask);
-  };
+ const handleAddTask = (newTask: Task) => {
+  setTasks((prev) => [...prev, newTask]);
+};
 
   return (
     <div className="flex h-screen relative">
