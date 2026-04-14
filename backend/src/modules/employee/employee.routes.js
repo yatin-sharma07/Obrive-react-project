@@ -5,13 +5,16 @@ const { authorize }= require('../../middleware/rbac');
 const validate     = require('../../middleware/validate');
 const { body, query } = require('express-validator');
 
+
+router.post('/login', ctrl.login);  
+
 router.use(authenticate);
 
-// ── Profile ─────────────────────────────────────────────────
+// ── Profile 
 router.get('/me',    authorize('EMPLOYEE'), ctrl.getMyProfile);
 router.put('/me',    authorize('EMPLOYEE'), ctrl.updateMyProfile);
 
-// ── Availability Calendar ────────────────────────────────────
+// ── Availability Calendar 
 router.get('/availability',
   authorize('EMPLOYEE', 'HR', 'ADMIN'),
   ctrl.getMyAvailability
