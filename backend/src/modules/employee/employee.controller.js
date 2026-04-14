@@ -1,5 +1,21 @@
 const service = require('./employee.service');
+const authService = require('../auth/auth.service');
 const { successResponse } = require('../../utils/apiResponse');
+
+exports.login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    const result = await authService.loginUser({
+      email,
+      password,
+      ip: req.ip,
+      userAgent: req.get('User-Agent'),
+    });
+    successResponse(res, result, 'Login successful');
+  } catch (err) {
+    next(err);
+  }
+};
 
 exports.getMyProfile          = async (req, res, next) => {
   try { successResponse(res, await service.getMyProfile(req.user.id)); }
