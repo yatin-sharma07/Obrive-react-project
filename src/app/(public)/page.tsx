@@ -131,7 +131,7 @@ export default function Home() {
                 <h1
                   className={`${FONTS.microgrammaBold.className} text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-secondary`}
                 >
-                  Owning The Future
+                  Orchestrating What’s Next
                 </h1>
               </FadeInOnLoad>
               <FadeInOnLoad delay={0.3}>
