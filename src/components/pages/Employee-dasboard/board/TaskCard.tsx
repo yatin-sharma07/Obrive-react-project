@@ -1,6 +1,18 @@
 "use client";
 
-export default function TaskCard({ task, ...dragProps }) {
+type Task = {
+  id: string;
+  title: string;
+  duration: string;
+  column: string;
+  color: string;
+};
+
+type TaskCardProps = {
+  task: Task;
+} & React.HTMLAttributes<HTMLDivElement>;
+
+export default function TaskCard({ task, ...dragProps }: TaskCardProps) {
   return (
     <div
       {...dragProps}

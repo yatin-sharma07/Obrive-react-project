@@ -1,6 +1,10 @@
 "use client";
 
-export default function FloatingButton({ onClick }) {
+type FloatingButtonProps = {
+  onClick: () => void;
+};
+
+export default function FloatingButton({ onClick }: FloatingButtonProps) {
   return (
     <button
       onClick={onClick}
