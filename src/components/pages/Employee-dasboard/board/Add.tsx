@@ -1,8 +1,23 @@
 "use client";
 
 import { useState } from "react";
+type AddTaskModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  onAdd: (task: {
+    id: string;
+    title: string;
+    duration: string;
+    column: string;
+    color: string;
+  }) => void;
+};
 
-export default function AddTaskModal({ isOpen, onClose, onAdd }) {
+export default function AddTaskModal({
+  isOpen,
+  onClose,
+  onAdd,
+}: AddTaskModalProps) {
   const [title, setTitle] = useState("");
   const [duration, setDuration] = useState("");
   const [column, setColumn] = useState("today");
