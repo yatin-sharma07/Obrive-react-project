@@ -2,7 +2,38 @@
 
 import TaskCard from "./TaskCard";
 
-export default function Column({ column, tasks, onDrop, onDragStart }) {
+type Task = {
+  id: string;
+  title: string;
+  duration: string;
+  column: string;
+  color: string;
+};
+
+type ColumnType = {
+  id: string;
+  label: string;
+};
+
+type ColumnProps = {
+  column: ColumnType;
+  tasks: Task[];
+  onDrop: (
+    e: React.DragEvent<HTMLDivElement>,
+    column: ColumnType
+  ) => void;
+  onDragStart: (
+    e: React.DragEvent<HTMLDivElement>,
+    task: Task
+  ) => void;
+};
+
+export default function Column({
+  column,
+  tasks,
+  onDrop,
+  onDragStart,
+}: ColumnProps) {
   return (
     <div
       className={`flex-1 p-4 ${
@@ -11,7 +42,7 @@ export default function Column({ column, tasks, onDrop, onDragStart }) {
       onDrop={(e) => onDrop(e, column)}
       onDragOver={(e) => e.preventDefault()}
     >
-      {/* HEADER */}
+      
       <div className="flex justify-between mb-4">
         <h2 className="font-semibold">{column.label}</h2>
         <span className="bg-gray-200 px-2 rounded-full">
@@ -19,7 +50,7 @@ export default function Column({ column, tasks, onDrop, onDragStart }) {
         </span>
       </div>
 
-      {/* TASKS */}
+      
       {tasks.map((task) => (
         <TaskCard
           key={task.id}
