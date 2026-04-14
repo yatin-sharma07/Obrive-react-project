@@ -1,0 +1,24 @@
+// backend/prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Single users table for both Client and Employee login
+model User {
+  id        Int      @id @default(autoincrement())
+  userid    String?  @unique   // For clients: "WEBSITE_847", For employees: "EMP001"
+  email     String?  @unique   // For employees: "john@obrive.com"
+  name      String?
+  role      String              // 'client' or 'employee'
+  password  String?             // Required for employees, NULL for clients
+  status    String   @default("offline")  // 'active', 'offline', 'inactive'
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  
+  @@map("users")
+}
