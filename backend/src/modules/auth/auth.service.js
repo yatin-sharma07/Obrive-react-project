@@ -1,33 +1,33 @@
-const { prisma }          = require('../../config/db');
-const { comparePassword } = require('../../utils/bcrypt');
+const { prisma } = require("../../config/db");
+const { comparePassword } = require("../../utils/bcrypt");
 const {
   signAccessToken,
   signRefreshToken,
   verifyRefreshToken,
-} = require('../../utils/jwt');
+} = require("../../utils/jwt");
 
 // Employee / HR / Admin login
 exports.loginUser = async ({ email, password, ip, userAgent }) => {
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.users.findUnique({ where: { email } });
   if (!user || !user.isActive)
-    throw { status: 401, message: 'Invalid credentials or inactive account' };
+    throw { status: 401, message: "Invalid credentials or inactive account" };
 
   const valid = await comparePassword(password, user.password);
-  if (!valid) throw { status: 401, message: 'Invalid credentials' };
+  if (!valid) throw { status: 401, message: "Invalid credentials" };
 
   const log = await prisma.loginLog.create({
     data: { userId: user.id, ipAddress: ip, userAgent },
   });
 
-  const payload      = { id: user.id, role: user.role, logId: log.id };
-  const accessToken  = signAccessToken(payload);
+  const payload = { id: user.id, role: user.role, logId: log.id };
+  const accessToken = signAccessToken(payload);
   const refreshToken = signRefreshToken({ id: user.id });
 
   return {
     accessToken,
     refreshToken,
     logId: log.id,
-    user:  { id: user.id, email: user.email, role: user.role },
+    user: { id: user.id, email: user.email, role: user.role },
   };
 };
 
@@ -35,17 +35,21 @@ exports.loginUser = async ({ email, password, ip, userAgent }) => {
 exports.loginClient = async ({ clientId, password }) => {
   const client = await prisma.client.findUnique({ where: { clientId } });
   if (!client || !client.isActive)
-    throw { status: 401, message: 'Invalid client credentials' };
+    throw { status: 401, message: "Invalid client credentials" };
 
   const valid = await comparePassword(password, client.password);
-  if (!valid) throw { status: 401, message: 'Invalid credentials' };
+  if (!valid) throw { status: 401, message: "Invalid credentials" };
 
-  const payload     = { id: client.id, role: 'CLIENT', clientId: client.clientId };
+  const payload = { id: client.id, role: "CLIENT", clientId: client.clientId };
   const accessToken = signAccessToken(payload);
 
   return {
     accessToken,
-    client: { id: client.id, clientId: client.clientId, companyName: client.companyName },
+    client: {
+      id: client.id,
+      clientId: client.clientId,
+      companyName: client.companyName,
+    },
   };
 };
 
@@ -54,29 +58,29 @@ exports.logout = async ({ userId, logId }) => {
   const log = await prisma.loginLog.findFirst({
     where: { userId, id: logId, logoutTime: null },
   });
-  if (!log) throw { status: 404, message: 'Active session not found' };
+  if (!log) throw { status: 404, message: "Active session not found" };
 
-  const logoutTime      = new Date();
+  const logoutTime = new Date();
   const sessionDuration = Math.floor((logoutTime - log.loginTime) / 1000);
 
   await prisma.loginLog.update({
     where: { id: log.id },
-    data:  { logoutTime, sessionDuration },
+    data: { logoutTime, sessionDuration },
   });
 
-  return { sessionDuration, message: 'Logged out successfully' };
+  return { sessionDuration, message: "Logged out successfully" };
 };
 
 // Refresh token
 exports.refreshToken = async (token) => {
   try {
     const payload = verifyRefreshToken(token);
-    const user    = await prisma.user.findUnique({ where: { id: payload.id } });
-    if (!user) throw { status: 401, message: 'User not found' };
+    const user = await prisma.user.findUnique({ where: { id: payload.id } });
+    if (!user) throw { status: 401, message: "User not found" };
 
     const newAccess = signAccessToken({ id: user.id, role: user.role });
     return { accessToken: newAccess };
   } catch {
-    throw { status: 403, message: 'Invalid or expired refresh token' };
+    throw { status: 403, message: "Invalid or expired refresh token" };
   }
 };
