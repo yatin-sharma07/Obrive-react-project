@@ -241,7 +241,7 @@ const handleLinkedInShare = async () => {
 </Button>
         </div>
       </div>
-      <CustomToast show={showToast} />
+      <CustomToast show={showToast} message={"Link copied"}/>
     </section>
   );
 }

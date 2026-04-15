@@ -31,9 +31,13 @@ exports.logout = async (req, res, next) => {
 
 exports.refreshToken = async (req, res, next) => {
   try {
-    const { refreshToken } = req.body;
-    if (!refreshToken) return errorResponse(res, 'Refresh token required', 400);
-    const result = await service.refreshToken(refreshToken);
-    successResponse(res, result);
+   const token = req.cookies?.refreshToken;
+
+if (!token) {
+  return errorResponse(res, 'Refresh token required', 400);
+}
+
+const result = await service.refreshToken(token);
+successResponse(res, result);
   } catch (err) { next(err); }
 };

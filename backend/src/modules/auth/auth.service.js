@@ -8,7 +8,9 @@ const {
 
 // Employee / HR / Admin login
 exports.loginUser = async ({ email, password, ip, userAgent }) => {
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.users.findUnique({ where: { email } });
+  console.log("LOGIN INPUT:", email, password);
+console.log("USER FROM DB:", user);
   if (!user || !user.isActive)
     throw { status: 401, message: 'Invalid credentials or inactive account' };
 
@@ -33,7 +35,7 @@ exports.loginUser = async ({ email, password, ip, userAgent }) => {
 
 // Client login
 exports.loginClient = async ({ clientId }) => {
-  const client = await prisma.user.findUnique({
+  const client = await prisma.users.findUnique({
     where: { userid: clientId }, 
   });
 
@@ -81,7 +83,7 @@ exports.logout = async ({ userId, logId }) => {
 exports.refreshToken = async (token) => {
   try {
     const payload = verifyRefreshToken(token);
-    const user    = await prisma.user.findUnique({ where: { id: payload.id } });
+    const user    = await prisma.users.findUnique({ where: { id: payload.id } });
     if (!user) throw { status: 401, message: 'User not found' };
 
     const newAccess = signAccessToken({ id: user.id, role: user.role });

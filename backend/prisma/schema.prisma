@@ -8,17 +8,20 @@ datasource db {
 }
 
 // Users model based on your database table
+
 model Users {
-  id        Int      @id @default(autoincrement())
-  userid    String   @unique @db.VarChar(50)
-  name      String   @db.VarChar(100)
+  id        Int        @id @default(autoincrement())
+  userid    String     @unique @db.VarChar(50)
+  name      String     @db.VarChar(100)
   role      String
-  email     String   @unique @db.VarChar(255)
-  password  String   @db.VarChar(255)
-  status    String   @db.VarChar(50)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp()
-  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp()
-  
+  email     String     @unique @db.VarChar(255)
+  password  String     @db.VarChar(255)
+  status    String     @db.VarChar(50)
+  isActive  Boolean    @default(true) @map("isActive") @db.Boolean
+  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamp()
+  loginLogs LoginLog[]
+
   @@map("users")
 }
 
@@ -27,4 +30,18 @@ enum UserRole {
   employee
   HR
   Admin
+}
+
+model LoginLog {
+  id              Int       @id @default(autoincrement())
+  userId          Int
+  ipAddress       String?
+  userAgent       String?
+  loginTime       DateTime  @default(now())
+  logoutTime      DateTime?
+  sessionDuration Int?
+
+  user Users @relation(fields: [userId], references: [id])
+
+  @@map("login_logs")
 }

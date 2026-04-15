@@ -1,5 +1,6 @@
 // backend/temp.js
 const { Pool } = require('pg');
+const bcrypt = require('bcrypt');
 require('dotenv').config();
 
 const pool = new Pool({
@@ -13,23 +14,27 @@ const pool = new Pool({
 
 async function add() {
     try {
-        await pool.query(`
-            INSERT INTO users (userid, email, name, role, password, status) VALUES 
-            ('EMP001', 'john@obrive.com', 'John Doe', 'employee', 'employee123', 'offline'),
-            ('EMP002', 'jane@obrive.com', 'Jane Smith', 'employee', 'employee123', 'offline'),
-            ('EMP003', 'bob@obrive.com', 'Bob Wilson', 'employee', 'employee123', 'offline'),
-            ('EMP004', 'sarah@obrive.com', 'Sarah Johnson', 'employee', 'employee123', 'offline'),
-            ('EMP005', 'mike@obrive.com', 'Mike Brown', 'employee', 'employee123', 'offline')
-            ON CONFLICT (email) DO NOTHING
-        `);
+         const hashedPassword = await bcrypt.hash("employee123", 12);
+       await pool.query(`
+  INSERT INTO users (userid, email, name, role, password, status, "isActive") VALUES 
+  ('EMP001', 'john@obrive.com', 'John Doe', 'employee', '${hashedPassword}', 'offline', true),
+  ('EMP002', 'jane@obrive.com', 'Jane Smith', 'employee', '${hashedPassword}', 'offline', true),
+  ('EMP003', 'bob@obrive.com', 'Bob Wilson', 'employee', '${hashedPassword}', 'offline', true),
+  ('EMP004', 'sarah@obrive.com', 'Sarah Johnson', 'employee', '${hashedPassword}', 'offline', true),
+  ('EMP005', 'mike@obrive.com', 'Mike Brown', 'employee', '${hashedPassword}', 'offline', true)
+  ON CONFLICT (email) DO NOTHING
+`);
+await pool.query(`
+  INSERT INTO users (userid, email, name, role, password, status, "isActive") VALUES 
+  ('WEBSITE_847', 'client@obrive.com', 'Test Client', 'client', '', 'offline', true)
+  ON CONFLICT (userid) DO NOTHING
+`);
 
-        console.log('✅ Employees added successfully!');
         
-        // Verify employees were added
         const res = await pool.query(`
-            SELECT userid, email, name, role, status 
+            SELECT userid, email, name, role,password, status,"isActive"
             FROM users 
-            WHERE role = 'employee'
+            
         `);
         
         console.log('\n📋 Employees in database:');

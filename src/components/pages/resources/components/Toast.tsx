@@ -2,7 +2,12 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function CustomToast({ show }: { show: boolean }) {
+type CustomToastProps = {
+  show: boolean;
+  message: string;
+};
+
+export default function CustomToast({ show, message }: CustomToastProps) {
   return (
     <AnimatePresence>
       {show && (
@@ -14,7 +19,7 @@ export default function CustomToast({ show }: { show: boolean }) {
           className="fixed bottom-4 left-4 z-50"
         >
           <div className="bg-[#198450] text-white px-6 py-2 rounded-lg shadow-lg text-sm">
-            Link copied
+            {message} 
           </div>
         </motion.div>
       )}
