@@ -1,22 +1,55 @@
 "use client";
 import FONTS from "@/assets/fonts";
+import CustomToast from "@/components/pages/resources/components/Toast";
 import RightArrowIcon from "@/components/shared/icons/RightArrowIcon";
 import WhiteLogo from "@/components/shared/logo/WhiteLogo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { apiFetch } from "@/lib/api";
 import React from "react";
 
 export default function EmployeeLogin() {
   const [loading , setLoading] = React.useState(false);
 
-  const handleLogin=() => {
+const [email, setEmail] = React.useState("");
+const [password, setPassword] = React.useState("");
+const [error, setError] = React.useState("");
+const[showToast, setShowToast] = React.useState(false);
+
+const handleLogin = async () => {
+  try {
     setLoading(true);
-    
+    setError("");
+
+    const res = await apiFetch("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "Login failed");
+    }
+  setShowToast(true);
+   
     setTimeout(() => {
-      setLoading(false);
-    }, 2000);
-  };
+      window.location.href = "/employee/dashboard";
+    }, 1500);
+
+
+
+  } catch (err: any) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+      
+  }
+};
 
   return (
     <div className="grid grid-cols-[2.5fr_2fr] w-full h-screen">
@@ -50,6 +83,8 @@ export default function EmployeeLogin() {
             <div>
               <Label htmlFor="email">Email Address</Label>
               <Input
+               value={email}
+  onChange={(e) => setEmail(e.target.value)}
                 type="email"
                 id="email"
                 placeholder="Type your Email Address"
@@ -59,6 +94,8 @@ export default function EmployeeLogin() {
             <div>
               <Label htmlFor="password">Password</Label>
               <Input
+               value={password}
+  onChange={(e) => setPassword(e.target.value)}
                 type="password"
                 id="password"
                 placeholder="Type your Password"
@@ -87,6 +124,8 @@ export default function EmployeeLogin() {
           </div>
         </div>
       </div>
+      {showToast && <CustomToast show={showToast} message={"Login successful!"} />}
+
     </div>
   );
 }
