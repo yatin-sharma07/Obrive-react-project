@@ -7,20 +7,39 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Users model based on your database table
 model Users {
-  id        Int      @id @default(autoincrement())
-  userid    String   @unique @db.VarChar(50)
-  name      String   @db.VarChar(100)
-  role      String
-  email     String   @unique @db.VarChar(255)
-  password  String   @db.VarChar(255)
-  status    String   @db.VarChar(50)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp()
+  id          Int         @id @default(autoincrement())
+  userid      String      @unique
+  email       String      @unique
+  name        String
+  role        String
+  password    String
+  status      String      @default("offline")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @default(now()) @updatedAt @map("updated_at")
+  isActive    Boolean      @default(true)
+  jobTitle    String?      @db.VarChar(255) @map("jobtitle")
+  department  String?     @db.VarChar(255)
+  phoneNumber String?     @db.VarChar(20) @map("phonenumber")
+  joinDate    String?     @db.VarChar(50) @map("joindate")
+  biography   String?
+  login_logs  login_logs[]
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp()
   
   @@map("users")
 }
+
+model login_logs {
+  id              Int       @id @default(autoincrement())
+  userId          Int
+  ipAddress       String?
+  userAgent       String?
+  loginTime       DateTime  @default(now())
+  logoutTime      DateTime?
+  sessionDuration Int?
+  users           Users     @relation(fields: [userId], references: [id])
+}
+
 
 enum UserRole {
   client

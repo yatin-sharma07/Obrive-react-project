@@ -93,6 +93,7 @@ app.use('/api/clients',   require('./src/modules/clients/client.routes'));
 app.use('/api/hr',        require('./src/modules/hr/hr.routes'));
 app.use('/api/admin',     require('./src/modules/admin/admin.routes'));
 app.use('/api/meetings',  require('./src/modules/meeting/meeting.routes'));
+app.use('/api/profile',   require('./src/modules/profile/profile.routes'));
 
 // ── Error handler ─────────────────────────────────────────────
 app.use(require('./src/middleware/errorHandler'));
