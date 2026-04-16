@@ -17,14 +17,13 @@ model Users {
   status      String      @default("offline")
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime     @default(now()) @updatedAt @map("updated_at")
-  isActive    Boolean      @default(true)
-  jobTitle    String?      @db.VarChar(255) @map("jobtitle")
+  isActive    Boolean      @default(true) @map("is_active")
+  jobTitle    String?      @db.VarChar(255) @map("job_title")
   department  String?     @db.VarChar(255)
-  phoneNumber String?     @db.VarChar(20) @map("phonenumber")
-  joinDate    String?     @db.VarChar(50) @map("joindate")
+  phoneNumber String?     @db.VarChar(20) @map("phone_number")
+  joinDate    String?     @db.VarChar(50) @map("join_date")
   biography   String?
   login_logs  login_logs[]
-  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp()
   
   @@map("users")
 }
