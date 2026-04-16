@@ -21,7 +21,7 @@ model Users {
   jobTitle    String?      @db.VarChar(255) @map("job_title")
   department  String?     @db.VarChar(255)
   phoneNumber String?     @db.VarChar(20) @map("phone_number")
-  joinDate    String?     @db.VarChar(50) @map("join_date")
+  joinDate    DateTime?   @map("join_date")
   biography   String?
   login_logs  login_logs[]
   

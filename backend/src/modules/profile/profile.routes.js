@@ -11,17 +11,52 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Full Name and Email are required' });
     }
 
-        const profile = await prisma.users.update({
-        where: { email },
-        data: {
-            name: fullName,
-            jobTitle,             
-            department,
-            phoneNumber,           
-            joinDate,              
-            biography,
-        },
-        });
+    // Build update data object, only including fields that are provided
+    const updateData = {
+      name: fullName,
+    };
+
+    if (jobTitle !== undefined && jobTitle !== '') updateData.jobTitle = jobTitle;
+    if (department !== undefined && department !== '') updateData.department = department;
+    if (phoneNumber !== undefined && phoneNumber !== '') updateData.phoneNumber = phoneNumber;
+    
+    // Handle joinDate - convert string to Date if provided
+    if (joinDate !== undefined && joinDate !== '') {
+      try {
+        let dateObj = new Date(joinDate);
+        
+        // Check if the date is valid
+        if (isNaN(dateObj.getTime())) {
+          // Try parsing dd-mm-yyyy format
+          const parts = joinDate.split('-');
+          if (parts.length === 3) {
+            // Could be dd-mm-yyyy or yyyy-mm-dd
+            const [part1, part2, part3] = parts;
+            if (part1.length === 4) {
+              // yyyy-mm-dd format
+              dateObj = new Date(`${part1}-${part2.padStart(2, '0')}-${part3.padStart(2, '0')}`);
+            } else {
+              // dd-mm-yyyy format
+              dateObj = new Date(`${part3}-${part2.padStart(2, '0')}-${part1.padStart(2, '0')}`);
+            }
+          }
+        }
+        
+        if (!isNaN(dateObj.getTime())) {
+          updateData.joinDate = dateObj;
+        }
+      } catch (e) {
+        console.error('Error parsing joinDate:', joinDate);
+        updateData.joinDate = null;
+      }
+    }
+    
+    if (biography !== undefined && biography !== '') updateData.biography = biography;
+
+    const profile = await prisma.users.update({
+      where: { email },
+      data: updateData,
+    });
 
     res.json({
       success: true,
