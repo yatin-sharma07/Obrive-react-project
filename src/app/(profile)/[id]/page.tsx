@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { Check, Upload } from 'lucide-react';
 import Image from 'next/image';
 import CustomToast from '@/components/pages/resources/components/Toast';
+import { profile } from 'console';
 
 export default function ProfilePage() {
   const params = useParams();
@@ -21,7 +22,7 @@ export default function ProfilePage() {
     fullName: '',
     email: '',
     department: '',
-        jobTitle: '',
+    jobTitle: '',
     phoneNumber: '',
     joinDate: '',
     biography: '',
@@ -38,9 +39,12 @@ export default function ProfilePage() {
           `http://localhost:5000/api/profile/${userId}`
         );
 
+        console.log('status:', response.status);
+
         if (response.ok) {
           const profile = await response.json();
-          console.log('Profile loaded:', profile);
+
+          // alert(JSON.stringify(profile));
           
           setFormData({
             fullName: profile.name || '',
@@ -48,9 +52,7 @@ export default function ProfilePage() {
             jobTitle: profile.jobTitle || '',
             department: profile.department || '',
             phoneNumber: profile.phoneNumber || '',
-            joinDate: profile.joinDate 
-              ? new Date(profile.joinDate).toISOString().split('T')[0]
-              : '',
+            joinDate: profile.joinDate ? new Date(profile.joinDate).toISOString().split('T')[0] : '',
             biography: profile.biography || '',
           });
         } else {
@@ -73,7 +75,9 @@ export default function ProfilePage() {
     }
   }, [userId]);
 
-  // ── Avatar Handler ────────────────────────
+
+// ── Avatar Handler ────────────────────────────────────────────────
+
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -90,7 +94,7 @@ export default function ProfilePage() {
     fileInputRef.current?.click();
   };
 
-  // ── Form Input Handler ────────────────────────
+// ── Form Input Handler ────────────────────────────────────────────────
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -101,9 +105,10 @@ export default function ProfilePage() {
     }));
   };
 
-  // ── Save Profile ────────────────────────
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+
+// ── Save Profile ────────────────────────────────────────────────
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
     try {
       const response = await fetch(
@@ -141,6 +146,9 @@ export default function ProfilePage() {
       </div>
     );
   }
+
+
+// if 
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8">

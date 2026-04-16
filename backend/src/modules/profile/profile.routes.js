@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { prisma } = require('../../config/db');
 
-// Save/Update Profile
+// Save/Update Profile ────────────────────────────────────────────────────────────────────────
 router.post('/', async (req, res) => {
   try {
     const { fullName, email, jobTitle, department, phoneNumber, joinDate, biography } = req.body;
@@ -69,25 +69,26 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Get Profile by ID
+// Get Profile by ID ───────────────────────────────────────────────────────────────────────
+
 router.get('/:id', async (req, res) => {
   try {
     const userId = parseInt(req.params.id);
-    console.log(`📝 Fetching profile for ID: ${userId}`);
+    console.log(`Fetching profile for ID: ${userId}`);
     
     const profile = await prisma.users.findUnique({
       where: { id: userId },
     });
 
     if (!profile) {
-      console.log(`❌ Profile not found for ID: ${userId}`);
+      console.log(`Profile not found for ID: ${userId}`);
       return res.status(404).json({ error: 'Profile not found' });
     }
 
     console.log(`✅ Profile found for ID: ${userId}`);
     res.json(profile);
   } catch (error) {
-    console.error('❌ Profile fetch error:', error.message);
+    console.error('Profile fetch error:', error.message);
     console.error('Full error:', error);
     res.status(500).json({ error: 'Failed to fetch profile', details: error.message });
   }
