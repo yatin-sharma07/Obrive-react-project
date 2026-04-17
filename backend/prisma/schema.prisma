@@ -8,7 +8,7 @@ datasource db {
 }
 
 
-// USERS TABLE
+//  USERS TABLE
 model Users {
   id        Int       @id @default(autoincrement())
   userid    String    @unique @db.VarChar(50)
@@ -16,8 +16,8 @@ model Users {
   name      String    @db.VarChar(100)
   role      String    @db.VarChar(50)
 
-  password  String    @db.VarChar(255) // 🔥 REQUIRED now
-  status    String    @default("offline") @db.VarChar(50) // 🔥 FIXED
+  password  String    @db.VarChar(255)
+  status    String    @default("offline") @db.VarChar(50)
 
   isActive  Boolean   @default(true) @map("is_active")
 
@@ -27,17 +27,18 @@ model Users {
   // extra fields
   jobTitle     String?   @db.VarChar(255) @map("job_title")
   department   String?   @db.VarChar(255) @map("department")
-  phoneNumber  String?   @db.VarChar(25) @map("phone_number")
+  phoneNumber  String?   @db.VarChar(25)  @map("phone_number")
   joinDate     DateTime? @map("join_date")
   biography    String?   @db.Text @map("biography")
 
+  // relation
   loginLogs LoginLog[]
 
   @@map("users")
 }
 
 
-// LOGIN LOGS
+//  LOGIN LOGS
 model LoginLog {
   id              Int       @id @default(autoincrement())
   userId          Int

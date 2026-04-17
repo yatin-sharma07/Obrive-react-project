@@ -9,28 +9,24 @@ const { prisma } = require("./src/config/db");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-//  SECURITY MIDDLEWARE
+// SECURITY MIDDLEWARE
 app.use(helmet());
 
-//  CORS (REQUIRED FOR COOKIES)
 app.use(
   cors({
     origin: process.env.CLIENT_URL || "http://localhost:3000",
-    credentials: true, // 🔥 REQUIRED for cookies
+    credentials: true,
   }),
 );
 
-// COOKIE PARSER
 app.use(cookieParser());
 
-//  BODY PARSER
+// BODY PARSER
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-//  LOGGER
 app.use(morgan("dev"));
 
-// ROUTES
 app.use("/api/auth", require("./src/modules/auth/auth.routes"));
 app.use("/api/employees", require("./src/modules/employee/employee.routes"));
 app.use("/api/hr", require("./src/modules/hr/hr.routes"));
@@ -41,7 +37,7 @@ app.use(
   require("./src/modules/onboarding/onboarding.routes"),
 );
 
-// HEALTH CHECK
+//  HEALTH CHECK
 app.get("/api/health", (req, res) => {
   res.json({
     status: "OK",
@@ -49,10 +45,10 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-//  ERROR HANDLER
+// ❌ ERROR HANDLER
 app.use(require("./src/middleware/errorHandler"));
 
-//  START SERVER
+// START SERVER
 async function bootstrap() {
   try {
     await prisma.$connect();
