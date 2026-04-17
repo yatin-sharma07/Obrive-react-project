@@ -30,7 +30,7 @@ async function clear() {
       WHERE table_name = 'users';
     `);
 
-    console.log("📊 Columns:", cols.rows);
+    console.log("Columns:", cols.rows);
 
   } catch (err) {
     console.error("❌ Error:", err.message);
