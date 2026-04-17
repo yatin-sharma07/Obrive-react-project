@@ -36,9 +36,12 @@ const handleLogin = async () => {
       throw new Error(data.message || "Login failed");
     }
   setShowToast(true);
-   
+
+    const role = data?.data?.user?.role;
+    const redirectPath = role === "hr" ? "/dashboard/hr" : "/dashboard/employee";
+
     setTimeout(() => {
-      window.location.href = "/employee/dashboard";
+      window.location.href = redirectPath;
     }, 1500);
 
 
