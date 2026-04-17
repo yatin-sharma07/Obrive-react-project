@@ -28,8 +28,7 @@ export async function apiFetch(
       // Retry original request ONCE
       return apiFetch(endpoint, { ...options, retry: false });
     } else {
-      // Refresh failed → logout situation
-      window.location.href = "/login";
+    
       return Promise.reject("Session expired");
     }
   }
