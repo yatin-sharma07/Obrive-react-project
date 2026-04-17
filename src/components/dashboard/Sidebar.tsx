@@ -19,11 +19,11 @@ export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false)
 
   const navItems = [
-    {
-      label: 'Dashboard',
-      icon: LayoutDashboard,
-      href: '/dashboard',
-    },
+  {
+    label: 'Dashboard',
+    icon: LayoutDashboard,
+    href: '/dashboard/hr', // or dynamically set based on user role
+  },
     {
       label: 'Projects',
       icon: FolderOpen,

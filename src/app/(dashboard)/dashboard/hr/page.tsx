@@ -10,7 +10,7 @@ import Workload from '@/components/dashboard/Workload'
 import Projects from '@/components/dashboard/Projects'
 import ProfileNotifications from '@/components/dashboard/ProfileNotifications'
 import { dashboardConfigs, type UserRole } from '@/constants/dashboardConfig'
-import { useDashboardData } from './useDashboardData'
+import { useDashboardData } from '../useDashboardData'
 
 interface DashboardLayoutProps {
   children: ReactNode
@@ -24,12 +24,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { workloadMembers, projects, events, activities } = useDashboardData(role)
 
   return (
-    <div className="flex h-screen w-screen bg-[#ebf1fa] gap-2 p-2">
-      
-      {/* Left Sidebar */}
-      <div className="rounded-2xl flex flex-col">
-        <Sidebar />
-      </div>
+    <div className="flex-1 flex flex-row gap-2 overflow-hidden">
 
       {/* Center Dashboard Area */}
       <div className="flex-1 flex flex-col gap-2 overflow-hidden">
@@ -38,9 +33,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
         <div className="flex-1 overflow-y-auto flex flex-col gap-2 pr-2">
           
-          {config.showWorkload && <Workload members={workloadMembers} />}
-          
-          {config.showProjects && <Projects projects={projects} />}
+          <Workload members={workloadMembers} />
+          <Projects projects={projects} />
           
           {children}
         </div>

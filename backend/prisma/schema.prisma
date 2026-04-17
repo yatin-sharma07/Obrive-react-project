@@ -7,34 +7,38 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
+//  USERS TABLE
 model Users {
-  id          Int         @id @default(autoincrement())
-  userid      String      @unique
-  email       String      @unique
-  name        String
-  role        String
-  password    String
-  status      String      @default("offline")
-  createdAt   DateTime     @default(now()) @map("created_at")
-  updatedAt   DateTime     @default(now()) @updatedAt @map("updated_at")
-  isActive    Boolean      @default(true) @map("is_active")
-  jobTitle    String?      @db.VarChar(255) @map("job_title")
-  department  String?     @db.VarChar(255)
-  phoneNumber String?     @db.VarChar(20) @map("phone_number")
-  joinDate    DateTime?   @map("join_date")
-  biography   String?
+  id        Int       @id @default(autoincrement())
+  userid    String    @unique @db.VarChar(50)
+  email     String    @unique @db.VarChar(255)
+  name      String    @db.VarChar(100)
+  role      String    @db.VarChar(50)
+
+  password  String    @db.VarChar(255)
+  status    String    @default("offline") @db.VarChar(50)
+
+  isActive  Boolean   @default(true) @map("is_active")
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamp()
+
+  // extra fields
+  jobTitle     String?   @db.VarChar(255) @map("job_title")
+  department   String?   @db.VarChar(255) @map("department")
+  phoneNumber  String?   @db.VarChar(25)  @map("phone_number")
+  joinDate     DateTime? @map("join_date")
+  biography    String?   @db.Text @map("biography")
+
+  // relation
   loginLogs LoginLog[]
-  
+
   @@map("users")
 }
 
-enum UserRole {
-  client
-  employee
-  HR
-  Admin
-}
 
+//  LOGIN LOGS
 model LoginLog {
   id              Int       @id @default(autoincrement())
   userId          Int
