@@ -3,29 +3,23 @@ const router = require('express').Router();
 const ctrl = require('./client.controller');
 const authenticate = require('../../middleware/auth');
 const { authorize } = require('../../middleware/rbac');
-const validate = require('../../middleware/validate');
-const { body } = require('express-validator');
 
-// ========== PUBLIC ROUTE (No authentication needed) ==========
-// POST /api/client/login
+// ========== PUBLIC ROUTE ==========
 router.post('/login', ctrl.login);
 
-// ========== PROTECTED ROUTES (Require authentication) ==========
+// ========== PROTECTED ROUTES ==========
 router.use(authenticate);
+router.use(authorize('client'));
 
-// All routes below require valid JWT token and CLIENT role
-router.get('/me',              authorize('CLIENT'), ctrl.getMyProfile);
-router.get('/projects',        authorize('CLIENT'), ctrl.getMyProjects);
-router.get('/projects/:id',    authorize('CLIENT'), ctrl.getProjectById);
+// Dashboard & Profile routes (NEW)
+router.get('/dashboard', ctrl.getDashboard);
+router.get('/profile', ctrl.getProfile);
+router.put('/profile', ctrl.updateProfile);
 
-router.post('/projects/request',
-  authorize('CLIENT'),
-  [
-    body('title').notEmpty().withMessage('Project title required'),
-    body('description').optional().isString(),
-  ],
-  validate,
-  ctrl.requestProject
-);
+// Existing routes
+router.get('/me', ctrl.getMyProfile);
+router.get('/projects', ctrl.getMyProjects);
+router.get('/projects/:id', ctrl.getProjectById);
+router.post('/projects/request', ctrl.requestProject);
 
 module.exports = router;

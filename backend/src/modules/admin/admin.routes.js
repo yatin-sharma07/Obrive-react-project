@@ -5,7 +5,7 @@ const { authorize }= require('../../middleware/rbac');
 const validate     = require('../../middleware/validate');
 const { body }     = require('express-validator');
 
-// Create Employee (ADMIN + HR) 
+// ── Create Employee (ADMIN + HR) ─────────────────────────────
 router.post('/users/employee',
   authenticate,
   authorize('ADMIN', 'HR'),
@@ -18,7 +18,7 @@ router.post('/users/employee',
   ctrl.createEmployee
 );
 
-// Create HR (ADMIN only) 
+// ── Create HR (ADMIN only) ───────────────────────────────────
 router.post('/users/hr',
   authenticate,
   authorize('ADMIN'),
@@ -31,7 +31,7 @@ router.post('/users/hr',
   ctrl.createHr
 );
 
-// Create Client (ADMIN + HR) 
+// ── Create Client (ADMIN + HR) ───────────────────────────────
 router.post('/users/client',
   authenticate,
   authorize('ADMIN', 'HR'),
@@ -45,28 +45,28 @@ router.post('/users/client',
   ctrl.createClient
 );
 
-//  Toggle active (ADMIN + HR) 
+// ── Toggle active (ADMIN + HR) ───────────────────────────────
 router.put('/users/:id/toggle-active',
   authenticate,
   authorize('ADMIN', 'HR'),
   ctrl.toggleUserActive
 );
 
-// Delete user (ADMIN only) 
+// ── Delete user (ADMIN only) ─────────────────────────────────
 router.delete('/users/:id',
   authenticate,
   authorize('ADMIN'),
   ctrl.deleteUser
 );
 
-// View all users (ADMIN + HR) 
+// ── View all users (ADMIN + HR) ──────────────────────────────
 router.get('/users',
   authenticate,
   authorize('ADMIN', 'HR'),
   ctrl.getAllUsers
 );
 
-// Logs & Stats (ADMIN only) 
+// ── Logs & Stats (ADMIN only) ────────────────────────────────
 router.get('/logs',
   authenticate,
   authorize('ADMIN'),

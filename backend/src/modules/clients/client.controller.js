@@ -1,8 +1,9 @@
 // backend/src/modules/client/client.controller.js
 const service = require('./client.service');
+const profileService = require('./client.profile.service');
 const { successResponse, errorResponse } = require('../../utils/apiResponse');
 
-// ========== LOGIN CONTROLLER (NEW) ==========
+// ========== LOGIN CONTROLLER ==========
 exports.login = async (req, res, next) => {
   try {
     const { clientId } = req.body;
@@ -18,7 +19,51 @@ exports.login = async (req, res, next) => {
   }
 };
 
-// ========== EXISTING CONTROLLERS (Updated to match his style) ==========
+// ========== DASHBOARD CONTROLLER (NEW) ==========
+exports.getDashboard = async (req, res, next) => {
+  try {
+    const clientId = req.user.clientId;
+    
+    // Get profile
+    const profile = await profileService.getProfile(clientId);
+    
+    // Note: Project functionality not yet implemented
+    // Once you add it to your Prisma schema, you can add it here
+    
+    successResponse(res, { profile }, 'Dashboard data retrieved');
+  } catch (err) {
+    errorResponse(res, err.message || 'Error fetching dashboard', err.status || 500);
+  }
+};
+
+// ========== PROFILE CONTROLLERS (NEW) ==========
+exports.getProfile = async (req, res, next) => {
+  try {
+    const clientId = req.user.clientId;
+    const profile = await profileService.getProfile(clientId);
+    successResponse(res, profile, 'Profile retrieved successfully');
+  } catch (err) {
+    errorResponse(res, err.message || 'Error fetching profile', err.status || 500);
+  }
+};
+
+exports.updateProfile = async (req, res, next) => {
+  try {
+    const clientId = req.user.clientId;
+    const { name, dateOfBirth } = req.body;
+    
+    const updatedProfile = await profileService.updateProfile(clientId, {
+      name,
+      dateOfBirth
+    });
+    
+    successResponse(res, updatedProfile, 'Profile updated successfully');
+  } catch (err) {
+    errorResponse(res, err.message || 'Error updating profile', err.status || 500);
+  }
+};
+
+// ========== EXISTING CONTROLLERS ==========
 exports.getMyProfile = async (req, res, next) => {
   try { 
     const data = await service.getMyProfile(req.user.id);

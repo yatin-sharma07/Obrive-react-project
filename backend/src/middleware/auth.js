@@ -1,27 +1,17 @@
-const jwt = require('jsonwebtoken');
+const { verifyAccessToken } = require('../utils/jwt');
+const { errorResponse }     = require('../utils/apiResponse');
 
-const authenticate = (req, res, next) => {
+module.exports = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith('Bearer '))
+    return errorResponse(res, 'No token provided', 401);
+
   try {
-    const token = req.cookies.accessToken;
-
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized - No token",
-      });
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
-
-    req.user = decoded;
+    const token = authHeader.split(' ')[1];
+    req.user    = verifyAccessToken(token);
     next();
-
-  } catch (error) {
-    return res.status(401).json({
-      success: false,
-      message: "Unauthorized - Invalid token",
-    });
+  } catch (err) {
+    const msg = err.name === 'TokenExpiredError' ? 'Token expired' : 'Invalid token';
+    return errorResponse(res, msg, 401);
   }
 };
-
-module.exports = authenticate;
