@@ -8,7 +8,9 @@ const {
 
 // Employee / HR / Admin login
 exports.loginUser = async ({ email, password, ip, userAgent }) => {
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.users.findUnique({ where: { email } });
+  console.log("LOGIN INPUT:", email, password);
+console.log("USER FROM DB:", user);
   if (!user || !user.isActive)
     throw { status: 401, message: 'Invalid credentials or inactive account' };
 
@@ -32,20 +34,30 @@ exports.loginUser = async ({ email, password, ip, userAgent }) => {
 };
 
 // Client login
-exports.loginClient = async ({ clientId, password }) => {
-  const client = await prisma.client.findUnique({ where: { clientId } });
-  if (!client || !client.isActive)
-    throw { status: 401, message: 'Invalid client credentials' };
+exports.loginClient = async ({ clientId }) => {
+  const client = await prisma.users.findUnique({
+    where: { userid: clientId }, 
+  });
 
-  const valid = await comparePassword(password, client.password);
-  if (!valid) throw { status: 401, message: 'Invalid credentials' };
+  if (!client || client.role !== "client") {
+    throw { status: 401, message: "Invalid client credentials" };
+  }
 
-  const payload     = { id: client.id, role: 'CLIENT', clientId: client.clientId };
+  const payload = {
+    id: client.id,
+    role: client.role,
+    clientId: client.userid,
+  };
+
   const accessToken = signAccessToken(payload);
 
   return {
     accessToken,
-    client: { id: client.id, clientId: client.clientId, companyName: client.companyName },
+    client: {
+      id: client.id,
+      clientId: client.userid,
+      name: client.name,
+    },
   };
 };
 
@@ -71,7 +83,7 @@ exports.logout = async ({ userId, logId }) => {
 exports.refreshToken = async (token) => {
   try {
     const payload = verifyRefreshToken(token);
-    const user    = await prisma.user.findUnique({ where: { id: payload.id } });
+    const user    = await prisma.users.findUnique({ where: { id: payload.id } });
     if (!user) throw { status: 401, message: 'User not found' };
 
     const newAccess = signAccessToken({ id: user.id, role: user.role });

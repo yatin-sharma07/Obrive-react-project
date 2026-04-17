@@ -23,12 +23,19 @@ model Users {
   phoneNumber String?     @db.VarChar(20) @map("phone_number")
   joinDate    DateTime?   @map("join_date")
   biography   String?
-  login_logs  login_logs[]
+  loginLogs LoginLog[]
   
   @@map("users")
 }
 
-model login_logs {
+enum UserRole {
+  client
+  employee
+  HR
+  Admin
+}
+
+model LoginLog {
   id              Int       @id @default(autoincrement())
   userId          Int
   ipAddress       String?
@@ -36,13 +43,8 @@ model login_logs {
   loginTime       DateTime  @default(now())
   logoutTime      DateTime?
   sessionDuration Int?
-  users           Users     @relation(fields: [userId], references: [id])
-}
 
+  user Users @relation(fields: [userId], references: [id])
 
-enum UserRole {
-  client
-  employee
-  HR
-  Admin
+  @@map("login_logs")
 }

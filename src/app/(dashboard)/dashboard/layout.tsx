@@ -1,100 +1,72 @@
 'use client'
 
-import { ReactNode, useState } from 'react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { ReactNode, useState, useEffect } from 'react'
+import { useParams } from 'next/navigation'
+import Sidebar from '@/components/dashboard/Sidebar'
+import Header from '@/components/dashboard/Header'
+import ActivityStream from '@/components/dashboard/ActivityStream'
+import NearestEvents from '@/components/dashboard/NearestEvents'
+import Workload from '@/components/dashboard/Workload'
+import Projects from '@/components/dashboard/Projects'
+import ProfileNotifications from '@/components/dashboard/ProfileNotifications'
+import { dashboardConfigs, type UserRole } from '@/constants/dashboardConfig'
+import { useDashboardData } from './useDashboardData'
 
 interface DashboardLayoutProps {
   children: ReactNode
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const pathname = usePathname()
-  const [sidebarOpen, setSidebarOpen] = useState(true)
-
-  const navigation = [
-    { name: 'Employee', href: '/dashboard/employee' },
-    { name: 'Admin', href: '/dashboard/admin' },
-    { name: 'HR', href: '/dashboard/hr' },
-    { name: 'Client', href: '/dashboard/client' },
-  ]
+  const params = useParams()
+  const role = (params?.role as UserRole) || 'hr' // Default to HR
+  
+  const config = dashboardConfigs[role]
+  const { workloadMembers, projects, events, activities } = useDashboardData(role)
 
   return (
-    <div className="flex h-screen w-screen  bg-[#ebf1fa] ">
+    <div className="flex h-screen w-screen bg-[#ebf1fa] gap-2 p-2">
       
       {/* Left Sidebar */}
-      <div className="m-2 p-3 w-40 text-white border-2 bg-white   rounded-sm ">
-        <h1 className="text-2xl font-bold mb-8 pb-4">Obrive</h1>
-        
-        <nav className="space-y-2">
- 
-        </nav>
+      <div className="rounded-2xl flex flex-col">
+        <Sidebar />
       </div>
 
       {/* Center Dashboard Area */}
-      <div className="m-2 grow text-white  bg-transparent flex flex-col relative">
+      <div className="flex-1 flex flex-col gap-2 overflow-hidden">
+        
+        <Header pageTitle={`${role.toUpperCase()} Dashboard`} userName="Evan" />
 
-
-
-                <div className=" h-30 text-white  relative">
-                
-                    <div className="grow">
-                        <input  type="text" placeholder="Search..." className="w-80 h-7 pl-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-100 text-black text-[9px]" />
-                    </div>
-
-                    <span className="text-[10px] text-gray-400 absolute bottom-11 ">Welcome back, Evan!</span>
-                    <h1 className="text-2xl font-semibold text-black absolute bottom-3 ">Dashboard</h1>
-
-
-                </div>
-
-                <div className="p-1 grow flex-1 border-2 bg-white border-black  rounded-sm ">
-                    <h2 className=" m-1 p-1 text-base font-extrabold text-black">Workload</h2>
-                </div>
-
-
-                <div className="grow flex-col flex  rounded-sm">
-                <h2 className="mt-2 mb-2 text-black font-bold">Projects</h2>
-
-                    <div className="p-1 grow flex-1 text-black bg-white border-black border-2  rounded-sm">
- 
-                    </div>
-
-                </div>
- 
+        <div className="flex-1 overflow-y-auto flex flex-col gap-2 pr-2">
+          
+          {config.showWorkload && <Workload members={workloadMembers} />}
+          
+          {config.showProjects && <Projects projects={projects} />}
+          
+          {children}
+        </div>
       </div>
 
       {/* Right Panel */}
-      <div className="m-2 p-1 w-80 text-white border-2 bg-white border-black flex flex-col">
+      <div className="w-80 flex flex-col gap-2 overflow-hidden">
+        
+        {config.showProfileNotifications && (
+          <div className="flex-none">
+            <ProfileNotifications />
+          </div>
+        )}
 
-                <div className="m-1 p-1  text-white border-2 bg-white border-black  flex flex-col relative">
+        {config.showNearestEvents && (
+          <div className="flex-1 min-h-0 bg-white rounded-lg p-3 overflow-y-auto text-black">
+            <NearestEvents events={events} />
+          </div>
+        )}
 
-                    <div className="h-15  flex flex-row border-2 border-black relative">
-
-                        <div className=" h-10 w-10 border-2 border-black bg-amber-500 absolute right-45 top-0">
-                        </div>
-
-                        <div className=" h-10 w-40 border-2 border-black bg-amber-200 absolute right-0 top-0">
-                        </div>
-
-                    </div>
-
-                    <div className="h-15 border-2 border-black bg-amber-800">
-                    </div>
-
-                </div>
-
-                <div className="m-1 p-1 grow flex-1 text-white border-2 bg-white border-black">
-
-
-                </div>
-
-                <div className="m-1 p-1 grow flex-1 text-white border-2 bg-white border-black">
-
-
-                </div>
-                
-                </div>
+        {config.showActivityStream && (
+          <div className="flex-1 min-h-0 bg-white rounded-lg p-3 overflow-y-auto text-black">
+            <ActivityStream activities={activities} />
+          </div>
+        )}
+      </div>
 
     </div>
   )

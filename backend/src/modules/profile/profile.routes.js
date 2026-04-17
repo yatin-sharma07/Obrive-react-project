@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { prisma } = require('../../config/db');
+const authenticate = require('../../middleware/auth');
 
 // Save/Update Profile ────────────────────────────────────────────────────────────────────────
 router.post('/', async (req, res) => {
