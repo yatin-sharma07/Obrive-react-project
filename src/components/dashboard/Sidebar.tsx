@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard,
   FolderOpen,
@@ -13,10 +13,24 @@ import {
   Info,
   LogOut,
 } from 'lucide-react'
+import { apiFetch } from '@/lib/api'
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const router = useRouter()
   const [isCollapsed, setIsCollapsed] = useState(false)
+
+  const handleLogout = async () => {
+    try {
+      await apiFetch('/auth/logout', {
+        method: 'POST',
+      })
+    } catch (error) {
+      console.error('Logout failed', error)
+    } finally {
+      router.push('/')
+    }
+  }
 
   const navItems = [
   {
@@ -103,7 +117,7 @@ export default function Sidebar() {
               }`}
               title={isCollapsed ? item.label : undefined}
             >
-              <Icon className="w-5 h-5 flex-shrink-0" />
+              <Icon className="w-5 h-5 shrink-0" />
               {!isCollapsed && <span className="text-sm font-medium">{item.label}</span>}
             </Link>
           )
@@ -112,8 +126,12 @@ export default function Sidebar() {
 
       {/* Logout Button */}
       <div className="p-4 border-t border-gray-100">
-        <button className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-red-50 rounded-lg transition-colors">
-          <LogOut className="w-5 h-5 flex-shrink-0" />
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-red-50 rounded-lg transition-colors"
+        >
+          <LogOut className="w-5 h-5 shrink-0" />
           {!isCollapsed && <span className="text-sm font-medium">Logout</span>}
         </button>
       </div>

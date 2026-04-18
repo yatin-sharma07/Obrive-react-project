@@ -3,20 +3,22 @@ const { successResponse, errorResponse } = require('../../utils/apiResponse');
 
 exports.getProjects = async (req, res) => {
   try {
-    const projects = await projectService.getEmployeeProjects(req.user.id);
+    const userId = req.user.id;
+    const userRole = req.user.role;
+    
+    const projects = await projectService.getProjectsByRole(userId, userRole);
     successResponse(res, projects, 'Projects retrieved');
   } catch (err) {
-    console.error('❌ getProjects error:', err);
     errorResponse(res, err.message, 500);
   }
 };
 
-exports.getAllProjects = async (req, res) => {
+exports.getProjectById = async (req, res) => {
   try {
-    const projects = await projectService.getAllProjects();
-    successResponse(res, projects, 'All projects retrieved');
+    const projectId = parseInt(req.params.id);
+    const project = await projectService.getProjectById(projectId);
+    successResponse(res, project, 'Project details retrieved');
   } catch (err) {
-    console.error('❌ getAllProjects error:', err);
-    errorResponse(res, err.message, 500);
+    errorResponse(res, err.message, 404);
   }
 };

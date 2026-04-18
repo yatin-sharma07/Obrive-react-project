@@ -36,6 +36,18 @@ exports.logout = async (req, res, next) => {
       userId: req.user.id,
       logId:  req.user.logId,
     });
+
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+    });
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+    });
+
     successResponse(res, result, 'Logged out');
   } catch (err) { next(err); }
 };
