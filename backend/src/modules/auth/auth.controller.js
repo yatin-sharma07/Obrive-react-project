@@ -8,6 +8,17 @@ exports.loginUser = async (req, res, next) => {
       ip:        req.ip,
       userAgent: req.headers['user-agent'],
     });
+     res.cookie("accessToken", result.accessToken, {
+      httpOnly: true,
+      secure: false, // true in production (HTTPS)
+      sameSite: "lax",
+    });
+
+    res.cookie("refreshToken", result.refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+    });
     successResponse(res, result, 'Login successful');
   } catch (err) { next(err); }
 };
@@ -31,9 +42,24 @@ exports.logout = async (req, res, next) => {
 
 exports.refreshToken = async (req, res, next) => {
   try {
-    const { refreshToken } = req.body;
-    if (!refreshToken) return errorResponse(res, 'Refresh token required', 400);
-    const result = await service.refreshToken(refreshToken);
+    const token = req.cookies.refreshToken; // 👈 THIS LINE
+
+    if (!token) {
+      return errorResponse(res, 'Refresh token required', 400);
+    }
+
+    const result = await service.refreshToken(token);
     successResponse(res, result);
-  } catch (err) { next(err); }
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getAllUsers = async (req, res, next) => {
+  try {
+    const result = await service.getAllUsers();
+    successResponse(res, result, 'Users fetched successfully');
+  } catch (err) {
+    next(err);
+  }
 };

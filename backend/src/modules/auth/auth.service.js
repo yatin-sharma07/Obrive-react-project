@@ -23,21 +23,16 @@ exports.loginUser = async ({ email, password, ip, userAgent }) => {
   if (!user) {
     throw { status: 401, message: 'Invalid credentials or inactive account' };
   }
-  
-  if (user.status !== 'online' && user.status !== 'active') {
-    throw { status: 401, message: 'Invalid credentials or inactive account' };
-  }
+  //temp removing strict status check
+  //if (user.status !== 'online' && user.status !== 'active') {
+    //throw { status: 401, message: 'Invalid credentials or inactive account' };
+  //}
   
   // Compare password - handles both plain text and hashed
-  let isValid = false;
+ 
   
   // Check if password is bcrypt hash (starts with $2b$)
-  if (user.password && user.password.startsWith('$2b$')) {
-    isValid = await comparePassword(password, user.password);
-  } else {
-    // Plain text comparison
-    isValid = (user.password === password);
-  }
+ const isValid = await bcrypt.compare(password, user.password);
   
   if (!isValid) {
     throw { status: 401, message: 'Invalid credentials' };
@@ -149,4 +144,27 @@ exports.refreshToken = async (token) => {
   } catch {
     throw { status: 403, message: 'Invalid or expired refresh token' };
   }
+};
+
+// Get all datat for user
+
+exports.getAllUsers = async () => {
+  const query = `
+    SELECT 
+      id,
+      userid,
+      email,
+      name,
+      role,
+      status,
+      date_of_birth,
+      bio,
+      phone_number,
+      created_at
+    FROM users
+    ORDER BY created_at DESC
+  `;
+
+  const { rows } = await db.query(query);
+  return rows;
 };
