@@ -6,7 +6,7 @@ import ProfileNotifications from '@/components/dashboard/ProfileNotifications'
 import { useDashboardData } from '../useDashboardData'
 
 export default function ClientDashboard() {
-  const { projects, loading } = useDashboardData('client')
+  const { projects, user, loading, error, refetch } = useDashboardData('client')
 
   if (loading) {
     return (
@@ -16,12 +16,29 @@ export default function ClientDashboard() {
     )
   }
 
+  if (error) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-4">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-center">
+          <p className="font-bold">Error loading dashboard</p>
+          <p className="text-sm mb-4">{error}</p>
+          <button 
+            onClick={() => refetch()}
+            className="text-xs bg-red-100 hover:bg-red-200 px-3 py-1 rounded transition"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex-1 flex flex-row gap-2 overflow-hidden">
 
 
             <div className="flex-1 overflow-hidden flex flex-col gap-2">
-                <Header pageTitle="Client Dashboard" userName="Evan" />               
+                <Header pageTitle="Client Dashboard" userName={user?.name} />               
                   <div className="flex-1 overflow-y-auto flex flex-col gap-2 pr-2">
                     {/* Client only sees projects */}
                     <Projects projects={projects} />

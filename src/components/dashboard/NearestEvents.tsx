@@ -17,32 +17,7 @@ interface NearestEventsProps {
 }
 
 export default function NearestEvents({
-  events = [
-    {
-      id: '1',
-      title: 'Presentation of the new department',
-      time: 'Today 15:00 PM',
-      priority: 'high',
-      duration: '4h',
-      borderColor: 'bg-blue-500',
-    },
-    {
-      id: '2',
-      title: "Anne's Birthday",
-      time: 'Today 16:00 PM',
-      priority: 'low',
-      duration: '4h',
-      borderColor: 'bg-purple-500',
-    },
-    {
-      id: '3',
-      title: "Ray's Birthday",
-      time: 'Tomorrow 12:00 PM',
-      priority: 'low',
-      duration: '4h',
-      borderColor: 'bg-purple-500',
-    },
-  ],
+  events = [],
   onViewAll,
 }: NearestEventsProps) {
   const getPriorityIcon = (priority: string) => {

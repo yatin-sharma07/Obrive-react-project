@@ -16,40 +16,7 @@ interface ActivityStreamProps {
 }
 
 export default function ActivityStream({
-  activities = [
-    {
-      id: '1',
-      userName: 'Oscar Holloway',
-      userRole: 'UI/UX Designer',
-      avatar: 'OH',
-      action: 'Updated the status of Mind Map task to In Progress',
-      actionType: 'update',
-    },
-    {
-      id: '2',
-      userName: 'Unknown User',
-      userRole: 'Team Member',
-      avatar: 'U',
-      action: 'Updated the status of Mind Map task to In Progress',
-      actionType: 'update',
-    },
-    {
-      id: '3',
-      userName: 'Unknown User',
-      userRole: 'Team Member',
-      avatar: 'U',
-      action: 'Attached files to the task',
-      actionType: 'attachment',
-    },
-    {
-      id: '4',
-      userName: 'Emily Tyler',
-      userRole: 'Copywriter',
-      avatar: 'ET',
-      action: 'Updated the status of Mind Map task to In Progress',
-      actionType: 'update',
-    },
-  ],
+  activities = [],
 }: ActivityStreamProps) {
   const getActionIcon = (actionType: string) => {
     switch (actionType) {

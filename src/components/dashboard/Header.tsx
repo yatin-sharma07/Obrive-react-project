@@ -1,14 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { Search, Bell } from 'lucide-react'
+import { Search, Bell, RotateCcw } from 'lucide-react'
 
 interface HeaderProps {
   userName?: string
   pageTitle?: string
+  onRefresh?: () => void
+  isRefreshing?: boolean
 }
 
-export default function Header({ userName = 'Evan', pageTitle = 'Dashboard' }: HeaderProps) {
+export default function Header({ userName = 'Evan', pageTitle = 'Dashboard', onRefresh, isRefreshing = false }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState('')
 
   return (
@@ -27,6 +29,16 @@ export default function Header({ userName = 'Evan', pageTitle = 'Dashboard' }: H
           </div>
         </div>
 
+        {onRefresh && (
+          <button
+            onClick={onRefresh}
+            disabled={isRefreshing}
+            className="ml-3 p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Refresh dashboard"
+          >
+            <RotateCcw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          </button>
+        )}
 
       </div>
 

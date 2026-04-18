@@ -28,6 +28,18 @@ const handleLogin = async () => {
     if (!res.ok) {
       throw new Error(data.message || "Login failed");
     }
+
+    // Save client info for the dashboard
+    if (data?.data?.client) {
+      localStorage.setItem('user', JSON.stringify({
+        ...data.data.client,
+        role: 'client'
+      }));
+    }
+    if (data?.data?.accessToken) {
+      localStorage.setItem('token', data.data.accessToken);
+    }
+
     setShowToast(true);
 
    

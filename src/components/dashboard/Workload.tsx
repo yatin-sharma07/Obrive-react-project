@@ -18,27 +18,17 @@ interface WorkloadProps {
   onViewAll?: () => void
 }
 
-const defaultMembers: WorkloadMember[] = [
-  { id: '1', name: 'Shawn Stone', role: 'UI/UX Designer', level: 'Middle' },
-  { id: '2', name: 'Randy Delgado', role: 'UI/UX Designer', level: 'Junior' },
-  { id: '3', name: 'Emily Tyler', role: 'Copywriter', level: 'Middle' },
-  { id: '4', name: 'Louis Castro', role: 'Copywriter', level: 'Middle' },
-  { id: '5', name: 'Blake Silva', role: 'iOS Developer', level: 'Senior' },
-  { id: '6', name: 'Joel Phillips', role: 'UI/UX Designer', level: 'Middle' },
-  { id: '7', name: 'Wayne Marsh', role: 'UI/UX Designer', level: 'Junior' },
-  { id: '8', name: 'Oscar Holloway', role: 'UI/UX Designer', level: 'Junior' },
-]
-
-function initials(name: string) {
+// Helper function to get initials from name
+function getInitials(name: string) {
   return name
     .split(' ')
     .filter(Boolean)
     .slice(0, 2)
-    .map((p) => p[0]!.toUpperCase())
+    .map((p) => p[0]?.toUpperCase() || '')
     .join('')
 }
 
-export default function Workload({ members = defaultMembers, onViewAll }: WorkloadProps) {
+export default function Workload({ members = [], onViewAll }: WorkloadProps) {
   return (
     <section className="bg-white rounded-lg p-3">
       <div className="flex items-center justify-between mb-3">
@@ -68,7 +58,7 @@ export default function Workload({ members = defaultMembers, onViewAll }: Worklo
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <span className="text-[9px] font-bold text-gray-600">{initials(m.name)}</span>
+                <span className="text-[9px] font-bold text-gray-600">{getInitials(m.name)}</span>
               )}
             </div>
 

@@ -1,5 +1,5 @@
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 type FetchOptions = RequestInit & {
   retry?: boolean;
@@ -11,11 +11,16 @@ export async function apiFetch(
 ) {
   const { retry = true, ...rest } = options;
 
+  // Get token from localStorage for fallback if cookie is not sent/working
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  const authHeader = token ? { 'Authorization': `Bearer ${token}` } : {};
+
   const response = await fetch(`${BASE_URL}${endpoint}`, {
     ...rest,
     credentials: "include", 
     headers: {
       "Content-Type": "application/json",
+      ...authHeader,
       ...(rest.headers || {}),
     },
   });

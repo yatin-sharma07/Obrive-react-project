@@ -14,6 +14,7 @@ import {
   LogOut,
 } from 'lucide-react'
 import { apiFetch } from '@/lib/api'
+import PrimaryLogo from '@/components/shared/logo/PrimaryLogo'
 
 export default function Sidebar() {
   const pathname = usePathname()
@@ -78,26 +79,46 @@ export default function Sidebar() {
     <div className={`${isCollapsed ? 'w-20' : 'w-50'} h-screen bg-white border-r border-gray-200 flex flex-col transition-all duration-300 m-2 rounded-lg shadow-sm`}>
       
       {/* Logo Section */}
-      <div className="p-6 border-b border-gray-100">
+      <div className="p-4 border-b border-gray-100">
         <div className="flex items-center justify-between">
+          <Link href="/dashboard/hr" className={`flex items-center ${isCollapsed ? 'justify-center w-full' : ''}`}>
+            <PrimaryLogo width={isCollapsed ? 40 : 60} height={isCollapsed ? 28 : 42} />
+          </Link>
           {!isCollapsed && (
-            <h1 className="text-2xl font-bold text-[#1a472a]">Obrive</h1>
-          )}
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition"
-            title={isCollapsed ? 'Expand' : 'Collapse'}
-          >
-            <svg
-              className={`w-5 h-5 transition-transform ${isCollapsed ? 'rotate-180' : ''}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+            <button
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="p-1.5 hover:bg-gray-100 rounded-lg transition"
+              title="Collapse"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+          )}
         </div>
+        {isCollapsed && (
+          <div className="flex justify-center mt-2">
+            <button
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="p-1.5 hover:bg-gray-100 rounded-lg transition"
+              title="Expand"
+            >
+              <svg
+                className="w-4 h-4 rotate-180"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Navigation Items */}

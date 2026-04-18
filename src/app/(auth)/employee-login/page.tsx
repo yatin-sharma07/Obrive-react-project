@@ -35,7 +35,16 @@ const handleLogin = async () => {
     if (!res.ok) {
       throw new Error(data.message || "Login failed");
     }
-  setShowToast(true);
+
+    // Save user info for the dashboard
+    if (data?.data?.user) {
+      localStorage.setItem('user', JSON.stringify(data.data.user));
+    }
+    if (data?.data?.accessToken) {
+      localStorage.setItem('token', data.data.accessToken);
+    }
+
+    setShowToast(true);
 
     const role = data?.data?.user?.role;
     const redirectPath = role === "hr" ? "/dashboard/hr" : "/dashboard/employee";

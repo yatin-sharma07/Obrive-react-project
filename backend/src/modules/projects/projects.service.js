@@ -30,13 +30,10 @@ class ProjectService {
         p.description,
         p.priority,
         p.created_at,
-        COUNT(DISTINCT t.id) as total_tasks,
-        SUM(CASE WHEN t.status = 'completed' THEN 1 ELSE 0 END) as completed_tasks,
-        COUNT(DISTINCT pa.employee_id) as assignees_count
+        (SELECT COUNT(*) FROM tasks t WHERE t.project_id = p.id) as total_tasks,
+        (SELECT COUNT(*) FROM tasks t WHERE t.project_id = p.id AND t.status = 'completed') as completed_tasks,
+        (SELECT COUNT(*) FROM project_assignments pa WHERE pa.project_id = p.id) as assignees_count
       FROM projects p
-      LEFT JOIN tasks t ON t.project_id = p.id
-      LEFT JOIN project_assignments pa ON pa.project_id = p.id
-      GROUP BY p.id
       ORDER BY p.created_at DESC
     `;
     
@@ -52,14 +49,12 @@ class ProjectService {
         p.description,
         p.priority,
         p.created_at,
-        COUNT(DISTINCT t.id) as total_tasks,
-        SUM(CASE WHEN t.status = 'completed' THEN 1 ELSE 0 END) as completed_tasks,
-        COUNT(DISTINCT pa.employee_id) as assignees_count
+        (SELECT COUNT(*) FROM tasks t WHERE t.project_id = p.id) as total_tasks,
+        (SELECT COUNT(*) FROM tasks t WHERE t.project_id = p.id AND t.status = 'completed') as completed_tasks,
+        (SELECT COUNT(*) FROM project_assignments pa WHERE pa.project_id = p.id) as assignees_count
       FROM projects p
       JOIN project_assignments pa ON pa.project_id = p.id
-      LEFT JOIN tasks t ON t.project_id = p.id
       WHERE pa.employee_id = ${employeeId}
-      GROUP BY p.id
       ORDER BY p.created_at DESC
     `;
     

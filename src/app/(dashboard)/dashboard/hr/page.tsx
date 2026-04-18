@@ -21,7 +21,26 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const role = (params?.role as UserRole) || 'hr' // Default to HR
   
   const config = dashboardConfigs[role]
-  const { workloadMembers, projects, events, activities } = useDashboardData(role)
+  const { workloadMembers, projects, events, activities, user, loading, error } = useDashboardData(role)
+
+  if (loading) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1a472a]"></div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-4">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+          <p className="font-bold">Error loading dashboard</p>
+          <p className="text-sm">{error}</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex-1 flex flex-row gap-2 overflow-hidden">
@@ -29,7 +48,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Center Dashboard Area */}
       <div className="flex-1 flex flex-col gap-2 overflow-hidden">
         
-        <Header pageTitle={`${role.toUpperCase()} Dashboard`} userName="Evan" />
+        <Header pageTitle={`${role.toUpperCase()} Dashboard`} userName={user?.name} />
 
         <div className="flex-1 overflow-y-auto flex flex-col gap-2 pr-2">
           
