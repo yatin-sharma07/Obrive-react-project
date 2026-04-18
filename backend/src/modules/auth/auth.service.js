@@ -1,5 +1,5 @@
 // backend/src/modules/auth/auth.service.js
-const { prisma }          = require('../../config/db');
+const { prisma } = require('../../config/db');
 const { comparePassword } = require('../../utils/bcrypt');
 const bcrypt = require('bcrypt');
 const {
@@ -23,16 +23,9 @@ exports.loginUser = async ({ email, password, ip, userAgent }) => {
   if (!user) {
     throw { status: 401, message: 'Invalid credentials or inactive account' };
   }
-  //temp removing strict status check
-  //if (user.status !== 'online' && user.status !== 'active') {
-    //throw { status: 401, message: 'Invalid credentials or inactive account' };
-  //}
   
-  // Compare password - handles both plain text and hashed
- 
-  
-  // Check if password is bcrypt hash (starts with $2b$)
- const isValid = await bcrypt.compare(password, user.password);
+  // Compare password
+  const isValid = await bcrypt.compare(password, user.password);
   
   if (!isValid) {
     throw { status: 401, message: 'Invalid credentials' };
@@ -83,11 +76,6 @@ exports.loginClient = async ({ clientId, password }) => {
   if (!client || client.status === 'inactive') {
     throw { status: 401, message: 'Invalid client credentials' };
   }
-  
-  // Clients don't need password check (or implement if needed)
-  // if (client.password && client.password !== password) {
-  //   throw { status: 401, message: 'Invalid credentials' };
-  // }
   
   const payload = { id: client.id, role: 'CLIENT', clientId: client.userid };
   const accessToken = signAccessToken(payload);
@@ -146,10 +134,9 @@ exports.refreshToken = async (token) => {
   }
 };
 
-// Get all datat for user
-
+// Get all users for admin/HR (FIXED)
 exports.getAllUsers = async () => {
-  const query = `
+  const result = await prisma.$queryRaw`
     SELECT 
       id,
       userid,
@@ -164,7 +151,6 @@ exports.getAllUsers = async () => {
     FROM users
     ORDER BY created_at DESC
   `;
-
-  const { rows } = await db.query(query);
-  return rows;
+  
+  return result;
 };
