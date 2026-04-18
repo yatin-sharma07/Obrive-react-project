@@ -28,22 +28,26 @@ export function useDashboardData(userRole: UserRole) {
       console.log('Fetching projects for role:', userRole)
 
       // Use apiFetch which handles BASE_URL and credentials (cookies)
-      const response = await apiFetch('/projects', {
-        method: 'GET'
-      })
+      const [projectsRes, eventsRes] = await Promise.all([
+        apiFetch('/projects', { method: 'GET' }),
+        apiFetch('/events/nearest', { method: 'GET' })
+      ])
       
-      if (!response.ok) {
-        if (response.status === 401) {
+      if (!projectsRes.ok) {
+        if (projectsRes.status === 401) {
           throw new Error('Unauthorized: Please login again')
         }
-        throw new Error(`Failed to fetch projects: ${response.status}`)
+        throw new Error(`Failed to fetch projects: ${projectsRes.status}`)
       }
 
-      const result = await response.json()
-      console.log('API Response:', result)
+      const projectsResult = await projectsRes.json()
+      const eventsResult = await eventsRes.ok ? await eventsRes.json() : { success: false, data: [] }
+
+      console.log('Projects API Response:', projectsResult)
+      console.log('Events API Response:', eventsResult)
       
-      if (result.success) {
-          const mappedProjects: ProjectItem[] = result.data.map((p: any) => ({
+      if (projectsResult.success) {
+          const mappedProjects: ProjectItem[] = projectsResult.data.map((p: any) => ({
             id: String(p.id),
             code: p.project_id || `PN${String(p.id).padStart(7, '0')}`,
             name: p.name,
@@ -59,6 +63,30 @@ export function useDashboardData(userRole: UserRole) {
             extraAssigneesCount: Math.max(0, Number(p.assignees_count) || 0)
           }))
 
+          const mappedEvents = (eventsResult.data || []).map((e: any) => {
+            // Calculate duration if both times exist
+            let duration = undefined;
+            if (e.event_time && e.end_time) {
+              const start = new Date(`1970-01-01T${e.event_time}`);
+              const end = new Date(`1970-01-01T${e.end_time}`);
+              const diffMs = end.getTime() - start.getTime();
+              if (diffMs > 0) {
+                const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+                const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                duration = diffHrs > 0 ? `${diffHrs}h ${diffMins}m` : `${diffMins}m`;
+              }
+            }
+
+            return {
+              id: String(e.id),
+              title: e.title,
+              time: `${e.display_date}, ${e.formatted_time}`,
+              priority: (e.priority || 'medium').toLowerCase() as 'high' | 'medium' | 'low',
+              borderColor: e.priority === 'high' ? 'bg-blue-500' : 'bg-purple-500',
+              duration: duration
+            };
+          })
+
           // Also try to get user info from localStorage as fallback for UI
           const userStr = typeof window !== 'undefined' ? localStorage.getItem('user') : null
           const user = userStr ? JSON.parse(userStr) : null
@@ -67,11 +95,11 @@ export function useDashboardData(userRole: UserRole) {
             user: user,
             projects: mappedProjects,
             workloadMembers: [], 
-            events: [],
+            events: mappedEvents,
             activities: []
           })
         } else {
-          throw new Error(result.message || 'Failed to fetch projects')
+          throw new Error(projectsResult.message || 'Failed to fetch projects')
         }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')

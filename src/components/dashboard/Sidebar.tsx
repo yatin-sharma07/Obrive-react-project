@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard,
@@ -144,6 +145,25 @@ export default function Sidebar() {
           )
         })}
       </nav>
+
+      {/* Support Section */}
+      {!isCollapsed && (
+        <div className="mx-4 mb-4 p-3 bg-[#D9F2F2] rounded-2xl flex flex-col items-center">
+          <div className="relative w-full h-32 mb-2">
+            <Image
+              src="/images/otter.png"
+              alt="Support Otter"
+              fill
+              className="object-contain"
+              priority
+            />
+          </div>
+          <button className="w-full bg-[#073933] text-white py-2.5 rounded-xl flex items-center justify-center gap-2 text-sm font-medium shadow-sm hover:bg-[#0a4a42] transition-colors">
+            <MessageCircle className="w-4 h-4" />
+            Support
+          </button>
+        </div>
+      )}
 
       {/* Logout Button */}
       <div className="p-4 border-t border-gray-100">
