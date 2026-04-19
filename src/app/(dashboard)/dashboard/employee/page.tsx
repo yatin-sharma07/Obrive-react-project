@@ -1,23 +1,41 @@
 'use client'
 
-import Header from '@/components/dashboard/Header'
-import Projects from '@/components/dashboard/Projects'
-import NearestEvents from '@/components/dashboard/NearestEvents'
-import ActivityStream from '@/components/dashboard/ActivityStream'
-import ProfileNotifications from '@/components/dashboard/ProfileNotifications'
+import {
+  LayoutDashboard,
+  FolderOpen,
+  Calendar,
+  Palmtree,
+} from 'lucide-react'
+import supportImg from "@/assets/images/employee/illustration.png"
 import { useDashboardData } from '../useDashboardData'
+import { useState } from 'react'
+import Sidebar from '@/components/dashboard/Sidebar'
+import Dashboard from './sections/Dashboard'
+import SkeletonLoading from '@/components/SkelitonLoading'
+
+import NearestEventsSection from './sections/NearestEventsSection'
+import ProfileNotifications from './components/ProfileNotifications'
 
 export default function EmployeeDashboard() {
-  const { projects, events, activities, user, loading, error, refetch } = useDashboardData('employee')
+  const {  loading, error, refetch } = useDashboardData('employee')
+  const [activeSection
+    , setActiveSection] = useState('dashboard')  
+  const[supportOpen,setSupportOpen]=useState(false)
+
+  const navItems=[
+    {label:'Dashboard', icon:LayoutDashboard, key:'dashboard'},
+    {label:'Projects', icon:FolderOpen, key:'projects'},
+    {label:'Calender', icon:Calendar, key:'calender'},
+    {label:'Vacations', icon:Palmtree, key:'tasks'},
+   
+
+  ]
 
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1a472a]"></div>
-      </div>
+      <SkeletonLoading/>
     )
   }
-
   if (error) {
     return (
       <div className="flex-1 flex items-center justify-center p-4">
@@ -36,39 +54,101 @@ export default function EmployeeDashboard() {
   }
 
   return (
+    <>
+    
+    <div className="flex">
+      <Sidebar
+        navItems={navItems}
+        activeSection={activeSection}
+        setActiveSection={setActiveSection}
+        setSupportOpen={setSupportOpen}
+      /></div>
     <div className="flex-1 flex flex-col gap-2 overflow-hidden">
-      
-
-      <div className="flex-1 overflow-hidden flex gap-2">
-        
-        {/* Middle  Content Area */}
-
-        <div className="flex-1 flex flex-col gap-2 overflow-hidden">
-           <Header pageTitle="Employee Dashboard" userName={user?.name} />
-        <div className="flex-1 overflow-y-auto flex flex-col gap-2 pr-2">
-          <Projects projects={projects} />
-        </div>
-
-      </div>
-
-        {/* Right Panel */}
-        <div className="w-80 flex flex-col gap-2 overflow-hidden">
-          
-          <div className="flex-none">
+       <div className="flex-none">
             <ProfileNotifications />
           </div>
+      
 
-          <div className="flex-1 min-h-0 bg-white rounded-lg p-3 overflow-y-auto text-black">
-            <NearestEvents events={events} />
-          </div>
-
-          <div className="flex-1 min-h-0 bg-white rounded-lg p-3 overflow-y-auto text-black">
-            <ActivityStream activities={activities} />
-          </div>
-        </div>
-
-      </div>
+    {activeSection==='dashboard'&&(
+      <Dashboard setActiveSection={setActiveSection}/>
+    )}
+    {activeSection==='projects'&&(
+      <div className="p-6">Projects Section - Coming Soon!</div>
+    )}
+    {activeSection==='calender'&&(
+      <div className="p-6">Calender Section - Coming Soon!</div>
+    )}
+    {activeSection==='tasks'&&(
+      <div className="p-6">Tasks Section - Coming Soon!</div>
+    )}
+    {activeSection ==='events'&&(
+     <NearestEventsSection/>
+    )}
 
     </div>
-  )
+   {supportOpen && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+    
+    {/* Modal */}
+    <div className="relative w-[420px] bg-white rounded-2xl p-6 shadow-xl">
+
+      {/* Close Button */}
+      <button
+        onClick={() => setSupportOpen(false)}
+        className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200"
+      >
+        ✕
+      </button>
+
+      {/* Title */}
+      <h2 className="text-xl font-semibold text-center text-[#073933] mb-4">
+        Need some Help?
+      </h2>
+
+      {/* Image */}
+      <div className="w-full h-40 rounded-xl bg-gray-100 flex items-center justify-center mb-4 overflow-hidden">
+        <img
+          src={supportImg.src}
+          alt="support"
+          className="object-contain h-full"
+        />
+      </div>
+
+      {/* Description */}
+      <p className="text-sm text-gray-600 text-center mb-5">
+        Describe your question and our specialists will answer you within 24 hours.
+      </p>
+
+      {/* Subject */}
+      <div className="mb-4">
+        <label className="text-sm text-gray-500 mb-1 block">
+          Request Subject
+        </label>
+        <select className="w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#6c63ff]">
+          <option>Technical difficulties</option>
+          <option>Billing issue</option>
+          <option>General inquiry</option>
+        </select>
+      </div>
+
+      {/* Description */}
+      <div className="mb-6">
+        <label className="text-sm text-gray-500 mb-1 block">
+          Description
+        </label>
+        <textarea
+          placeholder="Add some description of the request"
+          className="w-full border rounded-lg px-3 py-2 text-sm h-24 outline-none focus:ring-2 focus:ring-[#6c63ff]"
+        />
+      </div>
+
+      {/* Button */}
+      <button className="w-full bg-[#073933] text-white py-3 rounded-xl font-medium hover:bg-[#0a4a42] transition">
+        Send Request
+      </button>
+    </div>
+  </div>
+)}
+
+   </>)
 }

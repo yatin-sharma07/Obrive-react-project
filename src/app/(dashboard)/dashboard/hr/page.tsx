@@ -1,14 +1,9 @@
-'use client'
+/*'use client'
 
 import { ReactNode, useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Sidebar from '@/components/dashboard/Sidebar'
-import Header from '@/components/dashboard/Header'
-import ActivityStream from '@/components/dashboard/ActivityStream'
-import NearestEvents from '@/components/dashboard/NearestEvents'
-import Workload from '@/components/dashboard/Workload'
-import Projects from '@/components/dashboard/Projects'
-import ProfileNotifications from '@/components/dashboard/ProfileNotifications'
+
 import { dashboardConfigs, type UserRole } from '@/constants/dashboardConfig'
 import { useDashboardData } from '../useDashboardData'
 
@@ -45,7 +40,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="flex-1 flex flex-row gap-2 overflow-hidden">
 
-      {/* Center Dashboard Area */}
+      {/* Center Dashboard Area }
       <div className="flex-1 flex flex-col gap-2 overflow-hidden">
         
         <Header pageTitle={`${role.toUpperCase()} Dashboard`} userName={user?.name} />
@@ -59,7 +54,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
       </div>
 
-      {/* Right Panel */}
+      {/* Right Panel }
       <div className="w-80 flex flex-col gap-2 overflow-hidden">
         
         {config.showProfileNotifications && (
@@ -83,4 +78,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
     </div>
   )
+}*/import React from 'react'
+
+const page = () => {
+  return (
+    <div>page</div>
+  )
 }
+
+export default page

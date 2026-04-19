@@ -13,12 +13,12 @@ interface EventItem {
 
 interface NearestEventsProps {
   events?: EventItem[]
-  onViewAll?: () => void
+  setActiveSection: (key: string) => void
 }
 
 export default function NearestEvents({
   events = [],
-  onViewAll,
+  setActiveSection,
 }: NearestEventsProps) {
   const getPriorityIcon = (priority: string) => {
     if (priority === 'high') {
@@ -27,16 +27,19 @@ export default function NearestEvents({
     return <ChevronDown className="w-4 h-4 text-green-500" />
   }
 
+  console.log("NearestEvents prop:", setActiveSection)
   return (
+    
     <div className="w-full h-full flex flex-col">
       <div className="flex items-center justify-between mb-2 pb-2 border-b border-gray-200">
         <h3 className="text-sm font-bold text-gray-900">Nearest Events</h3>
-        <button
-          onClick={onViewAll}
-          className="text-xs font-semibold text-teal-600 hover:text-teal-700 transition flex items-center gap-1"
-        >
-          View all
-          <svg
+       
+          <button
+            onClick={() => setActiveSection('events')}
+            className="text-xs font-semibold text-teal-600 hover:text-teal-700 transition flex items-center gap-1"
+          >
+            View all
+            <svg
             className="w-3 h-3"
             fill="none"
             stroke="currentColor"
@@ -50,6 +53,7 @@ export default function NearestEvents({
             />
           </svg>
         </button>
+     
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-2 pr-1">

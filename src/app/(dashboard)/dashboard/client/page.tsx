@@ -1,8 +1,8 @@
-'use client'
+/*'use client'
 
 import Header from '@/components/dashboard/Header'
-import Projects from '@/components/dashboard/Projects'
-import ProfileNotifications from '@/components/dashboard/ProfileNotifications'
+import Projects from '@/app/(dashboard)/dashboard/employee/components/Projects'
+import ProfileNotifications from '@/app/(dashboard)/dashboard/employee/components/ProfileNotifications'
 import { useDashboardData } from '../useDashboardData'
 
 export default function ClientDashboard() {
@@ -40,7 +40,7 @@ export default function ClientDashboard() {
             <div className="flex-1 overflow-hidden flex flex-col gap-2">
                 <Header pageTitle="Client Dashboard" userName={user?.name} />               
                   <div className="flex-1 overflow-y-auto flex flex-col gap-2 pr-2">
-                    {/* Client only sees projects */}
+                    {/* Client only sees projects }
                     <Projects projects={projects} />
                   </div>
             </div> 
@@ -55,4 +55,13 @@ export default function ClientDashboard() {
 
     </div>
   )
+}*/
+import React from 'react'
+
+const page = () => {
+  return (
+    <div>page</div>
+  )
 }
+
+export default page

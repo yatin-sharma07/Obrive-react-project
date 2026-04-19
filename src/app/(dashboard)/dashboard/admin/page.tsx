@@ -1,10 +1,10 @@
-'use client'
+/*'use client'
 
 import Header from '@/components/dashboard/Header'
 import Workload from '@/components/dashboard/Workload'
-import Projects from '@/components/dashboard/Projects'
+import Projects from '@/app/(dashboard)/dashboard/employee/components/Projects'
 import ActivityStream from '@/components/dashboard/ActivityStream'
-import ProfileNotifications from '@/components/dashboard/ProfileNotifications'
+import ProfileNotifications from '@/app/(dashboard)/dashboard/employee/components/ProfileNotifications'
 import { useDashboardData } from '../useDashboardData'
 
 export default function AdminDashboard() {
@@ -38,7 +38,7 @@ export default function AdminDashboard() {
   return (
     <div className="flex-1 flex flex-row gap-2 overflow-hidden">
       
-      {/* Center Dashboard Area */}
+      {/* Center Dashboard Area }
       <div className="flex-1 flex flex-col gap-2 overflow-hidden">
 
             <Header pageTitle="Admin Dashboard" userName={user?.name} onRefresh={refetch} isRefreshing={loading} />
@@ -49,7 +49,7 @@ export default function AdminDashboard() {
               </div>
       </div>
 
-      {/* // left side panel */}
+      {/* // left side panel }
       <div className=" overflow-hidden flex gap-2">
 
         <div className="w-80 flex flex-col gap-2 overflow-hidden">
@@ -58,7 +58,7 @@ export default function AdminDashboard() {
             <ProfileNotifications />
           </div>
 
-          {/* Admin doesn't see events */}
+          {/* Admin doesn't see events }
           <div className="flex-1 min-h-0 bg-white rounded-lg p-3 overflow-y-auto text-black">
             <ActivityStream activities={activities} />
           </div>
@@ -68,4 +68,13 @@ export default function AdminDashboard() {
 
     </div>
   )
+}*/
+import React from 'react'
+
+const page = () => {
+  return (
+    <div>page</div>
+  )
 }
+
+export default page
