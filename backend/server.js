@@ -105,6 +105,7 @@ app.use('/api/admin',     require('./src/modules/admin/admin.routes'));
 app.use('/api/meetings',  require('./src/modules/meeting/meeting.routes'));
 app.use('/api/projects',  require('./src/modules/projects/projects.routes'));
 app.use('/api/events', require('./src/modules/events/events.routes'));
+app.use('/api/sticky-notes', require('./src/modules/sticky-notes/sticky-notes.routes'));
 // ── Error handler ─────────────────────────────────────────────
 app.use(require('./src/middleware/errorHandler'));
 

@@ -27,7 +27,7 @@ exports.createEmployee = async (data) => {
   const hash = await hashPassword(data.password);
   return prisma.$transaction(async (tx) => {
     const user = await tx.user.create({
-      data: { email: data.email, password: hash, role: 'EMPLOYEE' },
+      data: { email: data.email, password: hash, role: 'employee' },
     });
     const employee = await tx.employee.create({
       data: {

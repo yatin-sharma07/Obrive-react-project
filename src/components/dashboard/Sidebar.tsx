@@ -46,7 +46,7 @@ export default function Sidebar({
   }
 
   return (
-    <div className={`${isCollapsed ? 'w-20' : 'w-64'} h-screen bg-white border-r border-gray-200 flex flex-col transition-all duration-300 m-2 rounded-lg shadow-sm`}>
+    <div className={`${isCollapsed ? 'w-20' : 'w-64'} h-screen bg-white border-r border-gray-200 flex flex-col transition-all duration-300  rounded-lg shadow-sm`}>
 
       {/* Logo Section */}
       <div className="p-4 border-b border-gray-100">

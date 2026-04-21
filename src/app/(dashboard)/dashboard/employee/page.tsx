@@ -12,7 +12,6 @@ import { useState } from 'react'
 import Sidebar from '@/components/dashboard/Sidebar'
 import Dashboard from './sections/Dashboard'
 import SkeletonLoading from '@/components/SkelitonLoading'
-
 import NearestEventsSection from './sections/NearestEventsSection'
 import ProfileNotifications from './components/ProfileNotifications'
 
@@ -56,19 +55,17 @@ export default function EmployeeDashboard() {
   return (
     <>
     
-    <div className="flex">
-      <Sidebar
-        navItems={navItems}
-        activeSection={activeSection}
-        setActiveSection={setActiveSection}
-        setSupportOpen={setSupportOpen}
-      /></div>
-    <div className="flex-1 flex flex-col gap-2 overflow-hidden">
-       <div className="flex-none">
-            <ProfileNotifications />
-          </div>
-      
+    <div className="flex rounded-2xl flex-col">
+          <Sidebar
+            navItems={navItems}
+            activeSection={activeSection}
+            setActiveSection={setActiveSection}
+            setSupportOpen={setSupportOpen}
+          />
+    </div>
 
+    <div className="flex-1 flex flex-col gap-2 overflow-hidden">
+      
     {activeSection==='dashboard'&&(
       <Dashboard setActiveSection={setActiveSection}/>
     )}

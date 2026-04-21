@@ -13,6 +13,7 @@ const Dashboard = ({setActiveSection}:{
     setActiveSection:(key:string)=>void
 }) => {
      const { projects, events, activities, user, loading, error, refetch } = useDashboardData('employee')
+     const ProfileNotificationsComponent = ProfileNotifications as unknown as React.ComponentType
 
      if (loading) {
     return (
@@ -36,7 +37,11 @@ transition={{duration:0.7}}>
 
         {/* Right Panel */}
         <div className="w-80 flex flex-col gap-2 overflow-hidden">
-          
+
+
+          <div className="m-2 p-1 w-80 text-white flex flex-col">
+              <ProfileNotificationsComponent />
+          </div>
          
 
           <div className="flex-1 min-h-0 bg-white rounded-lg p-3 overflow-y-auto text-black">
