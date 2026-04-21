@@ -1,14 +1,15 @@
 'use client'
 
-import { CalendarDays, ChevronDown, ChevronUp } from 'lucide-react'
+import { CalendarDays, ChevronDown, ChevronRight, ChevronUp } from 'lucide-react'
 
 export type ProjectPriority = 'Low' | 'Medium' | 'High'
-
+type ProjectCardVariant = 'dashboard' | 'projects'
 export interface ProjectAssignee {
   id: string
   name: string
   avatarUrl?: string
 }
+
 
 export interface ProjectItem {
   id: string
@@ -43,7 +44,7 @@ function priorityUI(priority: ProjectPriority) {
   }
 }
 
-export default function ProjectCard({ project }: { project: ProjectItem }) {
+export default function ProjectCard({ project ,variant}: { project: ProjectItem; variant: ProjectCardVariant }) {
   const p = priorityUI(project.priority)
   const PriorityIcon = p.icon
 
@@ -52,8 +53,10 @@ export default function ProjectCard({ project }: { project: ProjectItem }) {
     (project.extraAssigneesCount ?? 0) +
     Math.max(0, project.assignees.length - visibleAssignees.length)
 
-  return (
-    <div className="bg-white rounded-lg border border-[#e8f0fb] shadow-sm overflow-hidden">
+ 
+    if(variant==='dashboard'){
+       return (
+      <div className="bg-white rounded-lg border border-[#e8f0fb] shadow-sm overflow-hidden">
       <div className="flex">
         <div className="w-1/3 p-3">
           <div className="flex items-start gap-2">
@@ -129,6 +132,22 @@ export default function ProjectCard({ project }: { project: ProjectItem }) {
           </div>
         </div>
       </div>
+    </div>)
+    }
+  if (variant === 'projects') {
+  return (
+    <div className=" rounded-xl p-4 flex justify-between items-center">
+      <div>
+        <p className="text-xs text-gray-400">{project.code}</p>
+        <p className="text-sm font-bold text-[#1a472a]">
+          {project.name}
+        </p>
+      </div>
+
+      <button className="text-sm font-semibold text-teal-700 flex items-center gap-1">
+        View details <ChevronRight className="w-4 h-4" />
+      </button>
     </div>
   )
+}
 }

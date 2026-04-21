@@ -53,7 +53,7 @@ const handleDrop = (
 };
 
   return (
-    <div className="flex h-screen relative">
+    <div className="flex h-screen relative rounded-lg bg-white p-3">
 
       {columns.map((col) => (
         <Column

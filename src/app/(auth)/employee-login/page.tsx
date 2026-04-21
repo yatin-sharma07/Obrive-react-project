@@ -7,9 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { apiFetch } from "@/lib/api";
-import React from "react";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
 
 export default function EmployeeLogin() {
+  const router = useRouter();
   const [loading , setLoading] = React.useState(false);
 
 const [email, setEmail] = React.useState("");
@@ -17,6 +19,30 @@ const [password, setPassword] = React.useState("");
 const [error, setError] = React.useState("");
 const[showToast, setShowToast] = React.useState(false);
 
+
+
+const fetchUserData =async()=>{
+  try{
+    const res = await apiFetch("/auth/users");
+    if(res.ok){
+      const data = await res.json()
+    
+      if(data?.updatedAt){
+            setTimeout(() => {
+      router.push("/CreateProfile");
+    }, 1500);
+       
+      }else{
+         setTimeout(() => {
+         router.push("/dashboard/employee");
+    }, 1500);
+
+      }
+    }
+  }catch(err){
+    console.error("Error fetching user data:",err);
+  }
+}
 const handleLogin = async () => {
   try {
     setLoading(true);
@@ -35,8 +61,8 @@ const handleLogin = async () => {
     if (!res.ok) {
       throw new Error(data.message || "Login failed");
     }
-
-    // Save user info for the dashboard
+    fetchUserData();
+    
     if (data?.data?.user) {
       localStorage.setItem('user', JSON.stringify(data.data.user));
     }
@@ -46,12 +72,9 @@ const handleLogin = async () => {
 
     setShowToast(true);
 
-    const role = data?.data?.user?.role;
-    const redirectPath = role === "hr" ? "/dashboard/hr" : "/dashboard/employee";
+  
 
-    setTimeout(() => {
-      window.location.href = redirectPath;
-    }, 1500);
+
 
 
 

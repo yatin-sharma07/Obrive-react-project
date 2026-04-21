@@ -16,23 +16,17 @@ async function add() {
     const hashed = await bcrypt.hash('employee123', 10);
 
     await pool.query(`
-      INSERT INTO users 
-      (userid, email, name, role, password, status, created_at, updated_at) 
-      VALUES 
-      ('EMP001', 'john@obrive.com', 'John Doe', 'employee', '${hashed}', 'offline', NOW(), NOW()),
-      ('EMP002', 'jane@obrive.com', 'Jane Smith', 'employee', '${hashed}', 'offline', NOW(), NOW()),
-      ('EMP003', 'bob@obrive.com', 'Bob Wilson', 'employee', '${hashed}', 'offline', NOW(), NOW()),
-      ('EMP004', 'sarah@obrive.com', 'Sarah Johnson', 'employee', '${hashed}', 'offline', NOW(), NOW()),
-      ('EMP005', 'mike@obrive.com', 'Mike Brown', 'employee', '${hashed}', 'offline', NOW(), NOW())
-      ON CONFLICT (email) DO NOTHING
+     SELECT table_name 
+FROM information_schema.tables 
+WHERE table_schema = 'public';
     `);
 
     console.log('✅ Employees added successfully!');
 
     const res = await pool.query(`
-      SELECT userid, email, name, role, status 
-      FROM users 
-      WHERE role = 'employee'
+      SELECT table_name 
+FROM information_schema.tables 
+WHERE table_schema = 'public';
     `);
 
     console.log('\n📋 Employees in database:');
