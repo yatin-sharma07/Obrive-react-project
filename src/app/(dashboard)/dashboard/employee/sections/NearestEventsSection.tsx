@@ -3,6 +3,7 @@
 import { Clock, ChevronUp, ChevronDown } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useDashboardData } from '../../useDashboardData'
+import SkeletonLoading from '@/components/SkelitonLoading'
 
 interface EventItem {
   id: string
@@ -17,7 +18,7 @@ export default function NearestEventsSection() {
   const { events, loading } = useDashboardData('employee')
 
   if (loading) {
-    return <div className="p-6">Loading events...</div>
+   <SkeletonLoading/>
   }
 
   const getPriorityIcon = (priority: string) => {

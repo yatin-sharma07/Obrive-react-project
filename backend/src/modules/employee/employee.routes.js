@@ -11,7 +11,7 @@ router.post('/login', ctrl.login);
 router.use(authenticate);
 
 // ── Profile 
-router.get('/me',    authorize('EMPLOYEE'), ctrl.getMyProfile);
+router.get('/me',    authorize('employee'), ctrl.getMyProfile);
 router.put('/me',    authorize('EMPLOYEE'), ctrl.updateMyProfile);
 
 // ── Availability Calendar 

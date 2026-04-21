@@ -30,10 +30,6 @@ export const getNext3Days = () => {
       label: format(addDays(today, 2)),
       date: addDays(today, 2).toISOString(),
     },
-    {
-      id: "waiting",
-      label: "Waiting",
-      date: null,
-    },
+  
   ];
 };

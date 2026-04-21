@@ -29,7 +29,7 @@ transition={{duration:0.7}}>
         <div className="flex-1 flex flex-col gap-2 overflow-hidden">
            <Header pageTitle="Employee Dashboard" userName={user?.name} />
         <div className="flex-1 overflow-y-auto flex flex-col gap-2 pr-2">
-          <Projects projects={projects} />
+          <Projects projects={projects} variant="dashboard"/>
         </div>
 
       </div>

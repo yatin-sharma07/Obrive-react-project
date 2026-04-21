@@ -126,10 +126,10 @@ export default function Home() {
         <div className="flex flex-col items-center">
           {/* hero content */}
           <FullWidthSection backgroundColor="accent" className="py-10 pt-30">
-            <div className="text-center flex flex-col items-center gap-8">
+            <div className="text-center flex flex-col items-center gap-8 mt-10">
               <FadeInOnLoad delay={0.15}>
                 <h1
-                  className={`${FONTS.microgrammaBold.className} text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-secondary`}
+                  className={`${FONTS.microgrammaBold.className} text-4xl sm:text-5xl md:text-5xl lg:text-6xl text-secondary`}
                 >
                   Orchestrating What’s Next
                 </h1>

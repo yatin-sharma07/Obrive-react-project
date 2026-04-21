@@ -2,12 +2,17 @@ const { prisma } = require('../../config/db');
 
 // ── Profile ──────────────────────────────────────────────────
 exports.getMyProfile = async (userId) => {
-  const employee = await prisma.employee.findUnique({
-    where:   { userId },
-    include: { user: { select: { email: true, role: true, isActive: true } } },
+  const user = await prisma.users.findUnique({
+    where: { id: userId },
   });
-  if (!employee) throw { status: 404, message: 'Employee profile not found' };
-  return employee;
+
+  if (!user) {
+    const err = new Error('User not found');
+    err.status = 404;
+    throw err;
+  }
+
+  return user;
 };
 
 exports.updateMyProfile = async (userId, data) => {

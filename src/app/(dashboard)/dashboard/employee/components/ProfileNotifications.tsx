@@ -12,29 +12,37 @@ export default function ProfileDropdown() {
   const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
+      console.log("USE EFFECT TRIGGERED 🚀")
     const fetchUserData = async () => {
       try {
-        const res = await apiFetch('/api/users')
+       const res = await apiFetch('/employee/me', {
+  method: "GET",
+  headers: {
+    'Cache-Control': 'no-cache'
+  }
+})
+        const json = await res.json()
 
-        if (res.ok) {
-          const data = await res.json()
-          setUser(data)
+
+setUser(json.data)
+
+      
         }
-      } catch (error) {
-        console.error('Error fetching user data:', error)
-      }
+        catch (error) {
+          console.error('Error fetching user data:', error)
+        }
     }
 
     fetchUserData()
   }, [])
 
   return (
-    <div className="relative">
+    <div className="relative flex justify-end">
 
       {/* Top Profile Bar */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between w-full bg-gray-100 rounded-2xl px-4 py-3"
+        className="flex items-center justify-between  bg-gray-100 rounded-2xl px-4 py-3 mr-5"
       >
         <div className="flex items-center gap-3">
           
@@ -56,7 +64,7 @@ export default function ProfileDropdown() {
         />
       </button>
 
-      {/* Dropdown */}
+      
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -64,7 +72,7 @@ export default function ProfileDropdown() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute mt-2 w-full bg-white rounded-2xl shadow-lg p-4 z-50"
+            className="absolute mt-17 w-80 mr-10 bg-white rounded-2xl shadow-lg p-4 z-50"
           >
             
             <div className="space-y-2 text-sm text-gray-700">
@@ -79,6 +87,9 @@ export default function ProfileDropdown() {
                   {user.biography}
                 </p>
               )}
+              <button className="bg-blue-500 text-white w-full px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                Update Profile
+              </button>
             </div>
 
           </motion.div>

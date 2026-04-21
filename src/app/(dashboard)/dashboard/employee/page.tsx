@@ -5,6 +5,7 @@ import {
   FolderOpen,
   Calendar,
   Palmtree,
+  List
 } from 'lucide-react'
 import supportImg from "@/assets/images/employee/illustration.png"
 import { useDashboardData } from '../useDashboardData'
@@ -15,6 +16,8 @@ import SkeletonLoading from '@/components/SkelitonLoading'
 
 import NearestEventsSection from './sections/NearestEventsSection'
 import ProfileNotifications from './components/ProfileNotifications'
+import Notes from './sections/Notes'
+import ProjectsSection from './sections/ProjectsSection'
 
 export default function EmployeeDashboard() {
   const {  loading, error, refetch } = useDashboardData('employee')
@@ -26,7 +29,8 @@ export default function EmployeeDashboard() {
     {label:'Dashboard', icon:LayoutDashboard, key:'dashboard'},
     {label:'Projects', icon:FolderOpen, key:'projects'},
     {label:'Calender', icon:Calendar, key:'calender'},
-    {label:'Vacations', icon:Palmtree, key:'tasks'},
+    {label:'Vacations', icon:Palmtree, key:'Vacations'},
+    {label:"Sticky Notes", icon:List, key:'tasks'},
    
 
   ]
@@ -73,16 +77,17 @@ export default function EmployeeDashboard() {
       <Dashboard setActiveSection={setActiveSection}/>
     )}
     {activeSection==='projects'&&(
-      <div className="p-6">Projects Section - Coming Soon!</div>
+      <ProjectsSection/>
     )}
     {activeSection==='calender'&&(
       <div className="p-6">Calender Section - Coming Soon!</div>
     )}
-    {activeSection==='tasks'&&(
-      <div className="p-6">Tasks Section - Coming Soon!</div>
-    )}
+  
     {activeSection ==='events'&&(
      <NearestEventsSection/>
+    )}
+    {activeSection ==='tasks'&&(
+     <Notes/>
     )}
 
     </div>

@@ -41,7 +41,7 @@ export default function Sidebar({
     } catch (error) {
       console.error('Logout failed', error)
     } finally {
-      router.push('/')
+      router.push('/employee-login')
     }
   }
 

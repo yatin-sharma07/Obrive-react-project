@@ -8,9 +8,9 @@ export default function FloatingButton({ onClick }: FloatingButtonProps) {
   return (
     <button
       onClick={onClick}
-      className="fixed bottom-6 left-6 w-14 h-14 rounded-full bg-black text-white text-2xl shadow-lg"
+      className="fixed bottom-37 right-10 w-45 h-10 bg-green-900 text-white text-xl shadow-lg rounded-lg"
     >
-      +
+     Add Note +
     </button>
   );
 }
