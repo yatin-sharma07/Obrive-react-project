@@ -113,4 +113,23 @@ model users {
   project_assignments project_assignments[]
   sticky_notes        sticky_notes[]
   tasks               tasks[]
+  work_sessions       work_sessions[]
+}
+
+model work_sessions {
+  id                  Int       @id @default(autoincrement())
+  userId              Int
+  sessionStart        DateTime  @default(now())
+  lastHeartbeat       DateTime  @default(now())
+  sessionEnd          DateTime?
+  totalActiveDuration Int       @default(0)
+  status              String    @default("active") @db.VarChar(20)
+  isAutoEnded         Boolean   @default(false)
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+  users               users     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "idx_work_sessions_userId")
+  @@index([sessionStart], map: "idx_work_sessions_sessionStart")
+  @@index([status], map: "idx_work_sessions_status")
 }

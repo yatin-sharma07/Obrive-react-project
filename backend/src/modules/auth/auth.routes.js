@@ -18,7 +18,7 @@ router.post('/login',
 router.post('/client/login',
   [
     body('clientId').notEmpty().withMessage('Client ID required'),
-    body('password').notEmpty().withMessage('Password required'),
+    // body('password').notEmpty().withMessage('Password required'),
   ],
   validate,
   controller.loginClient

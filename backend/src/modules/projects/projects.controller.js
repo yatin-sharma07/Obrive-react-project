@@ -1,6 +1,16 @@
 const projectService = require('./projects.service');
 const { successResponse, errorResponse } = require('../../utils/apiResponse');
 
+exports.getUserProjects = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const projects = await projectService.getUserProjects(userId);
+    successResponse(res, projects, 'User projects retrieved');
+  } catch (err) {
+    errorResponse(res, err.message, 500);
+  }
+};
+
 exports.getProjects = async (req, res) => {
   try {
     const userId = req.user.id;
