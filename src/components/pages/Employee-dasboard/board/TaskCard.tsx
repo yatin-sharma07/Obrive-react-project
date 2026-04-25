@@ -1,78 +1,102 @@
 "use client";
 
+import { useState } from "react";
+import { apiFetch } from "@/lib/api";
+import { Trash} from "lucide-react";
+import ConfirmationAlert from "@/components/ConfirmationAlert";
+
 type Task = {
   id: string;
   title: string;
-  description: string;
-  duration: string;
-  column: string;
+  note_date: string;
   color: string;
-  status: "Urgent" | "Medium" | "Low";
+  position: number;
+  user_id: string;
 };
 
-type TaskCardProps = {
+type Props = {
   task: Task;
+  userId: string |null
+  onDelete: (id: string) => void;
 } & React.HTMLAttributes<HTMLDivElement>;
 
-export default function TaskCard({ task, ...dragProps }: TaskCardProps) {
+export default function TaskCard({
+  task,
+  userId,
+  onDelete,
+  ...props
+}: Props) {
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleDelete = async () => {
+    try {
+      setLoading(true);
+
+      await apiFetch(`/sticky-notes/${task.id}`, {
+        method: "DELETE",
+      });
+
+      onDelete(task.id); // update UI
+      setShowConfirm(false);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete note");
+    } finally {
+      setLoading(false);
+    }
+  };
+console.log("task user:", task.user_id, "logged user:", userId);
   return (
-    <div
-      {...dragProps}
-      className="relative p-5 rounded-[28px] mb-4 cursor-grab border border-gray-200 shadow-sm bg-gray-50 flex flex-col justify-between h-[160px] border-l-8 border-${task.color}"
-          style={{ borderLeftColor: task.color }}
-      
-    >
-      {/* Curved Left Strip */}
+    <>
       <div
-        className=""
+        {...props}
+        className="relative p-4 mb-3 bg-white rounded shadow border-l-4"
+        style={{ borderLeftColor: task.color }}
       >
+        <p className="text-xs text-gray-400 mb-2">{task.note_date}</p>
 
-      {/* Top Section */}
-      <div className="space-y-2">
-        {/* Label */}
-        <p className="text-xs tracking-widest text-gray-400 font-semibold">
-          {task.column.toUpperCase()}
-        </p>
+        <p className="font-semibold">{task.title}</p>
 
-        {/* Title */}
-        <p className="font-semibold text-gray-900 text-lg leading-snug">
-          {task.title}
-        </p>
-
-        {/* Description */}
-        <p className="text-sm text-gray-500 leading-snug">
-          {task.description}
-        </p>
+        {userId && task.user_id && userId == task.user_id && (
+          <button
+            onClick={() => setShowConfirm(true)}
+            className="absolute top-2 right-2 text-gray-400 hover:text-red-500"
+          >
+            <Trash className="w-4 h-4"  />
+          </button>
+        )}
       </div>
 
-      {/* Bottom Section */}
-      <div className="flex items-center justify-between mt-4">
-        {/* Avatars */}
-        <div className="flex -space-x-2">
-          <img
-            src="https://i.pravatar.cc/40?img=1"
-            className="w-7 h-7 rounded-full border-2 border-white"
-          />
-          <img
-            src="https://i.pravatar.cc/40?img=2"
-            className="w-7 h-7 rounded-full border-2 border-white"
-          />
+      {showConfirm && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/30 z-50">
+          <div className="bg-white p-4 rounded w-[300px] space-y-3">
+            <ConfirmationAlert
+              title="Delete Note"
+              description="Are you sure you want to delete this note?"
+              type="warning"
+              onClose={() => setShowConfirm(false)}
+            />
+
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="px-3 py-1 bg-gray-200 rounded"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleDelete}
+                disabled={loading}
+                className="px-3 py-1 bg-red-500 text-white rounded"
+              >
+                {loading ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
         </div>
-
-        {/* Status Badge */}
-        <span
-          className={`text-xs px-3 py-1 rounded-full font-medium ${
-            task.status === "Urgent"
-              ? "bg-red-100 text-red-500"
-              : task.status === "Medium"
-              ? "bg-yellow-100 text-yellow-600"
-              : "bg-green-100 text-green-600"
-          }`}
-        >
-          {task.status}
-        </span>
-      </div>
-    </div>
-    </div>
+      )}
+    </>
   );
 }

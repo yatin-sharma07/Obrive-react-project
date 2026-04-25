@@ -22,15 +22,27 @@ exports.getStickyNotesByDate = async (req, res, next) => {
   }
 };
 
-// ── Get sticky notes by date range ───────────────────────────
+// ── Get sticky notes by date range ──────────────────────────
 exports.getStickyNotesByDateRange = async (req, res, next) => {
   try {
     const { startDate, endDate } = req.query;
+
     if (!startDate || !endDate) {
-      throw { status: 400, message: 'startDate and endDate query parameters are required' };
+      throw {
+        status: 400,
+        message: 'startDate and endDate query parameters are required',
+      };
     }
-    
-    successResponse(res, await service.getStickyNotesByDateRange(req.user.id, startDate, endDate));
+
+    const data = await service.getStickyNotesByDateRange(
+      req.user.id,
+      startDate,
+      endDate
+    );
+
+   
+
+    successResponse(res, data); // send AFTER logging
   } catch (err) {
     next(err);
   }

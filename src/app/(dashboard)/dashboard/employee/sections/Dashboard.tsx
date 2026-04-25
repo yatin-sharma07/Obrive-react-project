@@ -22,7 +22,8 @@ const Dashboard = ({setActiveSection}:{
    <motion.div
    initial={{opacity:0,y:20}}
 animate={{opacity:1,y:0}}
-transition={{duration:0.7}}>
+transition={{duration:0.7}}
+>
      <div className="flex-1 overflow-hidden flex gap-2">
         
         {/* Middle  Content Area */}

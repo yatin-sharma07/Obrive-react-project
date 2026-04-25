@@ -17,6 +17,7 @@ export async function apiFetch(
 
   const response = await fetch(`${BASE_URL}${endpoint}`, {
     ...rest,
+    cache: "no-store",
     credentials: "include", 
     headers: {
       "Content-Type": "application/json",

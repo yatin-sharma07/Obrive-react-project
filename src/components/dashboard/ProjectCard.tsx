@@ -44,7 +44,7 @@ function priorityUI(priority: ProjectPriority) {
   }
 }
 
-export default function ProjectCard({ project ,variant}: { project: ProjectItem; variant: ProjectCardVariant }) {
+export default function ProjectCard({ project, variant, onSelectProject }: { project: ProjectItem; variant: ProjectCardVariant; onSelectProject?: (project: ProjectItem) => void }) {
   const p = priorityUI(project.priority)
   const PriorityIcon = p.icon
 
@@ -136,7 +136,7 @@ export default function ProjectCard({ project ,variant}: { project: ProjectItem;
     }
   if (variant === 'projects') {
   return (
-    <div className=" rounded-xl p-4 flex justify-between items-center">
+    <div className=" rounded-xl p-4 flex justify-between items-center  ">
       <div>
         <p className="text-xs text-gray-400">{project.code}</p>
         <p className="text-sm font-bold text-[#1a472a]">
@@ -144,7 +144,9 @@ export default function ProjectCard({ project ,variant}: { project: ProjectItem;
         </p>
       </div>
 
-      <button className="text-sm font-semibold text-teal-700 flex items-center gap-1">
+      <button 
+        onClick={() => onSelectProject?.(project)}
+        className="text-sm font-semibold text-teal-700 hover:text-teal-800 flex items-center gap-1 cursor-pointer">
         View details <ChevronRight className="w-4 h-4" />
       </button>
     </div>

@@ -1,6 +1,5 @@
 const { Pool } = require('pg');
 require('dotenv').config();
-const bcrypt = require('bcrypt');
 
 const pool = new Pool({
   host: process.env.DB_HOST,
@@ -11,33 +10,24 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 });
 
-async function add() {
+async function getStickyNotes() {
   try {
-    const hashed = await bcrypt.hash('employee123', 10);
-
-    await pool.query(`
-     SELECT table_name 
-FROM information_schema.tables 
-WHERE table_schema = 'public';
-    `);
-
-    console.log('✅ Employees added successfully!');
-
     const res = await pool.query(`
-      SELECT table_name 
-FROM information_schema.tables 
-WHERE table_schema = 'public';
+      UPDATE sticky_notes
+      SET note_date=note_date + INTERVAL '1 day'
+      WHERE note_date < CURRENT_DATE
+      RETURNING *;
     `);
 
-    console.log('\n📋 Employees in database:');
+    console.log('\n📝 Sticky Notes:');
     console.table(res.rows);
-    console.log(`\n✅ Total employees: ${res.rows.length}`);
 
+    console.log(`\n✅ Total notes: ${res.rows.length}`);
   } catch (error) {
-    console.error('❌ Error:', error.message);
+    console.error('❌ Error fetching sticky notes:', error.message);
   } finally {
     await pool.end();
   }
 }
 
-add();
+getStickyNotes();

@@ -14,7 +14,6 @@ import Sidebar from '@/components/dashboard/Sidebar'
 import Dashboard from './sections/Dashboard'
 import SkeletonLoading from '@/components/SkelitonLoading'
 import NearestEventsSection from './sections/NearestEventsSection'
-import ProfileNotifications from './components/ProfileNotifications'
 import Notes from './sections/Notes'
 import ProjectsSection from './sections/ProjectsSection'
 
