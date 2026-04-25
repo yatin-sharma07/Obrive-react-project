@@ -27,10 +27,7 @@ class ProjectService {
                 p.name, 
                 p.description, 
                 p.priority, 
-                p.created_at, 
-                p.estimate, 
-                p.spent_time,
-                u_assigner.name AS assigner_name,
+                p.created_at,
                 COALESCE(
                     json_agg(json_build_object('id', u.id, 'name', u.name)) 
                     FILTER (WHERE u.id IS NOT NULL), 
@@ -38,14 +35,13 @@ class ProjectService {
                 ) AS team_members
             FROM projects p
             JOIN project_assignments pa ON p.id = pa.project_id
-            LEFT JOIN users u_assigner ON p.assigner_id = u_assigner.id
             LEFT JOIN project_assignments pa_inner ON p.id = pa_inner.project_id
             LEFT JOIN users u ON pa_inner.employee_id = u.id
             WHERE pa.employee_id = ${userId}
-            GROUP BY p.id, p.name, p.description, p.priority, p.created_at, p.estimate, p.spent_time, u_assigner.name`;
+            GROUP BY p.id, p.name, p.description, p.priority, p.created_at`;
     
     // Convert BigInt to Number for JSON serialization
-    return projects.map(project => ({
+    const convertedProjects = projects.map(project => ({
       ...project,
       id: Number(project.id),
       team_members: project.team_members && project.team_members.length > 0 
@@ -55,6 +51,50 @@ class ProjectService {
           }))
         : []
     }));
+
+    // Fetch tasks for each project with visibility filtering
+    const projectsWithTasks = await Promise.all(
+      convertedProjects.map(async (project) => {
+        const tasks = await prisma.$queryRaw`
+          SELECT 
+            t.id,
+            t.project_id,
+            t.task_number,
+            t.title,
+            t.description,
+            t.deadline,
+            t.status,
+            t.assigned_to,
+            t.created_by,
+            t.created_at,
+            t.updated_at,
+            u_assigned.name as assigned_to_name,
+            u_created.name as created_by_name
+          FROM tasks t
+          LEFT JOIN users u_assigned ON t.assigned_to = u_assigned.id
+          LEFT JOIN users u_created ON t.created_by = u_created.id
+          WHERE t.project_id = ${project.id}
+            AND (
+              t.created_by = ${userId}
+              OR t.assigned_to = ${userId}
+            )
+          ORDER BY t.task_number
+        `;
+
+        return {
+          ...project,
+          tasks: tasks.map(task => ({
+            ...task,
+            id: Number(task.id),
+            project_id: Number(task.project_id),
+            assigned_to: task.assigned_to ? Number(task.assigned_to) : null,
+            created_by: task.created_by ? Number(task.created_by) : null
+          }))
+        };
+      })
+    );
+
+    return projectsWithTasks;
   }
 
   async getAllProjects() {

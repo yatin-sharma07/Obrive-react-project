@@ -85,9 +85,16 @@ model tasks {
   deadline    DateTime? @db.Date
   status      String?   @default("pending") @db.VarChar(20)
   assigned_to Int?
+  created_by  Int?
   created_at  DateTime? @default(now()) @db.Timestamp(6)
-  users       users?    @relation(fields: [assigned_to], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  updated_at  DateTime? @default(now()) @db.Timestamp(6)
+  assigned_user  users?    @relation("TaskAssignedTo", fields: [assigned_to], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  creator        users?    @relation("TaskCreatedBy", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   projects    projects? @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([project_id], map: "idx_tasks_project_id")
+  @@index([assigned_to], map: "idx_tasks_assigned_to")
+  @@index([created_by], map: "idx_tasks_created_by")
 }
 
 model users {
@@ -112,7 +119,8 @@ model users {
   login_logs          login_logs[]
   project_assignments project_assignments[]
   sticky_notes        sticky_notes[]
-  tasks               tasks[]
+  tasks_assigned      tasks[]               @relation("TaskAssignedTo")
+  tasks_created       tasks[]               @relation("TaskCreatedBy")
   work_sessions       work_sessions[]
 }
 

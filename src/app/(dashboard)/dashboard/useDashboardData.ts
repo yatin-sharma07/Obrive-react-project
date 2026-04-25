@@ -29,7 +29,7 @@ export function useDashboardData(userRole: UserRole) {
 
       // Use apiFetch which handles BASE_URL and credentials (cookies)
       const [projectsRes, eventsRes] = await Promise.all([
-        apiFetch('/projects', { method: 'GET' }),
+        apiFetch('/projects/user/projects', { method: 'GET' }),
         apiFetch('/events/nearest', { method: 'GET' })
       ])
       
@@ -57,11 +57,16 @@ export function useDashboardData(userRole: UserRole) {
               year: 'numeric' 
             })}`,
             priority: (p.priority?.charAt(0).toUpperCase() + p.priority?.slice(1).toLowerCase()) as any || 'Medium',
-            allTasks: Math.max(0, Number(p.total_tasks) || 0),
-            activeTasks: Math.max(0, (Number(p.total_tasks) || 0) - (Number(p.completed_tasks) || 0)),
-            assignees: [], // Backend doesn't return names yet
-            extraAssigneesCount: Math.max(0, Number(p.assignees_count) || 0)
-          }))
+            allTasks: p.tasks ? p.tasks.length : 0,
+            activeTasks: p.tasks ? p.tasks.filter((t: any) => t.status !== 'completed').length : 0,
+            assignees: p.team_members?.map((member: any) => ({
+              id: String(member.id),
+              name: member.name,
+              avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${member.name}`
+            })) || [],
+            extraAssigneesCount: Math.max(0, (p.team_members?.length || 0) - 2),
+            tasks: p.tasks || [] // Include tasks in the project item
+          })) as any
 
           const mappedEvents = (eventsResult.data || []).map((e: any) => {
             // Calculate duration if both times exist
