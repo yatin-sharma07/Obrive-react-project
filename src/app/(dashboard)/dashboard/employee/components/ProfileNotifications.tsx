@@ -8,6 +8,7 @@ import Image from 'next/image'
 import UserPfp from '@/assets/images/employee/photo.png'
 import { Calendar } from 'lucide-react'
 import { Bell } from 'lucide-react'
+import { Timer } from './Timer'
 
 export default function ProfileDropdown( 
   notificationCount = 3,    
@@ -55,7 +56,7 @@ export default function ProfileDropdown(
         </button>
  
         <button
-          // onClick={onProfileClick}
+          onClick={() => setIsOpen(!isOpen)}
           className="flex items-center gap-1.5 px-2 py-1 hover:bg-gray-100 rounded-lg transition"
         >
           <div className="w-7 h-7 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center text-white text-[10px] font-semibold">
@@ -91,17 +92,9 @@ export default function ProfileDropdown(
           >
             
             <div className="space-y-2 text-sm text-gray-700">
-              
-              <p><span className="font-semibold">Email:</span> {user?.email}</p>
-              <p><span className="font-semibold">Role:</span> {user?.role}</p>
-              <p><span className="font-semibold">Job:</span> {user?.job_title}</p>
-              <p><span className="font-semibold">Phone:</span> {user?.phone_number}</p>
 
-              {user?.biography && (
-                <p className="text-gray-500 text-xs mt-2">
-                  {user.biography}
-                </p>
-              )}
+              <Timer />
+
             </div>
 
           </motion.div>

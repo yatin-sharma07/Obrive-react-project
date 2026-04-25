@@ -1,4 +1,5 @@
 const service = require('./auth.service');
+const timerService = require('../timer/timer.service');
 const { successResponse, errorResponse } = require('../../utils/apiResponse');
 
 exports.loginUser = async (req, res, next) => {
@@ -32,6 +33,14 @@ exports.loginClient = async (req, res, next) => {
 
 exports.logout = async (req, res, next) => {
   try {
+    // Auto-stop timer on logout
+    try {
+      await timerService.stopTimer(req.user.id);
+      console.log('⏹️  Timer auto-stopped for user:', req.user.id);
+    } catch (timerErr) {
+      console.log('ℹ️  No active timer to stop:', timerErr.message);
+    }
+
     const result = await service.logout({
       userId: req.user.id,
       logId:  req.user.logId,

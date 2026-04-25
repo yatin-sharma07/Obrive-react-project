@@ -104,8 +104,10 @@ app.use('/api/hr',        require('./src/modules/hr/hr.routes'));
 app.use('/api/admin',     require('./src/modules/admin/admin.routes'));
 app.use('/api/meetings',  require('./src/modules/meeting/meeting.routes'));
 app.use('/api/projects',  require('./src/modules/projects/projects.routes'));
-app.use('/api/events', require('./src/modules/events/events.routes'));
+app.use('/api/events',    require('./src/modules/events/events.routes'));
 app.use('/api/sticky-notes', require('./src/modules/sticky-notes/sticky-notes.routes'));
+// Timer routes
+app.use('/api/work-sessions', require('./src/modules/work-sessions/work-sessions.routes'));
 // ── Error handler ─────────────────────────────────────────────
 app.use(require('./src/middleware/errorHandler'));
 
@@ -151,3 +153,4 @@ process.on('SIGINT', async () => {
   console.log('🔌 DB disconnected. Shutting down.');
   process.exit(0);
 });
+

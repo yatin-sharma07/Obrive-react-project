@@ -20,7 +20,43 @@ class ProjectService {
       assignees_count: project.assignees_count ? Number(project.assignees_count) : 0
     }));
   }
-  
+
+  async getUserProjects(userId) {
+    const projects = await prisma.$queryRaw`SELECT 
+                p.id, 
+                p.name, 
+                p.description, 
+                p.priority, 
+                p.created_at, 
+                p.estimate, 
+                p.spent_time,
+                u_assigner.name AS assigner_name,
+                COALESCE(
+                    json_agg(json_build_object('id', u.id, 'name', u.name)) 
+                    FILTER (WHERE u.id IS NOT NULL), 
+                    '[]'::json
+                ) AS team_members
+            FROM projects p
+            JOIN project_assignments pa ON p.id = pa.project_id
+            LEFT JOIN users u_assigner ON p.assigner_id = u_assigner.id
+            LEFT JOIN project_assignments pa_inner ON p.id = pa_inner.project_id
+            LEFT JOIN users u ON pa_inner.employee_id = u.id
+            WHERE pa.employee_id = ${userId}
+            GROUP BY p.id, p.name, p.description, p.priority, p.created_at, p.estimate, p.spent_time, u_assigner.name`;
+    
+    // Convert BigInt to Number for JSON serialization
+    return projects.map(project => ({
+      ...project,
+      id: Number(project.id),
+      team_members: project.team_members && project.team_members.length > 0 
+        ? project.team_members.map(member => ({
+            ...member,
+            id: Number(member.id)
+          }))
+        : []
+    }));
+  }
+
   async getAllProjects() {
     const result = await prisma.$queryRaw`
       SELECT 
