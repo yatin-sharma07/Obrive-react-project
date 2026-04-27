@@ -29,12 +29,12 @@ transition={{duration:0.7}}
         {/* Middle  Content Area */}
 
         <div className="flex-1 flex flex-col gap-2 overflow-hidden">
-           <Header pageTitle="Employee Dashboard" userName={user?.name} />
-        <div className="flex-1 overflow-y-auto flex flex-col gap-2 pr-2">
-          <Projects projects={projects} variant="dashboard"/>
-        </div>
+          <Header pageTitle="Employee Dashboard" userName={user?.name} />
+            <div className="flex-1 overflow-y-auto flex flex-col gap-2 pr-2">
+              <Projects projects={projects} variant="dashboard"/>
+            </div>
 
-      </div>
+        </div>
 
         {/* Right Panel */}
         <div className="w-80 flex flex-col gap-2 overflow-hidden">

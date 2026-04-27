@@ -16,6 +16,7 @@ import SkeletonLoading from '@/components/SkelitonLoading'
 import NearestEventsSection from './sections/NearestEventsSection'
 import Notes from './sections/Notes'
 import ProjectsSection from './sections/ProjectsSection'
+import Calender from '@/components/dashboard/Calender'
 
 export default function EmployeeDashboard() {
   const {  loading, error, refetch } = useDashboardData('employee')
@@ -76,7 +77,7 @@ export default function EmployeeDashboard() {
       <ProjectsSection/>
     )}
     {activeSection==='calender'&&(
-      <div className="p-6">Calender Section - Coming Soon!</div>
+      <Calender/>
     )}
   
     {activeSection ==='events'&&(
