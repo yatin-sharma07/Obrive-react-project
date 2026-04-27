@@ -5,6 +5,16 @@ import { motion } from 'framer-motion'
 import { ProjectItem } from '@/components/dashboard/ProjectCard'
 import { AlertCircle, Calendar, CheckCircle, Users } from 'lucide-react'
 
+const formatStatus = (status?: string) => {
+  if (!status) return 'Planning'
+
+  return status
+    .split(/[_-\s]+/)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ')
+}
+
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'Completed':
@@ -37,10 +47,15 @@ const MyProjectsDetailsSection = ({ project }: { project: ProjectItem | null }) 
     )
   }
 
-  const statusText = details.status || 'Planning'
+  const statusText = formatStatus(details.status)
   const statusConfig = getStatusColor(statusText)
   const StatusIcon = statusConfig.icon
-  const progress = typeof details.progress === 'number' ? details.progress : 0
+  const progress =
+    typeof details.progress === 'number'
+      ? Math.max(0, Math.min(100, details.progress))
+      : typeof details.progress === 'string' && Number.isFinite(Number(details.progress))
+        ? Math.max(0, Math.min(100, Number(details.progress)))
+        : 0
   const completedTasks = details.completedTasks || 0
   const assignees = details.assignees || []
 
@@ -166,11 +181,16 @@ const MyProjectsDetailsSection = ({ project }: { project: ProjectItem | null }) 
               >
                 <div className="flex items-center gap-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-200 text-xs font-bold text-blue-700">
-                    {member.avatar}
+                    {member.name
+                      ?.split(' ')
+                      .filter(Boolean)
+                      .slice(0, 2)
+                      .map((part: string) => part[0]?.toUpperCase())
+                      .join('')}
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-gray-700">{member.name}</p>
-                    <p className="text-xs text-gray-500">{member.role}</p>
+                    <p className="text-xs text-gray-500">{member.role || 'Team member'}</p>
                   </div>
                 </div>
               </motion.div>
