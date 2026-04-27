@@ -1,15 +1,9 @@
 'use client'
-
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import supportImg from "@/assets/images/sidebar/support.png"
-
-import {
-  MessageCircle,
-  LogOut,
-} from 'lucide-react'
-
+import { MessageCircle, LogOut } from 'lucide-react'
 import { apiFetch } from '@/lib/api'
 import PrimaryLogo from '@/components/shared/logo/PrimaryLogo'
 
@@ -19,11 +13,7 @@ type NavItem = {
   key: string
 }
 
-export default function Sidebar({
-  navItems,
-  activeSection,
-  setActiveSection,
-  setSupportOpen,
+export default function Sidebar({ navItems, activeSection, setActiveSection, setSupportOpen,
 }: {
   navItems: NavItem[]
   activeSection: string
@@ -109,20 +99,10 @@ export default function Sidebar({
 
       {/* Support Section */}
       {!isCollapsed && (
-        <div
-          className="
-mx-4 mb-4 p-3 bg-[#D9F2F2] rounded-2xl flex flex-col  bg-no-repeat bg-cover bg-center h-70 justify-end relative"
-          style={{
-            backgroundImage: `url(${supportImg.src})`,
-          }}
-        >
+        <div className="mx-4 mb-4 p-3 bg-[#D9F2F2] rounded-2xl flex flex-col  bg-no-repeat bg-cover bg-center h-70 justify-end relative" style={{ backgroundImage: `url(${supportImg.src})`, }} >
           <button className="w-full bg-[#073933] text-white py-2.5 rounded-xl flex items-center justify-center gap-2 text-sm font-medium shadow-sm hover:bg-[#0a4a42] transition-colors"
-          onClick={()=>{
-              console.log("Support Opened")
-            setSupportOpen(true)
-          }
-          
-            
+          onClick={()=>{ console.log("Support Opened");
+            setSupportOpen(true) } 
           }
          >
             <MessageCircle className="w-4 h-4" />
