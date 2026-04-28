@@ -153,14 +153,13 @@ const MyProjectTasksSection = ({ project }: Props) => {
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col rounded-2xl bg-[#f5f9ff] p-6 shadow-sm">
-      <div className="mb-5 border-b border-gray-100 pb-4">
-        <p className="text-[10px] font-medium uppercase tracking-wide text-gray-400">
-          {project.code}
-        </p>
+      <div className="mb-5 border-b border-gray-100 pb-4 flex justify-between">
+       
         <h2 className="mt-1 text-xl font-bold text-[#1a472a] group-hover:text-2xl transition-all">
           {project.name}
         </h2>
-        <p className="mt-1 text-xs text-gray-500">Tasks assigned under this project</p>
+        
+      
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto pr-1">

@@ -21,6 +21,8 @@ const ProjectsSection = () => {
   const [section, setSection] = React.useState<string>("")
   const { projects } = useDashboardData("employee")
 
+  const sectionLabel = section === "" ? "Details" : "Tasks"
+
   const sections = [
     {
       id: 0,
@@ -66,7 +68,11 @@ const ProjectsSection = () => {
 
         <div className="flex min-w-0 flex-1 flex-col gap-4">
           <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-2xl bg-[#eef7ff] p-3 shadow-sm">
-            <div />
+            <div className="min-w-0">
+              <span className="text-sm font-semibold capitalize text-[#1a472a]">
+                {sectionLabel}
+              </span>
+            </div>
             <div className="flex flex-wrap items-center justify-center gap-3">
               {sections.map((s) => (
                 <div
