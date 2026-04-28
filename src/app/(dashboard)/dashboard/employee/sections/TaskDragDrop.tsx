@@ -81,15 +81,7 @@ export default function TaskDragDrop({ project }: Props) {
 
   return (
     <div className="flex h-full min-h-0 flex-col rounded-2xl bg-white p-6 shadow-sm">
-      <div className="mb-5 border-b border-gray-100 pb-4">
-        <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
-          {project.code}
-        </p>
-        <h2 className="mt-1 text-2xl font-bold text-[#1a472a]">{project.name}</h2>
-        <p className="mt-1 text-sm text-gray-500">
-          Drag tasks between columns to update their status
-        </p>
-      </div>
+     
 
       <div className="min-h-0 flex-1">
         <Board

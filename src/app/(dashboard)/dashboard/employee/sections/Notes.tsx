@@ -44,14 +44,14 @@ export default function Notes() {
 
   return (
     <>
-    <motion.div>
+    <motion.div className="flex h-full min-h-0 flex-col">
       <div>
         <h1 className="font-semibold text-xl ml-3 mb-5 mt-5">
           Check whats happening in the workspace!
         </h1>
            <FloatingButton onClick={() => setIsModalOpen(true)} />
       </div>
-      <div>
+      <div className="flex-1 min-h-0">
         <Board tasks={notes} setTasks={setNotes} />
       </div>
     </motion.div>

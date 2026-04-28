@@ -75,24 +75,27 @@ export default function TaskCard({
 
   const taskStatus = task.status && statusConfig[task.status];
   const StatusIcon = taskStatus?.icon;
-  const borderLeftColor =
-    mode === "tasks" && taskStatus ? taskStatus.border : task.color || "#d1d5db";
+  const noteBorderColor = task.color || "#d1d5db";
 
   return (
     <>
       <div
         {...props}
-        className="relative mb-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm"
-        style={{ borderLeft: `4px solid ${borderLeftColor}` }}
+        className={
+          mode === "tasks"
+            ? "relative mb-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm"
+            : "relative aspect-square rounded-lg border-2 bg-white p-4 shadow-sm"
+        }
+        style={mode === "notes" ? { borderColor: noteBorderColor } : undefined}
       >
         {mode === "tasks" ? (
           <>
             {task.task_number ? (
-              <p className="mb-2 text-xs text-gray-400">{task.task_number}</p>
+              <p className="mb-2 text-[10px] text-gray-400">{task.task_number}</p>
             ) : null}
-            <p className="font-semibold text-[#1a472a]">{task.title}</p>
+            <p className="font-semibold text-[13px] text-[#1a472a]">{task.title}</p>
             {task.description ? (
-              <p className="mt-1 text-sm text-gray-500">{task.description}</p>
+              <p className="mt-1 text-[10px] text-gray-500">{task.description}</p>
             ) : null}
             {taskStatus && StatusIcon ? (
               <span
@@ -106,7 +109,7 @@ export default function TaskCard({
         ) : (
           <>
             <p className="mb-2 text-xs text-gray-400">{task.note_date}</p>
-            <p className="font-semibold">{task.title}</p>
+            <p className="font-semibold text-gray-900">{task.title}</p>
 
             {userId && task.user_id && userId == task.user_id ? (
               <button

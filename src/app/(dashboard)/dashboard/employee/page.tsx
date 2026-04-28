@@ -17,6 +17,7 @@ import NearestEventsSection from './sections/NearestEventsSection'
 import Notes from './sections/Notes'
 import ProjectsSection from './sections/ProjectsSection'
 import Calender from '@/components/dashboard/Calender'
+import Vacations from './sections/Vacations'
 
 export default function EmployeeDashboard() {
   const {  loading, error, refetch } = useDashboardData('employee')
@@ -78,6 +79,9 @@ export default function EmployeeDashboard() {
     )}
     {activeSection==='calender'&&(
       <Calender/>
+    )}
+    {activeSection==='Vacations'&&(
+      <Vacations/>
     )}
   
     {activeSection ==='events'&&(

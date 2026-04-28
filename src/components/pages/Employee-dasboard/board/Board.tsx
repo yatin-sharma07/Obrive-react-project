@@ -157,21 +157,65 @@ export default function Board({
   };
 
   return (
-    <div className="flex h-full min-h-0 gap-3 overflow-x-auto pb-2">
-      {userId !== null &&
-        columns.map((col) => (
-          <Column
-            key={col.id}
-            column={col}
-            tasks={tasks.filter((t: any) => taskColumnId(t) === col.id)}
-            onDrop={handleDrop}
-            onDelete={handleDelete}
-            onDragStart={(task: BoardTask) => setDraggedTask(task)}
-            userId={userId}
-            handleAddCardOpen={shouldShowAddTask ? handleAddCardOpen : undefined}
-            mode={mode}
-          />
-        ))}
+    <div
+      className={
+        mode === "tasks"
+          ? "flex h-full min-h-0 flex-col gap-4 overflow-hidden"
+          : "flex h-full min-h-0 flex-col overflow-hidden"
+      }
+    >
+      {mode === "tasks" ? (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          {columns.map((col) => (
+            <div
+              key={col.id}
+              className="mx-auto inline-flex min-h-12 w-full items-center justify-center rounded-full border border-[#dde3ea] bg-[#f1f4f8] px-6 py-3 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_10px_24px_rgba(148,163,184,0.12)]"
+            >
+              <h2 className="text-sm font-semibold text-[#526274]">{col.label}</h2>
+            </div>
+          ))}
+        </div>
+      ) : null}
+
+      {mode === "tasks" ? (
+        <div className="rounded-[22px] bg-[#e3e8ef] px-6 py-4 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_10px_24px_rgba(148,163,184,0.18)]">
+          <h2 className="text-sm font-semibold tracking-[0.18em] text-[#5f6f83] uppercase">
+            Active Tasks
+          </h2>
+        </div>
+      ) : null}
+
+      <div
+        className={
+          mode === "tasks"
+            ? "grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-x-auto pb-2 md:grid-cols-3"
+            : "grid min-h-0 flex-1 grid-cols-1 gap-4 pb-2 md:grid-cols-3"
+        }
+      >
+        {userId !== null &&
+          columns.map((col) => (
+            <Column
+              key={col.id}
+              column={col}
+              tasks={tasks.filter((t: any) => taskColumnId(t) === col.id)}
+              onDrop={handleDrop}
+              onDelete={handleDelete}
+              onDragStart={(task: BoardTask) => setDraggedTask(task)}
+              userId={userId}
+              handleAddCardOpen={shouldShowAddTask ? handleAddCardOpen : undefined}
+              mode={mode}
+              showLabel={mode !== "tasks"}
+            />
+          ))}
+      </div>
+
+      {mode === "tasks" ? (
+        <div className="rounded-[22px] bg-[#e3e8ef] px-6 py-4 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_10px_24px_rgba(148,163,184,0.18)]">
+          <h2 className="text-sm font-semibold tracking-[0.18em] text-[#5f6f83] uppercase">
+            Backlog
+          </h2>
+        </div>
+      ) : null}
 
       {shouldShowAddTask ? (
         <>
