@@ -1,35 +1,97 @@
-const service = require('./hr.service');
-const { successResponse } = require('../../utils/apiResponse');
+// backend/src/modules/hr/hr.controller.js
+const hrService = require('./hr.service');
+const { successResponse, errorResponse } = require('../../utils/apiResponse');
 
-exports.getAllEmployees        = async (req, res, next) => {
-  try { successResponse(res, await service.getAllEmployees(req.query)); }
-  catch (err) { next(err); }
+// Get HR Dashboard
+exports.getDashboard = async (req, res, next) => {
+  try {
+    const stats = await hrService.getDashboardStats();
+    const recentEmployees = await hrService.getAllEmployees();
+    const hrProfile = await hrService.getHRProfile(req.user.id);
+    
+    successResponse(res, { 
+      profile: hrProfile,
+      stats, 
+      recentEmployees: recentEmployees.slice(0, 5)
+    }, 'HR Dashboard retrieved');
+  } catch (err) {
+    errorResponse(res, err.message, 500);
+  }
 };
-exports.getEmployee            = async (req, res, next) => {
-  try { successResponse(res, await service.getEmployee(req.params.id)); }
-  catch (err) { next(err); }
+
+// Get HR Profile
+exports.getProfile = async (req, res, next) => {
+  try {
+    const profile = await hrService.getHRProfile(req.user.id);
+    successResponse(res, profile, 'Profile retrieved');
+  } catch (err) {
+    errorResponse(res, err.message, 500);
+  }
 };
-exports.getEmployeeLogs        = async (req, res, next) => {
-  try { successResponse(res, await service.getEmployeeLogs(req.params.id)); }
-  catch (err) { next(err); }
+
+// Update HR Profile
+exports.updateProfile = async (req, res, next) => {
+  try {
+    const { name, bio, dateOfBirth, phone } = req.body;
+    const profile = await hrService.updateHRProfile(req.user.id, {
+      name, bio, dateOfBirth, phone
+    });
+    successResponse(res, profile, 'Profile updated');
+  } catch (err) {
+    errorResponse(res, err.message, 500);
+  }
 };
-exports.getEmployeeAvailability = async (req, res, next) => {
-  try { successResponse(res, await service.getEmployeeAvailability(req.params.id, req.query.date)); }
-  catch (err) { next(err); }
+
+// Get all employees
+exports.getAllEmployees = async (req, res, next) => {
+  try {
+    const employees = await hrService.getAllEmployees();
+    successResponse(res, employees, 'Employees retrieved');
+  } catch (err) {
+    errorResponse(res, err.message, 500);
+  }
 };
-exports.getAllProjects          = async (req, res, next) => {
-  try { successResponse(res, await service.getAllProjects(req.query.status)); }
-  catch (err) { next(err); }
+
+// Get employee by ID
+exports.getEmployeeById = async (req, res, next) => {
+  try {
+    const employee = await hrService.getEmployeeById(parseInt(req.params.id));
+    successResponse(res, employee, 'Employee retrieved');
+  } catch (err) {
+    errorResponse(res, err.message, 404);
+  }
 };
-exports.updateProjectStatus    = async (req, res, next) => {
-  try { successResponse(res, await service.updateProjectStatus(req.params.id, req.body.status)); }
-  catch (err) { next(err); }
+
+// Update employee
+exports.updateEmployee = async (req, res, next) => {
+  try {
+    const employee = await hrService.updateEmployee(parseInt(req.params.id), req.body);
+    successResponse(res, employee, 'Employee updated');
+  } catch (err) {
+    errorResponse(res, err.message, 500);
+  }
 };
-exports.assignEmployee         = async (req, res, next) => {
-  try { successResponse(res, await service.assignEmployee(req.user.id, req.body), 'Employee assigned', 201); }
-  catch (err) { next(err); }
+
+// Delete employee
+exports.deleteEmployee = async (req, res, next) => {
+  try {
+    await hrService.deleteEmployee(parseInt(req.params.id));
+    successResponse(res, null, 'Employee deleted');
+  } catch (err) {
+    errorResponse(res, err.message, 500);
+  }
 };
-exports.unassignEmployee       = async (req, res, next) => {
-  try { successResponse(res, await service.unassignEmployee(req.params.assignmentId)); }
-  catch (err) { next(err); }
+
+// Search employees
+exports.searchEmployees = async (req, res, next) => {
+  try {
+    const { q } = req.query;
+    if (!q) {
+      return errorResponse(res, 'Search term required', 400);
+    }
+    const employees = await hrService.searchEmployees(q);
+    successResponse(res, employees, 'Search results');
+  } catch (err) {
+    errorResponse(res, err.message, 500);
+  }
 };

@@ -34,8 +34,8 @@ exports.clientLogin = async (clientId) => {
       name: client.name, 
       role: client.role 
     },
-    process.env.JWT_SECRET,
-    { expiresIn: '24h' }
+    process.env.JWT_ACCESS_SECRET,
+    { expiresIn: process.env.JWT_ACCESS_EXPIRES || '24h' }
   );
   
   return {

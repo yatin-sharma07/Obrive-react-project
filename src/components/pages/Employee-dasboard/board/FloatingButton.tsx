@@ -1,16 +1,12 @@
 "use client";
 
-type FloatingButtonProps = {
-  onClick: () => void;
-};
-
-export default function FloatingButton({ onClick }: FloatingButtonProps) {
+export default function FloatingButton({ onClick, label = "Add Note +" }: any) {
   return (
     <button
       onClick={onClick}
-      className="fixed bottom-6 left-6 w-14 h-14 rounded-full bg-black text-white text-2xl shadow-lg"
+      className="fixed top-8 z-10 right-10 bg-green-900 text-white px-4 py-2 rounded"
     >
-      +
+      {label}
     </button>
   );
 }

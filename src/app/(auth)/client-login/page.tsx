@@ -11,7 +11,7 @@ import React from "react";
 
 export default function ClientLogin() {
   const [loading , setLoading] = React.useState(false);
- const [clientId, setClientId] = React.useState("");
+ const [clientId, setClientId] = React.useState(""); 
  const[showToast, setShowToast] = React.useState(false);
 
 const handleLogin = async () => {
@@ -28,6 +28,18 @@ const handleLogin = async () => {
     if (!res.ok) {
       throw new Error(data.message || "Login failed");
     }
+
+    // Save client info for the dashboard
+    if (data?.data?.client) {
+      localStorage.setItem('user', JSON.stringify({
+        ...data.data.client,
+        role: 'client'
+      }));
+    }
+    if (data?.data?.accessToken) {
+      localStorage.setItem('token', data.data.accessToken);
+    }
+
     setShowToast(true);
 
    

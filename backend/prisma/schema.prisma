@@ -7,32 +7,32 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Users model based on your database table
+model events {
+  id              Int       @id @default(autoincrement())
+  title           String    @db.VarChar(255)
+  description     String?
+  event_date      DateTime  @db.Date
+  event_time      DateTime? @db.Time(6)
+  end_date        DateTime? @db.Date
+  end_time        DateTime? @db.Time(6)
+  location        String?   @db.VarChar(255)
+  event_type      String?   @default("general") @db.VarChar(50)
+  created_by      Int?
+  created_at      DateTime? @default(now()) @db.Timestamp(6)
+  updated_at      DateTime? @default(now()) @db.Timestamp(6)
+  category        String?   @db.VarChar(50)
+  priority        String?   @default("medium") @db.VarChar(20)
+  is_recurring    Boolean?  @default(false)
+  repeat_type     String?   @db.VarChar(20)
+  repeat_days     String?   @db.VarChar(100)
+  repeat_end_date DateTime? @db.Date
+  users           users?    @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-model Users {
-  id        Int        @id @default(autoincrement())
-  userid    String     @unique @db.VarChar(50)
-  name      String     @db.VarChar(100)
-  role      String
-  email     String     @unique @db.VarChar(255)
-  password  String     @db.VarChar(255)
-  status    String     @db.VarChar(50)
-  isActive  Boolean    @default(true) @map("isActive") @db.Boolean
-  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamp()
-  updatedAt DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamp()
-  loginLogs LoginLog[]
-
-  @@map("users")
+  @@index([created_by], map: "idx_events_created_by")
+  @@index([event_date], map: "idx_events_event_date")
 }
 
-enum UserRole {
-  client
-  employee
-  HR
-  Admin
-}
-
-model LoginLog {
+model login_logs {
   id              Int       @id @default(autoincrement())
   userId          Int
   ipAddress       String?
@@ -40,8 +40,104 @@ model LoginLog {
   loginTime       DateTime  @default(now())
   logoutTime      DateTime?
   sessionDuration Int?
+  users           users     @relation(fields: [userId], references: [id])
+}
 
-  user Users @relation(fields: [userId], references: [id])
+model project_assignments {
+  id          Int       @id @default(autoincrement())
+  project_id  Int?
+  employee_id Int?
+  users       users?    @relation(fields: [employee_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  projects    projects? @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@map("login_logs")
+  @@unique([project_id, employee_id])
+}
+
+model projects {
+  id                  Int                   @id @default(autoincrement())
+  project_id          String                @unique @db.VarChar(50)
+  name                String                @db.VarChar(255)
+  description         String?
+  priority            String?               @db.VarChar(20)
+  created_at          DateTime?             @default(now()) @db.Timestamp(6)
+  project_assignments project_assignments[]
+  tasks               tasks[]
+}
+
+model sticky_notes {
+  id         Int       @id @default(autoincrement())
+  user_id    Int
+  content    String?
+  color      String?   @default("yellow") @db.VarChar(20)
+  note_date  DateTime  @db.Date
+  position   Int
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @default(now()) @db.Timestamp(6)
+  users      users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user")
+}
+
+model tasks {
+  id          Int       @id @default(autoincrement())
+  project_id  Int?
+  task_number String    @db.VarChar(20)
+  title       String    @db.VarChar(255)
+  description String?
+  deadline    DateTime? @db.Date
+  status      String?   @default("pending") @db.VarChar(20)
+  assigned_to Int?
+  created_by  Int?
+  created_at  DateTime? @default(now()) @db.Timestamp(6)
+  updated_at  DateTime? @default(now()) @db.Timestamp(6)
+  assigned_user  users?    @relation("TaskAssignedTo", fields: [assigned_to], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  creator        users?    @relation("TaskCreatedBy", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  projects    projects? @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([project_id], map: "idx_tasks_project_id")
+  @@index([assigned_to], map: "idx_tasks_assigned_to")
+  @@index([created_by], map: "idx_tasks_created_by")
+}
+
+model users {
+  id                  Int                   @id @default(autoincrement())
+  userid              String                @unique(map: "unique_employee_id") @db.VarChar(50)
+  email               String                @unique @db.VarChar(255)
+  name                String                @db.VarChar(100)
+  role                String                @db.VarChar(50)
+  password            String                @db.VarChar(255)
+  status              String                @default("offline") @db.VarChar(50)
+  created_at          DateTime              @default(now())
+  updated_at          DateTime
+  department          String?               @db.VarChar(255)
+  biography           String?
+  is_active           Boolean               @default(true)
+  job_title           String?               @db.VarChar(255)
+  join_date           DateTime?
+  phone_number        String?               @db.VarChar(25)
+  date_of_birth       DateTime?             @db.Date
+  bio                 String?
+  events              events[]
+  login_logs          login_logs[]
+  project_assignments project_assignments[]
+  sticky_notes        sticky_notes[]
+  tasks_assigned      tasks[]               @relation("TaskAssignedTo")
+  tasks_created       tasks[]               @relation("TaskCreatedBy")
+  work_sessions       work_sessions[]
+}
+
+model work_sessions {
+  id                  Int       @id @default(autoincrement())
+  userId              Int
+  sessionStart        DateTime  @default(now())
+  lastHeartbeat       DateTime  @default(now())
+  sessionEnd          DateTime?
+  totalActiveDuration Int       @default(0)
+  status              String    @default("active") @db.VarChar(20)
+  isAutoEnded         Boolean   @default(false)
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+  users               users     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "idx_work_sessions_userId")
+  @@index([sessionStart], map: "idx_work_sessions_sessionStart")
+  @@index([status], map: "idx_work_sessions_status")
 }

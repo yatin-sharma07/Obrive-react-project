@@ -1,4 +1,5 @@
 const service = require('./auth.service');
+const timerService = require('../timer/timer.service');
 const { successResponse, errorResponse } = require('../../utils/apiResponse');
 
 exports.loginUser = async (req, res, next) => {
@@ -7,6 +8,17 @@ exports.loginUser = async (req, res, next) => {
       ...req.body,
       ip:        req.ip,
       userAgent: req.headers['user-agent'],
+    });
+     res.cookie("accessToken", result.accessToken, {
+      httpOnly: true,
+      secure: false, // true in production (HTTPS)
+      sameSite: "lax",
+    });
+
+    res.cookie("refreshToken", result.refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
     });
     successResponse(res, result, 'Login successful');
   } catch (err) { next(err); }
@@ -21,23 +33,54 @@ exports.loginClient = async (req, res, next) => {
 
 exports.logout = async (req, res, next) => {
   try {
+    // Auto-stop timer on logout
+    try {
+      await timerService.stopTimer(req.user.id);
+      console.log('⏹️  Timer auto-stopped for user:', req.user.id);
+    } catch (timerErr) {
+      console.log('ℹ️  No active timer to stop:', timerErr.message);
+    }
+
     const result = await service.logout({
       userId: req.user.id,
       logId:  req.user.logId,
     });
+
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+    });
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+    });
+
     successResponse(res, result, 'Logged out');
   } catch (err) { next(err); }
 };
 
 exports.refreshToken = async (req, res, next) => {
   try {
-   const token = req.cookies?.refreshToken;
+    const token = req.cookies.refreshToken; // 👈 THIS LINE
 
-if (!token) {
-  return errorResponse(res, 'Refresh token required', 400);
-}
+    if (!token) {
+      return errorResponse(res, 'Refresh token required', 400);
+    }
 
-const result = await service.refreshToken(token);
-successResponse(res, result);
-  } catch (err) { next(err); }
+    const result = await service.refreshToken(token);
+    successResponse(res, result);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getAllUsers = async (req, res, next) => {
+  try {
+    const result = await service.getAllUsers();
+    successResponse(res, result, 'Users fetched successfully');
+  } catch (err) {
+    next(err);
+  }
 };

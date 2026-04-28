@@ -18,7 +18,7 @@ router.post('/login',
 router.post('/client/login',
   [
     body('clientId').notEmpty().withMessage('Client ID required'),
-   
+    // body('password').notEmpty().withMessage('Password required'),
   ],
   validate,
   controller.loginClient
@@ -26,5 +26,6 @@ router.post('/client/login',
 
 router.post('/logout',  authenticate, controller.logout);
 router.post('/refresh', controller.refreshToken);
-
+router.get('/users', authenticate, controller.getAllUsers);
 module.exports = router;
+

@@ -9,17 +9,21 @@ const jwt        = require('jsonwebtoken');
 
 const app  = express();
 const PORT = process.env.PORT || 5000;
+const cookieParser = require('cookie-parser'); // 👈 ADD THIS
 
-
-app.use(cors({
-  origin: "http://localhost:3000",
-  credentials: true,
-}));
 // ── Middleware ───────────────────────────────────────────────
 app.use(helmet());
-
+app.use(cors({
+  origin: [
+    process.env.CLIENT_URL || 'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3002',
+  ],
+  credentials: true,
+}));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use(morgan('dev'));
 
 // ============================================
@@ -95,10 +99,16 @@ app.get('/api/health', (req, res) => res.json({ status: 'OK', timestamp: new Dat
 app.use('/api/auth',      require('./src/modules/auth/auth.routes'));
 app.use('/api/employee',  require('./src/modules/employee/employee.routes'));
 app.use('/api/clients',   require('./src/modules/clients/client.routes'));
+app.use('/api/client',    require('./src/modules/clients/client.routes')); // alias for singular client path
 app.use('/api/hr',        require('./src/modules/hr/hr.routes'));
 app.use('/api/admin',     require('./src/modules/admin/admin.routes'));
 app.use('/api/meetings',  require('./src/modules/meeting/meeting.routes'));
-
+app.use('/api/projects',  require('./src/modules/projects/projects.routes'));
+app.use('/api/tasks',     require('./src/modules/tasks/tasks.routes'));
+app.use('/api/events',    require('./src/modules/events/events.routes'));
+app.use('/api/sticky-notes', require('./src/modules/sticky-notes/sticky-notes.routes'));
+// Timer routes
+app.use('/api/work-sessions', require('./src/modules/work-sessions/work-sessions.routes'));
 // ── Error handler ─────────────────────────────────────────────
 app.use(require('./src/middleware/errorHandler'));
 
@@ -144,3 +154,4 @@ process.on('SIGINT', async () => {
   console.log('🔌 DB disconnected. Shutting down.');
   process.exit(0);
 });
+

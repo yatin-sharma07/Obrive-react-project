@@ -20,6 +20,7 @@ exports.login = async (req, res, next) => {
 exports.getMyProfile          = async (req, res, next) => {
   try { successResponse(res, await service.getMyProfile(req.user.id)); }
   catch (err) { next(err); }
+  console.log("USER:", req.user);
 };
 
 exports.updateMyProfile       = async (req, res, next) => {

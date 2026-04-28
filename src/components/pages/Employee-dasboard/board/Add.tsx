@@ -1,103 +1,161 @@
 "use client";
 
 import { useState } from "react";
-type AddTaskModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-  onAdd: (task: {
-    id: string;
-    title: string;
-    duration: string;
-    column: string;
-    color: string;
-  }) => void;
-};
+import { getNext3Days } from "../constants/dates";
+import { apiFetch } from "@/lib/api";
 
-export default function AddTaskModal({
-  isOpen,
-  onClose,
-  onAdd,
-}: AddTaskModalProps) {
+const COLORS = ["yellow", "blue", "red", "green", "purple", "orange"];
+
+export default function AddTaskModal({ isOpen, onClose, onAdd }: any) {
+  const dates = getNext3Days();
+
   const [title, setTitle] = useState("");
-  const [duration, setDuration] = useState("");
-  const [column, setColumn] = useState("today");
-  const [color, setColor] = useState("#A8D5BA");
+  const [noteDate, setNoteDate] = useState(dates[0].id);
+  const [color, setColor] = useState("yellow");
+  const [openDate, setOpenDate] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!title.trim()) return;
 
-    const newTask = {
-      id: Date.now().toString(),
-      title,
-      duration,
-      column,
-      color,
-    };
+    try {
+      const res = await apiFetch("/sticky-notes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json", // ✅ important
+        },
+        body: JSON.stringify({
+          content: title,
+          note_date: noteDate,
+          color,
+          position: 0,
+        }),
+      });
 
-    onAdd(newTask);
+      const json = await res.json();
+      const saved = json.data;
 
-    // reset
-    setTitle("");
-    setDuration("");
-    setColumn("today");
-    setColor("#A8D5BA");
+      // ✅ update UI instantly
+      onAdd({
+        id: saved.id.toString(),
+        title: saved.content,
+        note_date: new Date(saved.note_date).toLocaleDateString("en-CA"),
+        color: saved.color,
+        position: saved.position,
+         user_id: saved.user_id, 
+      });
 
-    onClose();
+      // ✅ reset form
+      setTitle("");
+      setColor("yellow");
+      setNoteDate(dates[0].id);
+
+      // ✅ close modal
+      onClose();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to add task");
+    }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-lg w-[300px] space-y-3">
-        <h2 className="font-semibold">Add Task</h2>
+  <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+    <div className="bg-white w-[360px] rounded-2xl shadow-2xl p-6 space-y-5 animate-fadeIn">
+      
+      {/* Title */}
+      <h2 className="text-xl font-semibold text-gray-800">
+        Add New Note
+      </h2>
 
+      {/* Input */}
+      <div className="space-y-1">
+        <label className="text-sm text-gray-500">Task</label>
         <input
-          className="w-full border p-2"
-          placeholder="Task title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          placeholder="Enter your task..."
+          className="w-full border border-gray-200 focus:border-black focus:ring-1 focus:ring-black rounded-lg p-2 outline-none transition"
         />
+      </div>
 
-        <input
-          className="w-full border p-2"
-          placeholder="Duration (e.g 0:20h)"
-          value={duration}
-          onChange={(e) => setDuration(e.target.value)}
-        />
+      {/* Date */}
+     <div className="relative">
+  <label className="text-sm text-gray-500">Date</label>
 
-        {/* DATE SELECT (ONLY 3 OPTIONS) */}
-        <select
-          className="w-full border p-2"
-          value={column}
-          onChange={(e) => setColumn(e.target.value)}
-        >
-          <option value="today">Today</option>
-          <option value="tomorrow">Tomorrow</option>
-          <option value="dayAfterTomorrow">Day After Tomorrow</option>
-        </select>
+  {/* Trigger */}
+  <button
+    onClick={() => setOpenDate(!openDate)}
+    className="w-full mt-1 px-3 py-2 border border-gray-200 rounded-lg flex justify-between items-center hover:border-black transition"
+  >
+    <span>
+      {dates.find((d) => d.id === noteDate)?.label}
+    </span>
+    <span className={`transition-transform ${openDate ? "rotate-180" : ""}`}>
+      ▼
+    </span>
+  </button>
 
-        {/* COLOR PICKER */}
-        <input
-          type="color"
-          value={color}
-          onChange={(e) => setColor(e.target.value)}
-        />
+  {/* Dropdown */}
+  <div
+    className={`absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden transition-all duration-200 z-50 ${
+      openDate ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
+    }`}
+  >
+    {dates.map((d) => (
+      <button
+        key={d.id}
+        onClick={() => {
+          setNoteDate(d.id);
+          setOpenDate(false);
+        }}
+        className={`w-full text-left px-3 py-2 hover:bg-gray-100 transition ${
+          noteDate === d.id ? "bg-gray-100 font-medium" : ""
+        }`}
+      >
+        {d.label}
+      </button>
+    ))}
+  </div>
+</div>
 
-        <button
-          onClick={handleSubmit}
-          className="w-full bg-black text-white p-2 rounded"
-        >
-          Add Task
-        </button>
+      {/* Color */}
+      <div className="space-y-2">
+        <label className="text-sm text-gray-500">Color</label>
 
+        <div className="flex gap-2 flex-wrap">
+          {COLORS.map((c) => (
+            <button
+              key={c}
+              onClick={() => setColor(c)}
+              className={`w-7 h-7 rounded-full border-2 transition ${
+                color === c
+                  ? "border-black scale-110"
+                  : "border-transparent"
+              }`}
+              style={{ backgroundColor: c }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Buttons */}
+      <div className="flex justify-end gap-2 pt-2">
         <button
           onClick={onClose}
-          className="w-full border p-2 rounded"
+          className="px-4 py-2 text-sm rounded-lg bg-gray-100 hover:bg-gray-200 transition"
         >
           Cancel
         </button>
+
+        <button
+          onClick={handleSubmit}
+          className="px-4 py-2 text-sm rounded-lg bg-black text-white hover:bg-gray-800 transition"
+        >
+          Add Note
+        </button>
       </div>
     </div>
-  );
+  </div>
+);
 }
