@@ -80,7 +80,7 @@ export default function TaskDragDrop({ project }: Props) {
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col rounded-2xl bg-white p-6 shadow-sm">
+    <div className="flex h-full min-h-0 flex-col rounded-2xl bg-white p-4 shadow-sm sm:p-6">
      
 
       <div className="min-h-0 flex-1">

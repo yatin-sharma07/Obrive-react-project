@@ -59,7 +59,7 @@ export default function Column({
 
   return (
     <div
-      className="flex min-w-0 flex-1 flex-col rounded-2xl bg-gray-50 p-4"
+      className="flex min-w-0 flex-1 flex-col rounded-2xl bg-gray-50 p-3 sm:p-4"
       onDrop={(e) => onDrop(e, column)}
       onDragOver={(e) => e.preventDefault()}
     >

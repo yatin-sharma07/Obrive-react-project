@@ -5,7 +5,8 @@ import {
   FolderOpen,
   Calendar,
   Palmtree,
-  List
+  List,
+  Menu
 } from 'lucide-react'
 import supportImg from "@/assets/images/employee/illustration.png"
 import { useDashboardData } from '../useDashboardData'
@@ -24,6 +25,7 @@ export default function EmployeeDashboard() {
   const [activeSection
     , setActiveSection] = useState('dashboard')  
   const[supportOpen,setSupportOpen]=useState(false)
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
 
   const navItems=[
     {label:'Dashboard', icon:LayoutDashboard, key:'dashboard'},
@@ -59,17 +61,32 @@ export default function EmployeeDashboard() {
 
   return (
     <>
-    
-    <div className="flex rounded-2xl flex-col">
+    <div className="contents md:flex md:h-full md:w-auto md:flex-col md:rounded-2xl">
           <Sidebar
             navItems={navItems}
             activeSection={activeSection}
             setActiveSection={setActiveSection}
             setSupportOpen={setSupportOpen}
+            mobileOpen={isMobileSidebarOpen}
+            onMobileClose={() => setIsMobileSidebarOpen(false)}
           />
     </div>
 
-    <div className="flex-1 flex flex-col gap-2 overflow-hidden">
+    <div className="flex w-full flex-1 min-w-0 flex-col gap-2 overflow-hidden">
+    <div className="sticky top-2 z-30 flex items-center justify-between rounded-2xl bg-white px-4 py-3 shadow-sm md:hidden">
+      <button
+        type="button"
+        onClick={() => setIsMobileSidebarOpen(true)}
+        className="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700"
+      >
+        <Menu className="h-4 w-4" />
+        Menu
+      </button>
+
+      <span className="text-sm font-semibold text-[#1a472a] capitalize">
+        {activeSection === 'tasks' ? 'Sticky Notes' : activeSection}
+      </span>
+    </div>
       
     {activeSection==='dashboard'&&(
       <Dashboard setActiveSection={setActiveSection}/>
@@ -85,7 +102,7 @@ export default function EmployeeDashboard() {
     )}
   
     {activeSection ==='events'&&(
-     <NearestEventsSection/>
+     <NearestEventsSection setActiveSection={setActiveSection}/>
     )}
     {activeSection ==='tasks'&&(
      <Notes/>
@@ -93,10 +110,10 @@ export default function EmployeeDashboard() {
 
     </div>
    {supportOpen && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-3 backdrop-blur-sm">
     
     {/* Modal */}
-    <div className="relative w-[420px] bg-white rounded-2xl p-6 shadow-xl">
+    <div className="relative w-full max-w-[420px] bg-white rounded-2xl p-6 shadow-xl">
 
       {/* Close Button */}
       <button

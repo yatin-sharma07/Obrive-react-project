@@ -8,13 +8,13 @@ const {
   verifyRefreshToken,
 } = require('../../utils/jwt');
 
-// Employee / HR / Admin login
+// Employee / HR / Admin / Supervisor login
 exports.loginUser = async ({ email, password, ip, userAgent }) => {
   // Use raw query to find user by email
   const result = await prisma.$queryRaw`
     SELECT id, userid, email, name, role, password, status 
     FROM users 
-    WHERE email = ${email} AND (role = 'employee' OR role = 'hr' OR role = 'admin')
+    WHERE email = ${email} AND (role = 'employee' OR role = 'hr' OR role = 'admin' OR role = 'supervisor')
     LIMIT 1
   `;
   

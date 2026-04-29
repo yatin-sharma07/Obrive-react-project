@@ -98,10 +98,10 @@ export default function Projects({
   onViewAll,
   variant,
   onSelectProject,
+  setActiveSection
 }: ProjectsProps) {
   const [myProjects, setMyProjects] = useState<ProjectItem[]>([]);
 
-  // 🔥 Fetch projects from backend API
   useEffect(() => {
     if (variant !== "projects") return;
 
@@ -166,7 +166,7 @@ export default function Projects({
 
           <button
             type="button"
-            onClick={onViewAll}
+            onClick={()=>setActiveSection("projects")}
             className="text-sm font-semibold text-teal-700 hover:text-teal-800 inline-flex items-center gap-1"
           >
             View all <ChevronRight className="w-4 h-4" />

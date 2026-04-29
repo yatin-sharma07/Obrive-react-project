@@ -84,9 +84,9 @@ export default function TaskCard({
         className={
           mode === "tasks"
             ? "relative mb-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm"
-            : "relative aspect-square rounded-lg border-2 bg-white p-4 shadow-sm"
+            : "relative mb-3 rounded-xl border border-gray-100 border-l-4 bg-white p-4 shadow-sm"
         }
-        style={mode === "notes" ? { borderColor: noteBorderColor } : undefined}
+        style={mode === "notes" ? { borderLeftColor: noteBorderColor } : undefined}
       >
         {mode === "tasks" ? (
           <>

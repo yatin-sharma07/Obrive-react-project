@@ -1,37 +1,35 @@
 'use client'
 
-import { useState } from 'react'
-import { Search, Bell, RotateCcw } from 'lucide-react'
+import { RotateCcw, Search } from 'lucide-react'
 
 interface HeaderProps {
+  pageTitle: string
   userName?: string
-  pageTitle?: string
   onRefresh?: () => void
   isRefreshing?: boolean
 }
 
-export default function Header({ userName = 'Evan', pageTitle = 'Dashboard', onRefresh, isRefreshing = false }: HeaderProps) {
-
-
+export default function Header({
+  pageTitle = 'Supervisor Dashboard',
+  userName = 'Supervisor',
+  onRefresh,
+  isRefreshing = false,
+}: HeaderProps) {
   return (
     <div>
       <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="w-full sm:max-w-xs">
-
-                    <div className="relative">
+          <div className="relative">
             <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-400" />
             <input
               type="text"
               placeholder="Search..."
-              // value={searchQuery}
-              // onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-7 pr-3 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1a472a] focus:border-transparent transition"
+              className="w-full pl-8 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-[#1a472a]"
             />
           </div>
-         
         </div>
 
-        {onRefresh && (
+        <div className="flex gap-2">
           <button
             onClick={onRefresh}
             disabled={isRefreshing}
@@ -40,8 +38,7 @@ export default function Header({ userName = 'Evan', pageTitle = 'Dashboard', onR
           >
             <RotateCcw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
           </button>
-        )}
-
+        </div>
       </div>
 
       <div>

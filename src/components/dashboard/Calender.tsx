@@ -101,7 +101,7 @@ export default function Calendar() {
   }
 
   return (
-    <div className="flex-1 flex flex-col gap-4 h-full relative background-#F4F9FD;
+    <div className="relative flex h-full min-h-0 flex-1 flex-col gap-4 p-3 sm:p-4
 ">
       
       <style>{`
@@ -180,17 +180,17 @@ export default function Calendar() {
       
       <div className=' '>
 
-          <div className="flex justify-end mb-2">
+          <div className="mb-2 flex justify-end">
               <ProfileNotifications/>
           </div>
 
-          <div className="flex items-center justify-between mb-2">
+          <div className="mb-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
-               <h1 className="text-3xl font-bold text-[#0f172a] ml-1">Calendar</h1> 
+               <h1 className="ml-1 text-2xl font-bold text-[#0f172a] sm:text-3xl">Calendar</h1> 
 
                 <button 
                   onClick={() => openAddEventModal()}
-                  className="bg-[#3b82f6] hover:bg-[#2563eb] text-white px-4 py-2 rounded-lg flex items-center gap-2 font-medium transition-colors shadow-sm text-sm"
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#3b82f6] px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#2563eb] sm:w-auto"
                 >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
                     Add Event
@@ -200,7 +200,7 @@ export default function Calendar() {
 
       </div>
 
-      <div className="flex-1 w-full bg-white rounded-xl shadow-sm overflow-hidden h-full p-2">
+      <div className="h-[70vh] min-h-[520px] w-full flex-1 overflow-hidden rounded-xl bg-white p-2 shadow-sm md:h-full">
         <FullCalendar
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="dayGridMonth"
@@ -223,7 +223,7 @@ export default function Calendar() {
       {/* Add Event Modal */}
       {isModalOpen && (
         <div className="text-sm fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h2 className="text-xl font-bold text-gray-800">Add New Event</h2>
               <button 
@@ -247,7 +247,7 @@ export default function Calendar() {
                 />
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
                   <input 
@@ -275,7 +275,7 @@ export default function Calendar() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Trend / Priority</label>
-                <div className="flex gap-4">
+                <div className="flex flex-col gap-4 sm:flex-row">
                   <label className="flex items-center gap-2 cursor-pointer p-3 border border-gray-200 rounded-lg flex-1 hover:bg-gray-50 transition-colors">
                     <input 
                       type="radio" 

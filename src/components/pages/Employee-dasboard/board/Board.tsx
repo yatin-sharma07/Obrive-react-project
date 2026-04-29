@@ -189,7 +189,7 @@ export default function Board({
         className={
           mode === "tasks"
             ? "grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-x-auto pb-2 md:grid-cols-3"
-            : "grid min-h-0 flex-1 grid-cols-1 gap-4 pb-2 md:grid-cols-3"
+            : "grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto pb-2 md:grid-cols-2 xl:grid-cols-3"
         }
       >
         {userId !== null &&
