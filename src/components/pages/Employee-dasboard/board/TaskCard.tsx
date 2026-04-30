@@ -54,20 +54,29 @@ export default function TaskCard({
 }: Props) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errorAlert, setErrorAlert] = useState<{ isOpen: boolean; message: string }>({
+    isOpen: false,
+    message: "",
+  });
 
   const handleDelete = async () => {
     try {
       setLoading(true);
 
-      await apiFetch(`/sticky-notes/${task.id}`, {
+      const res = await apiFetch(`/sticky-notes/${task.id}`, {
         method: "DELETE",
       });
 
+      if (!res.ok) {
+        const json = await res.json();
+        throw new Error(json.message || "Failed to delete note");
+      }
+
       onDelete(task.id);
       setShowConfirm(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("Failed to delete note");
+      setErrorAlert({ isOpen: true, message: err.message || "Failed to delete note" });
     } finally {
       setLoading(false);
     }
@@ -152,6 +161,15 @@ export default function TaskCard({
           </div>
         </div>
       ) : null}
+
+      <ConfirmationAlert
+        isOpen={errorAlert.isOpen}
+        title="Error"
+        description={errorAlert.message}
+        type="error"
+        cancelLabel="Close"
+        onCancel={() => setErrorAlert({ isOpen: false, message: "" })}
+      />
     </>
   );
 }

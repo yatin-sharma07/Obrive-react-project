@@ -112,6 +112,63 @@ class SupervisorService {
       throw new Error(`Failed to fetch supervisor projects: ${error.message}`);
     }
   }
+
+  async getAllLeaveRequests() {
+    try {
+      const leaves = await prisma.leave_requests.findMany({
+        include: {
+          users: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              job_title: true,
+              department: true,
+            },
+          },
+        },
+        orderBy: {
+          created_at: 'desc',
+        },
+      });
+
+      return leaves;
+    } catch (error) {
+      throw new Error(`Failed to fetch leave requests: ${error.message}`);
+    }
+  }
+
+  async updateLeaveStatus(leaveId, status) {
+    try {
+      const validStatuses = ['approved', 'rejected', 'pending'];
+      if (!validStatuses.includes(status)) {
+        throw new Error('Invalid status. Must be approved, rejected, or pending');
+      }
+
+      const leave = await prisma.leave_requests.update({
+        where: {
+          id: leaveId,
+        },
+        data: {
+          status: status,
+          updated_at: new Date(),
+        },
+        include: {
+          users: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+      });
+
+      return leave;
+    } catch (error) {
+      throw new Error(`Failed to update leave status: ${error.message}`);
+    }
+  }
 }
 
 module.exports = new SupervisorService();

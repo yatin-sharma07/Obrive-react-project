@@ -1,49 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, XCircle, AlertCircle, Info, X } from "lucide-react";
 
 type AlertType = "success" | "error" | "info" | "warning";
 
-interface AlertProps {
-  title?: string;
+interface ConfirmationAlertProps {
+  isOpen: boolean;
+  title: string;
   description?: string;
   type?: AlertType;
-  duration?: number;
-  onClose?: () => void;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  onConfirm?: () => void;
+  onCancel: () => void;
 }
 
 export default function ConfirmationAlert({
+  isOpen,
   title,
   description,
   type = "info",
-  duration,
-  onClose,
-}: AlertProps) {
-  const [visible, setVisible] = useState(true);
-  const [progress, setProgress] = useState(100);
-
-  // auto close with progress bar
-  useEffect(() => {
-    if (!duration) return;
-
-    const startTime = Date.now();
-    const interval = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      const remaining = Math.max(0, 100 - (elapsed / duration) * 100);
-      setProgress(remaining);
-
-      if (remaining <= 0) {
-        clearInterval(interval);
-        setVisible(false);
-        onClose?.();
-      }
-    }, 16);
-
-    return () => clearInterval(interval);
-  }, [duration, onClose]);
-
-  if (!visible) return null;
+  confirmLabel = "Confirm",
+  cancelLabel = "Cancel",
+  onConfirm,
+  onCancel,
+}: ConfirmationAlertProps) {
+  if (!isOpen) return null;
 
   const iconMap = {
     success: CheckCircle,
@@ -54,32 +37,24 @@ export default function ConfirmationAlert({
 
   const styleConfig = {
     success: {
-      bg: "bg-emerald-50",
-      border: "border-emerald-200",
       icon: "text-emerald-600",
-      text: "text-emerald-900",
-      progress: "bg-emerald-500",
+      btn: "bg-emerald-600 hover:bg-emerald-700",
+      light: "bg-emerald-50 text-emerald-700",
     },
     error: {
-      bg: "bg-red-50",
-      border: "border-red-200",
       icon: "text-red-600",
-      text: "text-red-900",
-      progress: "bg-red-500",
+      btn: "bg-red-600 hover:bg-red-700",
+      light: "bg-red-50 text-red-700",
     },
     info: {
-      bg: "bg-blue-50",
-      border: "border-blue-200",
       icon: "text-blue-600",
-      text: "text-blue-900",
-      progress: "bg-blue-500",
+      btn: "bg-blue-600 hover:bg-blue-700",
+      light: "bg-blue-50 text-blue-700",
     },
     warning: {
-      bg: "bg-amber-50",
-      border: "border-amber-200",
       icon: "text-amber-600",
-      text: "text-amber-900",
-      progress: "bg-amber-500",
+      btn: "bg-amber-600 hover:bg-amber-700",
+      light: "bg-amber-50 text-amber-700",
     },
   };
 
@@ -87,35 +62,68 @@ export default function ConfirmationAlert({
   const IconComponent = iconMap[type];
 
   return (
-    <div
-      className={`${config.bg} ${config.border} border rounded-lg shadow-sm overflow-hidden animate-fadeIn`}
-    >
-      <div className="flex items-start gap-4 p-4">
-        <IconComponent className={`w-5 h-5 flex-shrink-0 mt-0.5 ${config.icon}`} />
-        
-        <div className="flex-1 min-w-0">
-          {title && <p className={`font-semibold text-sm ${config.text}`}>{title}</p>}
-          {description && (
-            <p className={`text-sm mt-1 opacity-90 ${config.text}`}>{description}</p>
-          )}
-        </div>
+    <AnimatePresence>
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+        {/* Backdrop */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onCancel}
+          className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+        />
 
-        <button
-          onClick={() => {
-            setVisible(false);
-            onClose?.();
-          }}
-          className={`flex-shrink-0 p-1 rounded hover:bg-white/50 transition-colors ${config.text}`}
-          aria-label="Close alert"
+        {/* Modal */}
+        <motion.div
+          initial={{ scale: 0.95, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.95, opacity: 0, y: 20 }}
+          className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
         >
-          <X className="w-4 h-4" />
-        </button>
-      </div>
+          <div className="p-6">
+            <div className="flex items-start gap-4">
+              <div className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl ${config.light}`}>
+                <IconComponent className="h-6 w-6" />
+              </div>
+              
+              <div className="flex-1 pt-1">
+                <h3 className="text-lg font-bold text-slate-900">
+                  {title}
+                </h3>
+                {description && (
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                    {description}
+                  </p>
+                )}
+              </div>
 
-      {/* Progress bar for auto-close */}
-      {duration && (
-        <div className={`h-1 ${config.progress} transition-all`} style={{ width: `${progress}%` }} />
-      )}
-    </div>
+              <button
+                onClick={onCancel}
+                className="flex-shrink-0 rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-500 transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                onClick={onCancel}
+                className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-6 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-50 active:scale-[0.98]"
+              >
+                {cancelLabel}
+              </button>
+              {onConfirm && (
+                <button
+                  onClick={onConfirm}
+                  className={`inline-flex h-11 items-center justify-center rounded-xl px-6 text-sm font-semibold text-white shadow-lg transition-all active:scale-[0.98] ${config.btn}`}
+                >
+                  {confirmLabel}
+                </button>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </AnimatePresence>
   );
 }

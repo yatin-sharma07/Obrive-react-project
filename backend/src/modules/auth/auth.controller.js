@@ -76,6 +76,14 @@ exports.refreshToken = async (req, res, next) => {
   }
 };
 
+exports.getCurrentUser = async (req, res, next) => {
+  try {
+    successResponse(res, req.user, 'Current user fetched');
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.getAllUsers = async (req, res, next) => {
   try {
     const result = await service.getAllUsers();

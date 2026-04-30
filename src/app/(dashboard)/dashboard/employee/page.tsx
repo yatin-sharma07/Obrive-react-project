@@ -21,6 +21,8 @@ import Calender from '@/components/dashboard/Calender'
 import Vacations from '@/components/dashboard/Vacations'
 import Header from './components/Header'
 
+export const dynamic = 'force-dynamic';
+
 export default function EmployeeDashboard() {
   const {  loading, error, refetch } = useDashboardData('employee')
   const [activeSection

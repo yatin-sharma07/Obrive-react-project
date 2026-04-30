@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { getNext3Days } from "../constants/dates";
 import { apiFetch } from "@/lib/api";
+import ConfirmationAlert from "@/components/ConfirmationAlert";
 
 const COLORS = ["yellow", "blue", "red", "green", "purple", "orange"];
 
@@ -13,6 +14,10 @@ export default function AddTaskModal({ isOpen, onClose, onAdd }: any) {
   const [noteDate, setNoteDate] = useState(dates[0].id);
   const [color, setColor] = useState("yellow");
   const [openDate, setOpenDate] = useState(false);
+  const [errorAlert, setErrorAlert] = useState<{ isOpen: boolean; message: string }>({
+    isOpen: false,
+    message: "",
+  });
 
   if (!isOpen) return null;
 
@@ -34,6 +39,8 @@ export default function AddTaskModal({ isOpen, onClose, onAdd }: any) {
       });
 
       const json = await res.json();
+      if (!res.ok) throw new Error(json.message || "Failed to add task");
+
       const saved = json.data;
 
       // ✅ update UI instantly
@@ -53,9 +60,9 @@ export default function AddTaskModal({ isOpen, onClose, onAdd }: any) {
 
       // ✅ close modal
       onClose();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("Failed to add task");
+      setErrorAlert({ isOpen: true, message: err.message || "Failed to add task" });
     }
   };
 
@@ -155,6 +162,15 @@ export default function AddTaskModal({ isOpen, onClose, onAdd }: any) {
           Add Note
         </button>
       </div>
+
+      <ConfirmationAlert
+        isOpen={errorAlert.isOpen}
+        title="Error"
+        description={errorAlert.message}
+        type="error"
+        cancelLabel="Close"
+        onCancel={() => setErrorAlert({ isOpen: false, message: "" })}
+      />
     </div>
   </div>
 );

@@ -10,6 +10,15 @@ exports.getDashboard = async (req, res) => {
   }
 };
 
+exports.deleteLeave = async (req, res) => {
+  try {
+    const result = await leavesService.deleteLeave(req.params.id, req.user.id);
+    successResponse(res, result, 'Leave request deleted');
+  } catch (error) {
+    errorResponse(res, error.message, 400);
+  }
+};
+
 exports.applyLeave = async (req, res) => {
   try {
     const result = await leavesService.applyLeave(req.user.id, req.body);

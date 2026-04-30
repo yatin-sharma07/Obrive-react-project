@@ -20,7 +20,7 @@ const ProjectsSection = () => {
   const [selectedProject, setSelectedProject] = React.useState<SelectedProject | null>(null)
   const [section, setSection] = React.useState<string>("")
   const [isProjectListOpen, setIsProjectListOpen] = React.useState(false)
-  const { projects } = useDashboardData("employee")
+  const { projects, refetch } = useDashboardData("employee")
 
   const sectionLabel = section === "" ? "Details" : "Tasks"
 
@@ -150,7 +150,12 @@ const ProjectsSection = () => {
           </div>
 
           <div className="min-h-0 flex-1 overflow-hidden">
-            {section === "" && <MyProjectsDetailsSection project={selectedProject} />}
+            {section === "" && (
+              <MyProjectsDetailsSection 
+                project={selectedProject} 
+                onUpdate={() => refetch()}
+              />
+            )}
             {section === "Tasks-list" && <MyProjectTasksSection project={selectedProject} />}
             {section === "Drag-drop-tasks" && <TaskDragDrop project={selectedProject} />}
           </div>

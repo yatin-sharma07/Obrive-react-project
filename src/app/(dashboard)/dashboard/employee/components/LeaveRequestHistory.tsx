@@ -1,24 +1,28 @@
 "use client";
 
+import { Trash2 } from "lucide-react";
+
 type LeaveRequestHistoryProps = {
   requests: Array<{
     id: number;
-    leaveType: string;
-    leaveDate: string;
+    leaveType?: string;
+    leaveDate?: string;
     reason?: string | null;
-    status: string;
+    status?: string;
   }>;
+  onDelete?: (id: number) => void;
 };
 
-const formatDate = (value: string) =>
-  new Date(`${value}T00:00:00`).toLocaleDateString("en-US", {
+const formatDate = (value?: string) =>
+  value ? new Date(`${value}T00:00:00`).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
-  });
+  }) : "N/A";
 
 export default function LeaveRequestHistory({
   requests,
+  onDelete,
 }: LeaveRequestHistoryProps) {
   return (
     <div className="rounded-2xl bg-white p-5 shadow-sm">
@@ -31,7 +35,7 @@ export default function LeaveRequestHistory({
         </p>
       </div>
 
-      {requests.length === 0 ? (
+      {!requests || requests.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-6 text-sm text-gray-500">
           No leave requests yet for this month.
         </div>
@@ -43,12 +47,12 @@ export default function LeaveRequestHistory({
               className="rounded-2xl border border-gray-100 bg-[#fbfdff] p-4"
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div>
+                <div className="flex-1">
                   <p className="font-medium text-[#123c35]">
                     {formatDate(request.leaveDate)}
                   </p>
                   <p className="text-sm capitalize text-gray-500">
-                    {request.leaveType} leave
+                    {request.leaveType || 'N/A'} leave
                   </p>
                   {request.reason ? (
                     <p className="mt-2 text-sm text-gray-600">
@@ -56,9 +60,24 @@ export default function LeaveRequestHistory({
                     </p>
                   ) : null}
                 </div>
-                <span className="rounded-full bg-[#e2f5f1] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0f766e]">
-                  {request.status}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${
+                    request.status === 'approved' ? 'bg-green-100 text-green-700' :
+                    request.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                    'bg-[#e2f5f1] text-[#0f766e]'
+                  }`}>
+                    {request.status || 'pending'}
+                  </span>
+                  {onDelete && (
+                    <button
+                      onClick={() => onDelete(request.id)}
+                      className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+                      title="Delete leave request"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           ))}

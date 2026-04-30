@@ -18,4 +18,8 @@ router.get('/employees/:employeeId/projects', ctrl.getEmployeeProjects);
 // Project endpoints
 router.get('/projects', ctrl.getSupervisorProjects);
 
+// Leave endpoints
+router.get('/leaves', ctrl.getAllLeaveRequests);
+router.put('/leaves/:id/status', ctrl.updateLeaveStatus);
+
 module.exports = router;

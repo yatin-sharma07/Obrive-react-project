@@ -26,26 +26,31 @@ export default function ProfileDropdown(
 
 
   useEffect(() => {
-
     const fetchUserData = async () => {
       try {
-        const res = await apiFetch('/api/users')
+        const res = await apiFetch('/auth/me');
 
         if (res.ok) {
-          const data = await res.json()
-          setUser(data)
+          const data = await res.json();
+          if (data?.success) {
+            setUser(data.data);
+          }
         }
       } catch (error) {
-        console.error('Error fetching user data:', error)
+        console.error('Error fetching user data:', error);
       }
-    }
+    };
 
-    fetchUserData()
-  }, [])
+    fetchUserData();
+  }, []);
 
   const HandleRouting = () => {
-    router.push('/dashboard/employee/profile')
-  }
+    if (user?.id) {
+      router.push(`/profile/${user.id}`);
+    } else {
+      router.push('/dashboard/employee');
+    }
+  };
 
   return ( 
     <div className="relative">
