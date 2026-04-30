@@ -8,6 +8,7 @@ import { apiFetch } from '@/lib/api'
 import CreateProjectDialog from '../components/CreateProjectDialog'
 import ProjectCard from '../components/ProjectCard'
 import ProjectDetailsView from '../components/ProjectDetailsView'
+import ConfirmationAlert from '@/components/ConfirmationAlert'
 
 interface Project {
   id: number
@@ -26,6 +27,10 @@ const Projects = () => {
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false)
   const [isProjectListOpen, setIsProjectListOpen] = useState(false)
   const [creating, setCreating] = useState(false)
+  const [deleteAlert, setDeleteAlert] = useState<{ isOpen: boolean; projectId: number | null }>({
+    isOpen: false,
+    projectId: null,
+  })
 
   // Fetch all supervisor projects
   useEffect(() => {
@@ -38,7 +43,12 @@ const Projects = () => {
       const response = await apiFetch('/supervisor/projects', { method: 'GET' })
       const result = await response.json()
       if (result.success) {
-        setProjects(result.data || [])
+        // Transform project_assignments to team_members
+        const transformedProjects = result.data.map((project: any) => ({
+          ...project,
+          team_members: project.project_assignments?.map((pa: any) => pa.users) || []
+        }))
+        setProjects(transformedProjects || [])
       }
     } catch (error) {
       console.error('Error fetching projects:', error)
@@ -49,25 +59,32 @@ const Projects = () => {
 
   const handleCreateProject = async (formData: {
     name: string
+    project_id: string
     description?: string
     priority?: string
+    deadline?: string
+    team_members: number[]
   }) => {
     try {
       setCreating(true)
       const response = await apiFetch('/projects', {
         method: 'POST',
-        body: JSON.stringify({
-          name: formData.name,
-          description: formData.description,
-          priority: formData.priority || 'medium',
-          project_id: `PROJ-${Date.now()}`,
-        }),
+        body: JSON.stringify(formData),
       })
 
       const result = await response.json()
       if (result.success) {
-        setProjects([...projects, result.data])
+        // Transform the new project to include team_members for the UI
+        const newProject = {
+          ...result.data,
+          team_members: formData.team_members.map(id => {
+            const emp = result.data.team_members?.find((m: any) => m.id === id)
+            return emp || { id }
+          })
+        }
+        setProjects([...projects, newProject])
         setIsCreateProjectOpen(false)
+        fetchProjects() // Refetch to get full data with joined users
       }
     } catch (error) {
       console.error('Error creating project:', error)
@@ -77,7 +94,12 @@ const Projects = () => {
   }
 
   const handleDeleteProject = async (projectId: number) => {
-    if (!confirm('Are you sure you want to delete this project?')) return
+    setDeleteAlert({ isOpen: true, projectId })
+  }
+
+  const confirmDeleteProject = async () => {
+    const projectId = deleteAlert.projectId
+    if (!projectId) return
 
     try {
       const response = await apiFetch(`/projects/${projectId}`, {
@@ -93,6 +115,8 @@ const Projects = () => {
       }
     } catch (error) {
       console.error('Error deleting project:', error)
+    } finally {
+      setDeleteAlert({ isOpen: false, projectId: null })
     }
   }
 
@@ -248,6 +272,16 @@ const Projects = () => {
         onClose={() => setIsCreateProjectOpen(false)}
         onSubmit={handleCreateProject}
         creating={creating}
+      />
+
+      <ConfirmationAlert
+        isOpen={deleteAlert.isOpen}
+        title="Delete Project"
+        description="Are you sure you want to delete this project? This action cannot be undone."
+        type="error"
+        confirmLabel="Delete"
+        onConfirm={confirmDeleteProject}
+        onCancel={() => setDeleteAlert({ isOpen: false, projectId: null })}
       />
     </motion.div>
   )

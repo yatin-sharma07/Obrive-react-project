@@ -9,47 +9,50 @@ import EmployeesOnLeaveList from "../components/EmployeesOnLeaveList";
 import LeaveApplicationDialog from "../components/LeaveApplicationDialog";
 import LeaveBalanceRing from "../components/LeaveBalanceRing";
 import LeaveRequestHistory from "../components/LeaveRequestHistory";
+import ConfirmationAlert from "@/components/ConfirmationAlert";
+
+export const dynamic = 'force-dynamic';
 
 type LeaveSummary = {
-  month: {
-    startDate: string;
-    endDate: string;
+  month?: {
+    startDate?: string;
+    endDate?: string;
   };
-  selectedDate: string;
-  allowances: {
-    vacation: { total: number; used: number; remaining: number };
-    sick: { total: number; used: number; remaining: number };
+  selectedDate?: string;
+  allowances?: {
+    vacation?: { total?: number; used?: number; remaining?: number };
+    sick?: { total?: number; used?: number; remaining?: number };
   };
-  requests: Array<{
+  requests?: Array<{
     id: number;
-    leaveType: string;
-    leaveDate: string;
+    leaveType?: string;
+    leaveDate?: string;
     reason?: string | null;
-    status: string;
+    status?: string;
   }>;
-  colleaguesOnLeave: {
-    today: Array<{
+  colleaguesOnLeave?: {
+    today?: Array<{
       id: number;
-      leaveType: string;
-      status: string;
-      leaveDate: string;
-      employee: {
+      leaveType?: string;
+      status?: string;
+      leaveDate?: string;
+      employee?: {
         id: number;
-        name: string;
-        email: string;
+        name?: string;
+        email?: string;
         job_title?: string | null;
         department?: string | null;
       };
     }>;
-    tomorrow: Array<{
+    tomorrow?: Array<{
       id: number;
-      leaveType: string;
-      status: string;
-      leaveDate: string;
-      employee: {
+      leaveType?: string;
+      status?: string;
+      leaveDate?: string;
+      employee?: {
         id: number;
-        name: string;
-        email: string;
+        name?: string;
+        email?: string;
         job_title?: string | null;
         department?: string | null;
       };
@@ -59,13 +62,19 @@ type LeaveSummary = {
 
 const getCurrentMonthBounds = () => {
   const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth(), 1);
-  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const start = new Date(year, month, 1);
+  const end = new Date(year, month + 1, 0);
+
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const toLocalDateString = (d: Date) =>
+    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
   return {
-    startDate: start.toISOString().split("T")[0],
-    endDate: end.toISOString().split("T")[0],
-    today: now.toISOString().split("T")[0],
+    startDate: toLocalDateString(start),
+    endDate: toLocalDateString(new Date(year, month + 2, 0)), // Allow until the end of next month
+    today: toLocalDateString(now),
   };
 };
 
@@ -93,6 +102,18 @@ export default function Vacations() {
     reason: "",
   });
   const [selectedDate, setSelectedDate] = useState(initialDate);
+  const [alertConfig, setAlertConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    type: "success" | "error" | "info" | "warning";
+    onConfirm?: () => void;
+  }>({
+    isOpen: false,
+    title: "",
+    description: "",
+    type: "info",
+  });
 
   const fetchSummary = useCallback(async (date: string, silent = false) => {
     try {
@@ -166,15 +187,58 @@ export default function Vacations() {
         reason: "",
       });
       setDialogOpen(false);
-    } catch (submitError) {
-      setError(
-        submitError instanceof Error
-          ? submitError.message
-          : "Failed to apply for leave",
-      );
+      setAlertConfig({
+        isOpen: true,
+        title: "Success",
+        description: "Leave application submitted successfully!",
+        type: "success",
+      });
+      fetchSummary(selectedDate);
+    } catch (submitError: any) {
+      setAlertConfig({
+        isOpen: true,
+        title: "Error",
+        description: submitError.message || "Failed to apply for leave",
+        type: "error",
+      });
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleDeleteLeave = async (id: number) => {
+    setAlertConfig({
+      isOpen: true,
+      title: "Delete Leave Request",
+      description: "Are you sure you want to delete this leave request?",
+      type: "warning",
+      onConfirm: async () => {
+        try {
+          const response = await apiFetch(`/leaves/${id}`, {
+            method: "DELETE",
+          });
+          const result = await response.json();
+          if (result.success) {
+            setAlertConfig({
+              isOpen: true,
+              title: "Success",
+              description: "Leave request deleted successfully",
+              type: "success",
+            });
+            fetchSummary(selectedDate);
+          } else {
+            throw new Error(result.message || "Failed to delete leave request");
+          }
+        } catch (err: any) {
+          setAlertConfig({
+            isOpen: true,
+            title: "Error",
+            description: err.message || "An unexpected error occurred",
+            type: "error",
+          });
+        }
+      },
+    });
   };
 
   if (loading) {
@@ -220,8 +284,8 @@ export default function Vacations() {
                   <input
                     type="date"
                     value={selectedDate}
-                    min={summary.month.startDate}
-                    max={summary.month.endDate}
+                    min={summary?.month?.startDate}
+                    max={summary?.month?.endDate}
                     onChange={(event) =>
                       handleDateFilterChange(event.target.value)
                     }
@@ -258,29 +322,32 @@ export default function Vacations() {
           <div className="grid gap-4 xl:grid-cols-2">
             <LeaveBalanceRing
               label="Vacation Leaves"
-              total={summary.allowances.vacation.total}
-              used={summary.allowances.vacation.used}
-              remaining={summary.allowances.vacation.remaining}
+              total={summary?.allowances?.vacation?.total || 0}
+              used={summary?.allowances?.vacation?.used || 0}
+              remaining={summary?.allowances?.vacation?.remaining || 0}
               accentColor="#0f766e"
               trackColor="#d8f3ef"
             />
             <LeaveBalanceRing
               label="Sick Leaves"
-              total={summary.allowances.sick.total}
-              used={summary.allowances.sick.used}
-              remaining={summary.allowances.sick.remaining}
+              total={summary?.allowances?.sick?.total || 0}
+              used={summary?.allowances?.sick?.used || 0}
+              remaining={summary?.allowances?.sick?.remaining || 0}
               accentColor="#2563eb"
               trackColor="#dbeafe"
             />
           </div>
 
           <EmployeesOnLeaveList
-            selectedDate={summary.selectedDate}
-            today={summary.colleaguesOnLeave.today}
-            tomorrow={summary.colleaguesOnLeave.tomorrow}
+            selectedDate={summary?.selectedDate || ""}
+            today={summary?.colleaguesOnLeave?.today || []}
+            tomorrow={summary?.colleaguesOnLeave?.tomorrow || []}
           />
 
-          <LeaveRequestHistory requests={summary.requests} />
+          <LeaveRequestHistory 
+            requests={summary?.requests || []} 
+            onDelete={handleDeleteLeave}
+          />
         </div>
       </motion.div>
 
@@ -292,21 +359,20 @@ export default function Vacations() {
         leaveType={form.leaveType}
         leaveDate={form.leaveDate}
         reason={form.reason}
-        minDate={summary.month.startDate}
-        maxDate={summary.month.endDate}
+        minDate={bounds.startDate}
+        maxDate={bounds.endDate}
         onChange={(field, value) => {
-          setForm((current) => {
-            if (field === "leaveType") {
-              return { ...current, leaveType: value as "vacation" | "sick" };
-            }
-
-            if (field === "leaveDate") {
-              return { ...current, leaveDate: value };
-            }
-
-            return { ...current, reason: value };
-          });
+          setForm((prev) => ({ ...prev, [field]: value }));
         }}
+      />
+
+      <ConfirmationAlert
+        isOpen={alertConfig.isOpen}
+        title={alertConfig.title}
+        description={alertConfig.description}
+        type={alertConfig.type}
+        onConfirm={alertConfig.onConfirm}
+        onCancel={() => setAlertConfig((prev) => ({ ...prev, isOpen: false }))}
       />
     </>
   );

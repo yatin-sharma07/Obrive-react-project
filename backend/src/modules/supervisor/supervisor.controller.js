@@ -44,3 +44,23 @@ exports.getSupervisorProjects = async (req, res) => {
     errorResponse(res, error.message, 400);
   }
 };
+
+exports.getAllLeaveRequests = async (req, res) => {
+  try {
+    const leaves = await supervisorService.getAllLeaveRequests();
+    successResponse(res, leaves, 'Leave requests retrieved successfully');
+  } catch (error) {
+    errorResponse(res, error.message, 400);
+  }
+};
+
+exports.updateLeaveStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const leave = await supervisorService.updateLeaveStatus(parseInt(id), status);
+    successResponse(res, leave, 'Leave status updated successfully');
+  } catch (error) {
+    errorResponse(res, error.message, 400);
+  }
+};

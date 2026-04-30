@@ -20,6 +20,8 @@ import ProjectsSection from './sections/ProjectsSection'
 import Calender from '@/components/dashboard/Calender'
 import Vacations from './sections/Vacations'
 
+export const dynamic = 'force-dynamic';
+
 export default function EmployeeDashboard() {
   const {  loading, error, refetch } = useDashboardData('employee')
   const [activeSection

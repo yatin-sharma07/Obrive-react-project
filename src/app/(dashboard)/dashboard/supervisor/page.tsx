@@ -4,7 +4,8 @@ import {
   LayoutDashboard,
   FolderOpen,
   List,
-  Menu
+  Menu,
+  Calendar
 } from 'lucide-react'
 import { useState } from 'react'
 import Sidebar from '@/components/dashboard/Sidebar'
@@ -12,6 +13,9 @@ import Dashboard from './sections/Dashboard'
 import SkeletonLoading from '@/components/SkelitonLoading'
 import Projects from './sections/Projects'
 import StickyNotes from './sections/StickyNotes'
+import Leaves from './sections/Leaves'
+
+export const dynamic = 'force-dynamic'
 
 export default function SupervisorDashboard() {
   const [activeSection, setActiveSection] = useState('dashboard')
@@ -21,6 +25,7 @@ export default function SupervisorDashboard() {
   const navItems = [
     { label: 'Dashboard', icon: LayoutDashboard, key: 'dashboard' },
     { label: 'Projects', icon: FolderOpen, key: 'projects' },
+    { label: 'Leaves', icon: Calendar, key: 'leaves' },
     { label: 'Sticky Notes', icon: List, key: 'sticky-notes' },
   ]
 
@@ -58,6 +63,9 @@ export default function SupervisorDashboard() {
         )}
         {activeSection === 'projects' && (
           <Projects />
+        )}
+        {activeSection === 'leaves' && (
+          <Leaves />
         )}
         {activeSection === 'sticky-notes' && (
           <StickyNotes />

@@ -15,14 +15,32 @@ export const getNext3Days = () => {
   };
 
   const formatDate = (date: Date) =>
-    date.toISOString().split("T")[0]; // ✅ key line
+    date.toISOString().split("T")[0];
 
-  return [0, 1, 2].map((i) => {
+  return Array.from({ length: 3 }, (_, i) => {
     const d = addDays(i);
 
     return {
-      id: formatDate(d),     // 🔥 THIS is your column ID
-      label: formatLabel(d), // UI label
+      id: formatDate(d),
+      label: formatLabel(d),
     };
+  });
+};
+
+export const getNext60Days = () => {
+  const today = new Date();
+
+  const addDays = (days: number) => {
+    const d = new Date();
+    d.setDate(today.getDate() + days);
+    return d;
+  };
+
+  const formatDate = (date: Date) =>
+    date.toISOString().split("T")[0];
+
+  return Array.from({ length: 60 }, (_, i) => {
+    const d = addDays(i);
+    return formatDate(d);
   });
 };

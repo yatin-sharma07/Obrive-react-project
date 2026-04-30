@@ -1,23 +1,28 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { Check, Upload } from 'lucide-react';
 import Image from 'next/image';
 import CustomToast from '@/components/pages/resources/components/Toast';
-import { profile } from 'console';
+import { apiFetch } from '@/lib/api';
+
+export const dynamic = 'force-dynamic';
 
 export default function ProfilePage() {
   const params = useParams();
-  const userId = params.id as string; // Get [id] from URL
-  
+  const router = useRouter();
+  const userId = params.id as string;
+
   const [avatar, setAvatar] = useState<string | null>(null);
   const [isUploaded, setIsUploaded] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
-  
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -28,35 +33,26 @@ export default function ProfilePage() {
     biography: '',
   });
 
-  // ── Load Profile Data on Page Load ────────────────────────
   useEffect(() => {
     const loadProfile = async () => {
       try {
         setLoading(true);
-        console.log(`Fetching profile for: ${userId}`);
-        
-        const response = await fetch(
-          `http://localhost:5000/api/profile/${userId}`
-        );
+        const response = await apiFetch(`/profile/${userId}`);
+        const result = await response.json();
 
-        console.log('status:', response.status);
-
-        if (response.ok) {
-          const profile = await response.json();
-
-          // alert(JSON.stringify(profile));
-          
+        if (response.ok && result?.success) {
+          const profile = result.data;
           setFormData({
             fullName: profile.name || '',
             email: profile.email || '',
-            jobTitle: profile.jobTitle || '',
+            jobTitle: profile.job_title || '',
             department: profile.department || '',
-            phoneNumber: profile.phoneNumber || '',
-            joinDate: profile.joinDate ? new Date(profile.joinDate).toISOString().split('T')[0] : '',
+            phoneNumber: profile.phone_number || '',
+            joinDate: profile.join_date ? new Date(profile.join_date).toISOString().split('T')[0] : '',
             biography: profile.biography || '',
           });
         } else {
-          setToastMessage('Profile not found');
+          setToastMessage(result?.message || 'Profile not found');
           setShowToast(true);
           setTimeout(() => setShowToast(false), 3000);
         }
@@ -75,8 +71,20 @@ export default function ProfilePage() {
     }
   }, [userId]);
 
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {};
 
-// ── Avatar Handler ────────────────────────────────────────────────
+    if (!formData.fullName.trim()) newErrors.fullName = 'Full name is required';
+    if (!formData.email.trim()) newErrors.email = 'Email is required';
+    if (!formData.department.trim()) newErrors.department = 'Department is required';
+    if (!formData.jobTitle.trim()) newErrors.jobTitle = 'Job title is required';
+    if (!formData.phoneNumber.trim()) newErrors.phoneNumber = 'Phone number is required';
+    if (!formData.joinDate.trim()) newErrors.joinDate = 'Join date is required';
+    if (!formData.biography.trim()) newErrors.biography = 'Biography is required';
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -94,7 +102,6 @@ export default function ProfilePage() {
     fileInputRef.current?.click();
   };
 
-// ── Form Input Handler ────────────────────────────────────────────────
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -103,29 +110,38 @@ export default function ProfilePage() {
       ...prev,
       [name]: value,
     }));
+    // Clear error for this field when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: '',
+      }));
+    }
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-// ── Save Profile ────────────────────────────────────────────────
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+    if (!validateForm()) {
+      return;
+    }
 
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/profile`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData),
-        }
-      );
+      setSaving(true);
+      const response = await apiFetch(`/profile/${userId}`, {
+        method: 'PUT',
+        body: JSON.stringify(formData),
+      });
+      const result = await response.json();
 
-      if (response.ok) {
+      if (response.ok && result?.success) {
         setToastMessage('Profile saved successfully!');
         setShowToast(true);
-        setTimeout(() => setShowToast(false), 3000);
+        setTimeout(() => {
+          router.push('/dashboard/employee');
+        }, 1500);
       } else {
-        setToastMessage('Error saving profile');
+        setToastMessage(result?.message || 'Error saving profile');
         setShowToast(true);
         setTimeout(() => setShowToast(false), 3000);
       }
@@ -134,12 +150,14 @@ const handleSubmit = async (e: React.FormEvent) => {
       setToastMessage('Connection error');
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
+    } finally {
+      setSaving(false);
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8 flex items-center justify-center">
+      <div className="min-h-screen w-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
         <div className="text-center">
           <p className="text-slate-600">Loading profile...</p>
         </div>
@@ -147,18 +165,15 @@ const handleSubmit = async (e: React.FormEvent) => {
     );
   }
 
-
-// if 
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8">
-      <div className="mx-auto max-w-5xl">
+    <div className="min-h-screen w-screen bg-gradient-to-br from-slate-50 to-slate-100 overflow-auto">
+      <div className="mx-auto max-w-5xl p-8">
         <div className="mb-12">
-          <h1 className="text-2xl font-bold text-slate-900">Professional Dossier</h1>
+          <h1 className="text-3xl font-bold text-slate-900">Complete Your Profile</h1>
+          <p className="text-slate-600 mt-2">Please fill in all required fields to continue</p>
         </div>
 
         <div className="w-full grid grid-cols-1 gap-12 lg:grid-cols-3">
-          {/* Left Column */}
           <div className="space-y-8">
             <div className="rounded-2xl bg-white p-8 shadow-sm">
               <div className="mb-6 flex flex-col items-center">
@@ -212,13 +227,12 @@ const handleSubmit = async (e: React.FormEvent) => {
               </div>
 
               <p className="mb-6 text-center text-xs text-slate-500">
-                Recommended min. dimension<br/>
-                410 or PNG max 2MB.
+                Recommended min. dimension 410px or PNG max 2MB.
               </p>
 
               <div className="mb-6">
                 <label className="block text-xs font-semibold uppercase text-slate-600 mb-3">
-                  Full Name
+                  Full Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -226,35 +240,39 @@ const handleSubmit = async (e: React.FormEvent) => {
                   value={formData.fullName}
                   onChange={handleInputChange}
                   placeholder="Full Name"
-                  required
-                  className="text-xs w-full rounded-lg bg-slate-100 px-4 py-3 text-slate-700 placeholder-slate-400 transition-colors focus:bg-slate-200 focus:outline-none"
+                  className={`text-xs w-full rounded-lg bg-slate-100 px-4 py-3 text-slate-700 placeholder-slate-400 transition-colors focus:bg-slate-200 focus:outline-none ${
+                    errors.fullName ? 'border-2 border-red-500' : ''
+                  }`}
                 />
+                {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>}
               </div>
 
               <div>
                 <label className="block text-xs font-semibold uppercase text-slate-600 mb-3">
-                  Email Address
+                  Email Address <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  placeholder="email"
-                  className="text-xs w-full rounded-lg bg-slate-100 px-4 py-3 text-slate-700 placeholder-slate-400 transition-colors focus:bg-slate-200 focus:outline-none"
+                  placeholder="email@example.com"
+                  className={`text-xs w-full rounded-lg bg-slate-100 px-4 py-3 text-slate-700 placeholder-slate-400 transition-colors focus:bg-slate-200 focus:outline-none ${
+                    errors.email ? 'border-2 border-red-500' : ''
+                  }`}
                 />
+                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
               </div>
             </div>
           </div>
 
-          {/* Right Column */}
           <div className="lg:col-span-2">
             <div className="rounded-2xl h-full bg-white p-8 shadow-sm">
               <div className="space-y-6">
                 <div className="grid gap-6 md:grid-cols-2">
                   <div>
                     <label className="block text-xs font-semibold uppercase text-slate-600 mb-3">
-                      Job Title
+                      Job Title <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -262,12 +280,15 @@ const handleSubmit = async (e: React.FormEvent) => {
                       value={formData.jobTitle}
                       onChange={handleInputChange}
                       placeholder="Senior Strategy Lead"
-                      className="text-xs w-full rounded-lg bg-slate-100 px-4 py-3 text-slate-700 placeholder-slate-400 transition-colors focus:bg-slate-200 focus:outline-none"
+                      className={`text-xs w-full rounded-lg bg-slate-100 px-4 py-3 text-slate-700 placeholder-slate-400 transition-colors focus:bg-slate-200 focus:outline-none ${
+                        errors.jobTitle ? 'border-2 border-red-500' : ''
+                      }`}
                     />
+                    {errors.jobTitle && <p className="text-red-500 text-xs mt-1">{errors.jobTitle}</p>}
                   </div>
                   <div>
                     <label className="block text-xs font-semibold uppercase text-slate-600 mb-3">
-                      Department
+                      Department <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -275,15 +296,18 @@ const handleSubmit = async (e: React.FormEvent) => {
                       value={formData.department}
                       onChange={handleInputChange}
                       placeholder="Product Design"
-                      className="text-xs w-full rounded-lg bg-slate-100 px-4 py-3 text-slate-700 placeholder-slate-400 transition-colors focus:bg-slate-200 focus:outline-none"
+                      className={`text-xs w-full rounded-lg bg-slate-100 px-4 py-3 text-slate-700 placeholder-slate-400 transition-colors focus:bg-slate-200 focus:outline-none ${
+                        errors.department ? 'border-2 border-red-500' : ''
+                      }`}
                     />
+                    {errors.department && <p className="text-red-500 text-xs mt-1">{errors.department}</p>}
                   </div>
                 </div>
 
                 <div className="grid gap-6 md:grid-cols-2">
                   <div>
                     <label className="block text-xs font-semibold uppercase text-slate-600 mb-3">
-                      Phone Number
+                      Phone Number <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="tel"
@@ -291,48 +315,55 @@ const handleSubmit = async (e: React.FormEvent) => {
                       value={formData.phoneNumber}
                       onChange={handleInputChange}
                       placeholder="+91 (555) 000-0000"
-                      className="text-xs w-full rounded-lg bg-slate-100 px-4 py-3 text-slate-700 placeholder-slate-400 transition-colors focus:bg-slate-200 focus:outline-none"
+                      className={`text-xs w-full rounded-lg bg-slate-100 px-4 py-3 text-slate-700 placeholder-slate-400 transition-colors focus:bg-slate-200 focus:outline-none ${
+                        errors.phoneNumber ? 'border-2 border-red-500' : ''
+                      }`}
                     />
+                    {errors.phoneNumber && <p className="text-red-500 text-xs mt-1">{errors.phoneNumber}</p>}
                   </div>
                   <div>
                     <label className="block text-xs font-semibold uppercase text-slate-600 mb-3">
-                      Join Date
+                      Join Date <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="date"
                       name="joinDate"
                       value={formData.joinDate}
                       onChange={handleInputChange}
-                      className="text-xs w-full rounded-lg bg-slate-100 px-4 py-3 text-slate-700 placeholder-slate-400 transition-colors focus:bg-slate-200 focus:outline-none"
+                      className={`text-xs w-full rounded-lg bg-slate-100 px-4 py-3 text-slate-700 placeholder-slate-400 transition-colors focus:bg-slate-200 focus:outline-none ${
+                        errors.joinDate ? 'border-2 border-red-500' : ''
+                      }`}
                     />
+                    {errors.joinDate && <p className="text-red-500 text-xs mt-1">{errors.joinDate}</p>}
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold uppercase text-slate-600 mb-3">
-                    Biography & Focus
+                    Biography & Focus <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     name="biography"
                     value={formData.biography}
                     onChange={handleInputChange}
-                    placeholder="Briefly describe the expertise and professional trajectory..."
+                    placeholder="Briefly describe your expertise and professional trajectory..."
                     rows={6}
-                    className="text-xs w-full rounded-lg bg-slate-100 px-4 py-3 text-slate-700 placeholder-slate-400 transition-colors focus:bg-slate-200 focus:outline-none resize-none"
+                    className={`text-xs w-full rounded-lg bg-slate-100 px-4 py-3 text-slate-700 placeholder-slate-400 transition-colors focus:bg-slate-200 focus:outline-none resize-none ${
+                      errors.biography ? 'border-2 border-red-500' : ''
+                    }`}
                   />
+                  {errors.biography && <p className="text-red-500 text-xs mt-1">{errors.biography}</p>}
                 </div>
               </div>
 
               <div className="mt-8 flex gap-4">
                 <button
                   onClick={handleSubmit}
-                  className="w-50 rounded-lg bg-blue-600 px-6 py-2 text-sm font-semibold text-white transition-all hover:bg-blue-700 active:scale-95"
+                  disabled={saving}
+                  className="rounded-lg bg-blue-600 px-8 py-3 text-sm font-semibold text-white transition-all hover:bg-blue-700 active:scale-95 disabled:opacity-50"
                 >
-                  Save Profile
+                  {saving ? 'Saving...' : 'Complete Profile'}
                 </button>
-                {/* <button className="flex-1 rounded-lg border-2 border-slate-200 px-6 py-2 text-sm font-semibold text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50">
-                  Cancel
-                </button> */}
               </div>
             </div>
           </div>

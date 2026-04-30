@@ -61,7 +61,7 @@ export default function LeaveApplicationDialog({
         </div>
 
         <p className="mb-5 text-center text-sm text-gray-600">
-          Pick your leave type, choose a day from this month, and send your
+          Pick your leave type, choose a day, and send your
           leave request.
         </p>
 

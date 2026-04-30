@@ -109,6 +109,7 @@ app.use('/api/tasks',     require('./src/modules/tasks/tasks.routes'));
 app.use('/api/events',    require('./src/modules/events/events.routes'));
 app.use('/api/sticky-notes', require('./src/modules/sticky-notes/sticky-notes.routes'));
 app.use('/api/leaves', require('./src/modules/leaves/leaves.routes'));
+app.use('/api/profile', require('./src/modules/profile/profile.routes'));
 // Timer routes
 app.use('/api/work-sessions', require('./src/modules/work-sessions/work-sessions.routes'));
 // ── Error handler ─────────────────────────────────────────────

@@ -6,10 +6,10 @@ const validate = require('../../middleware/validate');
 const ctrl = require('./leaves.controller');
 
 router.use(authenticate);
-router.use(authorize('employee', 'EMPLOYEE'));
 
 router.get(
   '/dashboard',
+  authorize('employee', 'supervisor', 'hr'),
   [
     query('date')
       .optional()
@@ -22,6 +22,7 @@ router.get(
 
 router.post(
   '/apply',
+  authorize('employee'),
   [
     body('leaveType')
       .isIn(['vacation', 'sick'])
@@ -36,6 +37,12 @@ router.post(
   ],
   validate,
   ctrl.applyLeave
+);
+
+router.delete(
+  '/:id',
+  authorize('employee', 'supervisor', 'hr'),
+  ctrl.deleteLeave
 );
 
 module.exports = router;
