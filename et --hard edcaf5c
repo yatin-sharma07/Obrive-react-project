@@ -1,0 +1,249 @@
+[33mcommit f712fa295d7aa514ef0895709f4f4db9fb3a6b06[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mbackend[m[33m)[m
+Author: shivansh <shivansh@obrive.com>
+Date:   Thu Apr 30 22:37:24 2026 +0530
+
+    Initialisation
+
+[33mcommit edcaf5c1c1320d67b2bb932fb74f0619346a848c[m[33m ([m[1;31morigin/frontend/dashboard[m[33m)[m
+Author: shivansh <shivansh@obrive.com>
+Date:   Thu Apr 30 19:49:56 2026 +0530
+
+    files managed
+
+[33mcommit 01170a5e6dc0291e50d7c5b008badc083f2053a7[m
+Author: shivansh <shivansh@obrive.com>
+Date:   Thu Apr 30 18:59:44 2026 +0530
+
+    backend for calander, full stack for events,ui corrections and resolved conflicts
+
+[33mcommit 0ad90fe1c4b8f84a59243fe5d33f1e8ee8d2ea56[m
+Merge: d3f10fa 6811957
+Author: shivansh <shivansh@obrive.com>
+Date:   Thu Apr 30 17:53:44 2026 +0530
+
+    backend for calander, full stack for events,ui corrections and resolved conflicts
+
+[33mcommit d3f10fadbc9c1c07a6bc61ba662c394596be5dac[m
+Merge: bb7240b e478957
+Author: shivansh <shivansh@obrive.com>
+Date:   Thu Apr 30 14:29:05 2026 +0530
+
+    backend for calander, full stack for events,ui corrections and resolved conflicts
+
+[33mcommit 6811957821e6bc2de3ca7e2aac4913089c90ca44[m
+Author: Obrive <obrive.inc@gmail.com>
+Date:   Thu Apr 30 14:14:22 2026 +0530
+
+    supervisor dashboard added
+
+[33mcommit bb7240bf85fdd12cd09be9090f931135ed30b546[m[33m ([m[1;32mmain[m[33m)[m
+Author: shivansh <shivansh@obrive.com>
+Date:   Thu Apr 30 11:23:01 2026 +0530
+
+    backend for calander, full stack for events,ui corrections
+
+[33mcommit e47895710b0cc155d6bcf0f062ae9f06eb1e1e50[m
+Author: Obrive <obrive.inc@gmail.com>
+Date:   Wed Apr 29 18:22:47 2026 +0530
+
+    supervisor dashboard and backend added with login and other functionality
+
+[33mcommit 100641cebf5dd9849d4b6e32bfb647111a90ceb9[m
+Author: Obrive <obrive.inc@gmail.com>
+Date:   Tue Apr 28 18:27:59 2026 +0530
+
+    employee dashboard almost complete
+
+[33mcommit 1d8d043bb8b74a49053be3bcdf2fe1d884bbff2e[m
+Merge: 82d1e61 b93d3cc
+Author: Obrive <obrive.inc@gmail.com>
+Date:   Mon Apr 27 18:16:05 2026 +0530
+
+    Merge branch 'frontend/dashboard' of https://github.com/yatin-sharma07/Obrive-react-project into frontend/dashboard
+
+[33mcommit 82d1e61b115c578d21a482c0375041d79aaddcb8[m
+Author: Obrive <obrive.inc@gmail.com>
+Date:   Mon Apr 27 18:15:29 2026 +0530
+
+    my work before merge
+
+[33mcommit b93d3cc7cd39fbc2ee70d9f33d8a902909e1261f[m
+Author: shivansh <shivansh@obrive.com>
+Date:   Mon Apr 27 09:08:50 2026 +0530
+
+    Calander in dashboard is added
+
+[33mcommit 430ea52ecc7660a59dbb929a7e238af5edbce984[m
+Author: Obrive <obrive.inc@gmail.com>
+Date:   Sat Apr 25 20:20:49 2026 +0530
+
+    projects page done
+
+[33mcommit 14adac70f953fb818787b05c6f889254d619bc67[m
+Merge: 09addd5 5ba3929
+Author: Obrive <obrive.inc@gmail.com>
+Date:   Sat Apr 25 18:16:13 2026 +0530
+
+    Merge branch 'frontend/dashboard' of https://github.com/yatin-sharma07/Obrive-react-project into frontend/dashboard
+
+[33mcommit 09addd5d8af0f5e086cc396d673c65e663983d6d[m
+Author: Obrive <obrive.inc@gmail.com>
+Date:   Sat Apr 25 18:15:46 2026 +0530
+
+    my changes
+
+[33mcommit 5ba39292b8d8669096220babea6ed0376299cda1[m
+Author: shivansh <shivansh@obrive.com>
+Date:   Sat Apr 25 14:13:31 2026 +0530
+
+    timer and backend for project detils
+
+[33mcommit 49df9f3994004645d3282ed32098e5a632ccd33a[m
+Merge: 2223229 c103115
+Author: shivansh <shivansh@obrive.com>
+Date:   Wed Apr 22 01:01:24 2026 +0530
+
+    Merge remote-tracking branch 'origin/main' into backend
+
+[33mcommit 222322903ab6ba0c82ea1ab583a63c52ba9b3c8b[m
+Author: shivansh <shivansh@obrive.com>
+Date:   Tue Apr 21 23:40:29 2026 +0530
+
+    backend for sticky notes and ui improvements
+
+[33mcommit c1031150fb3c23325936b1d69188b07ab0f133d8[m
+Author: Obrive <obrive.inc@gmail.com>
+Date:   Tue Apr 21 22:39:58 2026 +0530
+
+    frontend changes and additions
+
+[33mcommit 206e7b5d422bce21ade06e9476c0cf739c5c667e[m
+Author: Obrive <obrive.inc@gmail.com>
+Date:   Sun Apr 19 16:06:03 2026 +0530
+
+     sections added with changed folder structure on dashboard
+
+[33mcommit f4b359a732c05bd0e9d8eede550e1a6a0ee6e7d9[m[33m ([m[1;31morigin/backend/dashboard[m[33m)[m
+Author: sidobrive <sidobrive@users.noreply.github.com>
+Date:   Sat Apr 18 18:09:53 2026 +0530
+
+    feat: add complete events module with CRUD operations and nearest events API
+
+[33mcommit aa797807f3ff1ad3be76f9031c799dded50166b1[m
+Author: sidobrive <sidobrive@users.noreply.github.com>
+Date:   Sat Apr 18 15:33:21 2026 +0530
+
+    configured projects dashboard for emp
+
+[33mcommit 3d3f8a9db18e377acb954e88b659ca5792e94f41[m
+Author: sidobrive <sidobrive@users.noreply.github.com>
+Date:   Sat Apr 18 15:18:20 2026 +0530
+
+    feat: add complete backend modules (projects, tasks, events)
+
+[33mcommit 65c945103931426dafc95d961bd17fccb2c7ccf8[m
+Author: sidobrive <sidobrive@users.noreply.github.com>
+Date:   Sat Apr 18 12:58:34 2026 +0530
+
+    feat: add projects API with HR view all projects and fix BigInt serialization
+
+[33mcommit 08a914eb6e89e0fd3152129ccf56dfd08e747803[m
+Author: sidobrive <sidobrive@users.noreply.github.com>
+Date:   Sat Apr 18 11:24:43 2026 +0530
+
+    fix: fix getAllUsers function in auth.service.js - replace db with prisma
+
+[33mcommit f3932ea4c2f2bfe86e23c2bd59699b2e7e875994[m
+Merge: 5c80178 3e3c3bf
+Author: Obrive <obrive.inc@gmail.com>
+Date:   Sat Apr 18 11:09:29 2026 +0530
+
+    Merge branch 'frontend/dashboard' of https://github.com/yatin-sharma07/Obrive-react-project into frontend/dashboard
+
+[33mcommit 5c8017839133a6d3155c59f573f8f1115b626559[m
+Author: Obrive <obrive.inc@gmail.com>
+Date:   Sat Apr 18 11:09:11 2026 +0530
+
+    changes
+
+[33mcommit 3e3c3bf5f1c92d821900085da4169ed026b16966[m
+Author: sidobrive <sidobrive@users.noreply.github.com>
+Date:   Fri Apr 17 21:24:23 2026 +0530
+
+    added testing scripts
+
+[33mcommit fc0c69fac691e1c0a9aae303f93f8d4169589601[m
+Author: sidobrive <sidobrive@users.noreply.github.com>
+Date:   Fri Apr 17 21:18:20 2026 +0530
+
+    feat: add projects, tasks tables with task numbers and deadlines
+
+[33mcommit bbe2fff9dd18aca1b42d9c245112e7db124b353d[m
+Author: sidobrive <sidobrive@users.noreply.github.com>
+Date:   Fri Apr 17 19:37:02 2026 +0530
+
+    feat: add role-based redirection for HR and Employee dashboards
+
+[33mcommit 6a8dabbd11ab53d3690ac1996e60340c48e5a749[m
+Author: sidobrive <sidobrive@users.noreply.github.com>
+Date:   Fri Apr 17 19:00:15 2026 +0530
+
+    configured cors for hr dashboard login
+
+[33mcommit ef73550bd2975bed1a80f31e302453fb74ae2bc2[m
+Author: shivansh <shivansh@obrive.com>
+Date:   Fri Apr 17 15:23:53 2026 +0530
+
+    Users Dashboards frontend complete and re designed
+
+[33mcommit abdb81a89920e4e308fc7142acc93cebde3e5bf9[m
+Author: shivansh <shivansh@obrive.com>
+Date:   Fri Apr 17 15:17:36 2026 +0530
+
+    Users Dashboards frontend complete and re designed
+
+[33mcommit d8f4bd0897320b6ac69f248e8f815c4f90bc1edd[m
+Merge: 791f3ef e77ce7b
+Author: shivansh <shivansh@obrive.com>
+Date:   Fri Apr 17 12:49:48 2026 +0530
+
+    Merge remote-tracking branch 'origin/main' into backend
+
+[33mcommit 791f3efe0aa87f187096c226adbd0f2bc849ced0[m
+Author: shivansh <shivansh@obrive.com>
+Date:   Thu Apr 16 16:16:41 2026 +0530
+
+    Save progress on backend before merging main
+
+[33mcommit 33bf248b5de1119470cc54defdec716add4c8455[m
+Author: shivansh <shivansh@obrive.com>
+Date:   Thu Apr 16 14:06:25 2026 +0530
+
+    improvements and corrections
+
+[33mcommit 70be5ce726a3996f404841d3f5f72367e8cb1e4f[m
+Author: shivansh <shivansh@obrive.com>
+Date:   Thu Apr 16 12:46:37 2026 +0530
+
+    prisma conflict resolved
+
+[33mcommit b1e521853f7db625f29fd0c6347256212fbff498[m
+Author: shivansh <shivansh@obrive.com>
+Date:   Wed Apr 15 22:36:17 2026 +0530
+
+    added : profile frontend and backend and updated prisma
+
+[33mcommit 201e2e426af0395b7e19fef33a5d67ec10e29869[m
+Author: shivansh <shivansh@obrive.com>
+Date:   Wed Apr 15 22:33:26 2026 +0530
+
+    Resolve merge conflict in schema.prisma
+
+[33mcommit e77ce7b0024070857575d1b8d62b2f6be6da6b1c[m
+Merge: c27d51d 897fe40
+Author: yatin-sharma07 <Yatin@obrive.com>
+Date:   Wed Apr 15 10:11:48 2026 +0530
+
+    Merge pull request #6 from yatin-sharma07/frontend/login
+    
+   
