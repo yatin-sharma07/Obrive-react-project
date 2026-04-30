@@ -98,10 +98,6 @@ export default function EmployeeDashboard() {
     {activeSection==='calender'&&(
       <Calender/>
     )}
-    {activeSection==='Vacations'&&(
-      <Vacations/>
-    )}
-  
     {activeSection ==='events'&&(
      <NearestEventsSection setActiveSection={setActiveSection}/>
     )}
