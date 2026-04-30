@@ -14,8 +14,8 @@ interface EventItem {
   borderColor: string
 }
 
-export default function NearestEventsSection() {
-  const { events, loading } = useDashboardData('employee')
+export default function NearestEventsSection({setActiveSection}:{setActiveSection:(key:string)=>void}) {
+  const { events = [], loading } = useDashboardData('employee')
 
   if (loading) {
     return <SkeletonLoading />
@@ -31,19 +31,29 @@ export default function NearestEventsSection() {
     return null
   }
 
+  const getBorderColor = (borderColor: string) =>
+    borderColor === 'bg-blue-500' ? '#3b82f6' : '#a855f7'
+
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-[#073933]">
+      <div className='mb-6'>
+        <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-xl font-bold text-[#073933] sm:text-2xl">
           Nearest Events
         </h2>
 
-        <button className="bg-[#073933] text-white px-4 py-2 rounded-xl flex items-center gap-2 shadow hover:bg-[#0a4a42] transition">
+        <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#073933] px-4 py-2 text-white shadow transition hover:bg-[#0a4a42] sm:w-auto">
           <span className="text-lg">+</span>
           Add Event
         </button>
+      </div>
+      <div>
+        <h1>
+          Stay Updated About The Nearest Events
+        </h1>
+      </div>
       </div>
 
       {/* Grid */}
@@ -51,47 +61,60 @@ export default function NearestEventsSection() {
         {(events ?? []).map((event: EventItem, i: number) => (
           <motion.div
             key={event.id}
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 18, scale: 0.98 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-            className="bg-white rounded-2xl p-4 flex items-center justify-between shadow-sm hover:shadow-md transition"
+            whileHover={{ y: -6, scale: 1.01 }}
+            transition={{ delay: i * 0.06, duration: 0.28 }}
+            className="group relative overflow-hidden rounded-[26px] border bg-white p-5 shadow-[0_18px_40px_rgba(15,23,42,0.08)]"
+            style={{
+              borderColor: `${getBorderColor(event.borderColor)}25`,
+              borderLeftWidth: '6px',
+              borderLeftColor: getBorderColor(event.borderColor),
+            }}
           >
-            
-            {/* Left */}
-            <div className="flex items-start gap-3">
-              
-              {/* Colored line */}
-              <div
-                className="w-1 h-full rounded-full"
-                style={{ borderLeftColor: event.borderColor === 'bg-blue-500' ? '#3b82f6' : '#a855f7' }}
-              />
+            <div
+              className="absolute inset-x-0 top-0 h-24 opacity-60 transition-opacity duration-300 group-hover:opacity-90"
+              style={{
+                background: `linear-gradient(135deg, ${getBorderColor(event.borderColor)}18 0%, transparent 70%)`,
+              }}
+            />
 
-              {/* Text */}
-              <div>
-                <p className="text-sm font-semibold text-gray-900">
-                  {event.title}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">
-                  {event.time}
-                </p>
+            <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex min-w-0 items-start gap-3">
+                <div
+                  className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]"
+                  style={{
+                    backgroundColor: `${getBorderColor(event.borderColor)}16`,
+                    color: getBorderColor(event.borderColor),
+                  }}
+                >
+                  <Clock className="h-5 w-5" />
+                </div>
+
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-gray-900 sm:text-base">
+                    {event.title}
+                  </p>
+                  <p className="mt-1 text-xs text-gray-500 sm:text-sm">
+                    {event.time}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 sm:flex-col sm:items-end">
+                <div className="flex items-center gap-2 rounded-full bg-[#f5f8fc] px-3 py-1.5 text-xs font-medium text-gray-600">
+                  {getPriorityIcon(event.priority)}
+                  <span className="capitalize">{event.priority}</span>
+                </div>
+
+                {event.duration && (
+                  <div className="flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600">
+                    <Clock className="h-3.5 w-3.5 text-gray-500" />
+                    <span>{event.duration}</span>
+                  </div>
+                )}
               </div>
             </div>
-
-            {/* Right */}
-            <div className="flex items-center gap-3">
-              
-              {getPriorityIcon(event.priority)}
-
-              {event.duration && (
-                <div className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-lg">
-                  <Clock className="w-3 h-3 text-gray-500" />
-                  <span className="text-xs text-gray-600 font-medium">
-                    {event.duration}
-                  </span>
-                </div>
-              )}
-            </div>
-
           </motion.div>
         ))}
       </div>

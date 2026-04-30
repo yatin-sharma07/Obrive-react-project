@@ -1,4 +1,4 @@
-export type UserRole = 'hr' | 'employee' | 'admin' | 'client'
+export type UserRole = 'hr' | 'employee' | 'admin' | 'client' | 'supervisor'
 
 export interface DashboardConfig {
   showWorkload: boolean
@@ -36,6 +36,13 @@ export const dashboardConfigs: Record<UserRole, DashboardConfig> = {
     showProjects: true,
     showNearestEvents: false,
     showActivityStream: false,
+    showProfileNotifications: true,
+  },
+  supervisor: {
+    showWorkload: true,
+    showProjects: true,
+    showNearestEvents: true,
+    showActivityStream: true,
     showProfileNotifications: true,
   },
 }

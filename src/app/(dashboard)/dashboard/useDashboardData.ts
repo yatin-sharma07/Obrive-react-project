@@ -3,6 +3,34 @@ import type { UserRole } from '@/constants/dashboardConfig'
 import type { ProjectItem } from '@/components/dashboard/ProjectCard'
 import { apiFetch } from '@/lib/api'
 
+const formatDateLabel = (value?: string | null) => {
+  if (!value) return undefined
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return undefined
+
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
+}
+
+const normalizeProgress = (value: unknown) => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return Math.max(0, Math.min(100, value))
+  }
+
+  if (typeof value === 'string') {
+    const parsed = Number(value)
+    if (Number.isFinite(parsed)) {
+      return Math.max(0, Math.min(100, parsed))
+    }
+  }
+
+  return undefined
+}
+
 interface DashboardData {
   workloadMembers?: any[]
   projects?: ProjectItem[]
@@ -25,13 +53,24 @@ export function useDashboardData(userRole: UserRole) {
       setLoading(true)
       setError(null)
 
-      console.log('Fetching projects for role:', userRole)
+      console.log('Fetching data for role:', userRole)
 
       // Use apiFetch which handles BASE_URL and credentials (cookies)
-      const [projectsRes, eventsRes] = await Promise.all([
-        apiFetch('/projects/user/projects', { method: 'GET' }),
-        apiFetch('/events/nearest', { method: 'GET' })
-      ])
+      let projectsRes, eventsRes
+      
+      if (userRole === 'supervisor') {
+        // For supervisor, fetch all projects and events
+        [projectsRes, eventsRes] = await Promise.all([
+          apiFetch('/projects', { method: 'GET' }),
+          apiFetch('/events/nearest', { method: 'GET' })
+        ])
+      } else {
+        // For employee, fetch user's projects
+        [projectsRes, eventsRes] = await Promise.all([
+          apiFetch('/projects/user/projects', { method: 'GET' }),
+          apiFetch('/events/nearest', { method: 'GET' })
+        ])
+      }
       
       if (!projectsRes.ok) {
         if (projectsRes.status === 401) {
@@ -62,9 +101,16 @@ export function useDashboardData(userRole: UserRole) {
             assignees: p.team_members?.map((member: any) => ({
               id: String(member.id),
               name: member.name,
-              avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${member.name}`
+              avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${member.name}`,
+              role: member.role,
             })) || [],
             extraAssigneesCount: Math.max(0, (p.team_members?.length || 0) - 2),
+            description: p.description,
+            status: p.status,
+            progress: normalizeProgress(p.progress),
+            completedTasks: p.tasks ? p.tasks.filter((t: any) => t.status === 'completed').length : p.completedTasks || 0,
+            startDate: formatDateLabel(p.start_date ?? p.startDate ?? p.created_at),
+            endDate: formatDateLabel(p.end_date ?? p.endDate ?? p.deadline),
             tasks: p.tasks || [] // Include tasks in the project item
           })) as any
 

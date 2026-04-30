@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, User } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { apiFetch } from '@/lib/api'
@@ -9,6 +9,8 @@ import UserPfp from '@/assets/images/employee/photo.png'
 import { Calendar } from 'lucide-react'
 import { Bell } from 'lucide-react'
 import { Timer } from './Timer'
+import {useRouter} from "next/navigation"
+
 
 export default function ProfileDropdown( 
   notificationCount = 3,    
@@ -19,6 +21,9 @@ export default function ProfileDropdown(
   , ) {
   const [user, setUser] = useState<any>(null)
   const [isOpen, setIsOpen] = useState(false)
+  const router = useRouter()
+
+
 
   useEffect(() => {
 
@@ -37,6 +42,10 @@ export default function ProfileDropdown(
 
     fetchUserData()
   }, [])
+
+  const HandleRouting = () => {
+    router.push('/dashboard/employee/profile')
+  }
 
   return ( 
     <div className="relative">
@@ -93,7 +102,17 @@ export default function ProfileDropdown(
             
             <div className="space-y-2 text-sm text-gray-700">
 
-              <Timer />
+              <div className="space-y-2 text-sm text-gray-700">
+                <Timer />
+              </div>
+              <div className="flex gap-1 items-center justify-center rounded-sm bg-blue-600 hover:bg-blue-800 text-white h-6"
+              onClick={HandleRouting}>
+                <button >
+                  Profile
+                </button>
+                 <User className='h-4 w-4'/>
+              </div>
+
 
             </div>
 

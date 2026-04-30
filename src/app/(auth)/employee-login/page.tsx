@@ -21,7 +21,7 @@ const[showToast, setShowToast] = React.useState(false);
 
 
 
-const fetchUserData =async()=>{
+const fetchUserData =async(userData: any)=>{
   try{
     const res = await apiFetch("/auth/users");
     if(res.ok){
@@ -32,17 +32,13 @@ const fetchUserData =async()=>{
       router.push("/CreateProfile");
     }, 1500);
        
-      }else{
-         setTimeout(() => {
-         router.push("/dashboard/employee");
-    }, 1500);
-
       }
     }
   }catch(err){
     console.error("Error fetching user data:",err);
   }
 }
+
 const handleLogin = async () => {
   try {
     setLoading(true);
@@ -61,28 +57,41 @@ const handleLogin = async () => {
     if (!res.ok) {
       throw new Error(data.message || "Login failed");
     }
-    fetchUserData();
     
     if (data?.data?.user) {
       localStorage.setItem('user', JSON.stringify(data.data.user));
+      
+      // Determine redirect path based on user role
+      const role = data.data.user?.role || 'employee';
+      let redirectPath = '/dashboard/employee';
+      
+      if (role === 'supervisor') {
+        redirectPath = '/dashboard/supervisor';
+      } else if (role === 'hr') {
+        redirectPath = '/dashboard/hr';
+      } else if (role === 'admin') {
+        redirectPath = '/dashboard/admin';
+      }
+      
+      // Check for profile updates (optional)
+      fetchUserData(data.data.user);
+      
+      // Route based on role
+      setTimeout(() => {
+        router.push(redirectPath);
+      }, 1500);
     }
+    
     if (data?.data?.accessToken) {
       localStorage.setItem('token', data.data.accessToken);
     }
 
     setShowToast(true);
 
-  
-
-
-
-
-
   } catch (err: any) {
     setError(err.message);
   } finally {
     setLoading(false);
-      
   }
 };
 

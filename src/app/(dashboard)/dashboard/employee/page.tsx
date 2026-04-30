@@ -5,7 +5,8 @@ import {
   FolderOpen,
   Calendar,
   Palmtree,
-  List
+  List,
+  Menu
 } from 'lucide-react'
 import supportImg from "@/assets/images/employee/illustration.png"
 import { useDashboardData } from '../useDashboardData'
@@ -25,6 +26,7 @@ export default function EmployeeDashboard() {
   const [activeSection
     , setActiveSection] = useState('dashboard')  
   const[supportOpen,setSupportOpen]=useState(false)
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
 
   const navItems=[
     {label:'Dashboard', icon:LayoutDashboard, key:'dashboard'},
@@ -68,6 +70,8 @@ export default function EmployeeDashboard() {
             activeSection={activeSection}
             setActiveSection={setActiveSection}
             setSupportOpen={setSupportOpen}
+            mobileOpen={isMobileSidebarOpen}
+            onMobileClose={() => setIsMobileSidebarOpen(false)}
           />
 
 
@@ -92,9 +96,12 @@ export default function EmployeeDashboard() {
     {activeSection==='calender'&&(
       <Calender/>
     )}
+    {activeSection==='Vacations'&&(
+      <Vacations/>
+    )}
   
     {activeSection ==='events'&&(
-     <NearestEventsSection/>
+     <NearestEventsSection setActiveSection={setActiveSection}/>
     )}
     {activeSection ==='tasks'&&(
      <Notes/>
@@ -105,10 +112,10 @@ export default function EmployeeDashboard() {
 
     </div>
    {supportOpen && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-3 backdrop-blur-sm">
     
     {/* Modal */}
-    <div className="relative w-[420px] bg-white rounded-2xl p-6 shadow-xl">
+    <div className="relative w-full max-w-[420px] bg-white rounded-2xl p-6 shadow-xl">
 
       {/* Close Button */}
       <button

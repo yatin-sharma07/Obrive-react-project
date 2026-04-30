@@ -8,6 +8,30 @@ import Header from "./Header";
 
 type ProjectCardVariant = "dashboard" | "projects";
 
+const formatDateLabel = (value?: string | null) => {
+  if (!value) return undefined;
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return undefined;
+
+  return date.toLocaleDateString();
+};
+
+const normalizeProgress = (value: unknown) => {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return Math.max(0, Math.min(100, value));
+  }
+
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) {
+      return Math.max(0, Math.min(100, parsed));
+    }
+  }
+
+  return undefined;
+};
+
 // COMMENTED OUT DUMMY DATA - Now using API endpoint: http://localhost:5000/api/projects/user/projects
 // const DUMMY_PROJECTS: ProjectItem[] = [
 //   {
@@ -75,10 +99,10 @@ export default function Projects({
   onViewAll,
   variant,
   onSelectProject,
+  setActiveSection
 }: ProjectsProps) {
   const [myProjects, setMyProjects] = useState<ProjectItem[]>([]);
 
-  // 🔥 Fetch projects from backend API
   useEffect(() => {
     if (variant !== "projects") return;
 
@@ -91,19 +115,30 @@ export default function Projects({
 
           const mapped = json.data.map((p: any) => ({
             id: p.id.toString(),
-            code: p.code || `PROJ-${p.id}`,
+            code: p.code || p.project_id || `PROJ-${p.id}`,
             name: p.name,
             description: p.description,
             priority: p.priority,
             createdAtLabel: new Date(p.created_at).toLocaleDateString(),
-            allTasks: p.allTasks || 0,
-            activeTasks: p.activeTasks || 0,
+            allTasks: Array.isArray(p.tasks) ? p.tasks.length : p.allTasks || 0,
+            activeTasks: Array.isArray(p.tasks)
+              ? p.tasks.filter((task: any) => task.status !== "completed").length
+              : p.activeTasks || 0,
             assignees: p.team_members?.map((member: any) => ({
               id: member.id.toString(),
               name: member.name,
               avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${member.name}`,
+              role: member.role,
             })) || [],
             extraAssigneesCount: Math.max(0, (p.team_members?.length || 0) - 2),
+            status: p.status,
+            progress: normalizeProgress(p.progress),
+            completedTasks: Array.isArray(p.tasks)
+              ? p.tasks.filter((task: any) => task.status === "completed").length
+              : p.completedTasks || 0,
+            startDate: formatDateLabel(p.start_date ?? p.startDate ?? p.created_at),
+            endDate: formatDateLabel(p.end_date ?? p.endDate ?? p.deadline),
+            tasks: Array.isArray(p.tasks) ? p.tasks : [],
           }));
 
           setMyProjects(mapped);
@@ -133,7 +168,7 @@ export default function Projects({
 
           <button
             type="button"
-            onClick={onViewAll}
+            onClick={()=>setActiveSection("projects")}
             className="text-sm font-semibold text-teal-700 hover:text-teal-800 inline-flex items-center gap-1"
           >
             View all <ChevronRight className="w-4 h-4" />

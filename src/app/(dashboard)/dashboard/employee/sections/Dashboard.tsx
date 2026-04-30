@@ -3,9 +3,9 @@ import React from 'react'
 import { useDashboardData } from '../../useDashboardData'
 import Projects from '../components/Projects'
 import ProfileNotifications from '../components/ProfileNotifications'
-import NearestEvents from '../components/NearestEvents'
 import SkeletonLoading from '@/components/SkelitonLoading'
 import { motion } from 'framer-motion'
+import NearestEvents from '../components/NearestEvents'
 
 const Dashboard = ({ setActiveSection }: {
   setActiveSection: (key: string) => void
