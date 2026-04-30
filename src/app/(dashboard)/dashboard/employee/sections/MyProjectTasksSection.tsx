@@ -152,8 +152,8 @@ const MyProjectTasksSection = ({ project }: Props) => {
   }
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-col rounded-2xl bg-[#f5f9ff] p-6 shadow-sm">
-      <div className="mb-5 border-b border-gray-100 pb-4 flex justify-between">
+    <div className="flex h-full min-h-0 w-full flex-col rounded-2xl bg-[#f5f9ff] p-4 shadow-sm sm:p-6">
+      <div className="mb-5 flex justify-between border-b border-gray-100 pb-4">
        
         <h2 className="mt-1 text-xl font-bold text-[#1a472a] group-hover:text-2xl transition-all">
           {project.name}
@@ -175,9 +175,9 @@ const MyProjectTasksSection = ({ project }: Props) => {
               return (
                 <div
                   key={task.id}
-                  className="group rounded-2xl bg-white px-5 py-4 transition-all duration-200"
+                  className="group rounded-2xl bg-white px-4 py-4 transition-all duration-200 sm:px-5"
                 >
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 items-center">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5 items-start lg:items-center">
                     
                     <div>
                       <p className="text-[10px] text-gray-400">Task</p>

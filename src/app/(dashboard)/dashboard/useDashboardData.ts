@@ -53,13 +53,24 @@ export function useDashboardData(userRole: UserRole) {
       setLoading(true)
       setError(null)
 
-      console.log('Fetching projects for role:', userRole)
+      console.log('Fetching data for role:', userRole)
 
       // Use apiFetch which handles BASE_URL and credentials (cookies)
-      const [projectsRes, eventsRes] = await Promise.all([
-        apiFetch('/projects/user/projects', { method: 'GET' }),
-        apiFetch('/events/nearest', { method: 'GET' })
-      ])
+      let projectsRes, eventsRes
+      
+      if (userRole === 'supervisor') {
+        // For supervisor, fetch all projects and events
+        [projectsRes, eventsRes] = await Promise.all([
+          apiFetch('/projects', { method: 'GET' }),
+          apiFetch('/events/nearest', { method: 'GET' })
+        ])
+      } else {
+        // For employee, fetch user's projects
+        [projectsRes, eventsRes] = await Promise.all([
+          apiFetch('/projects/user/projects', { method: 'GET' }),
+          apiFetch('/events/nearest', { method: 'GET' })
+        ])
+      }
       
       if (!projectsRes.ok) {
         if (projectsRes.status === 401) {

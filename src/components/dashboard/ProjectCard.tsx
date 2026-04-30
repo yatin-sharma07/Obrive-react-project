@@ -159,7 +159,7 @@ export default function ProjectCard({
     return (
       <div
         onClick={() => onSelectProject?.(project)}
-        className="rounded-xl p-4 flex flex-col justify-between cursor-pointer transition-all
+        className="rounded-xl p-3 sm:p-4 flex flex-col justify-between cursor-pointer transition-all
                    bg-white border border-transparent
                    hover:border-r-4 hover:border-r-teal-600 hover:bg-[#eef4f8]"
       >

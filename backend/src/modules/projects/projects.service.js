@@ -105,6 +105,9 @@ class ProjectService {
         p.name,
         p.description,
         p.priority,
+        p.deadline,
+        p.progress,
+        p.leader_id,
         p.created_at,
         (SELECT COUNT(*) FROM tasks t WHERE t.project_id = p.id) as total_tasks,
         (SELECT COUNT(*) FROM tasks t WHERE t.project_id = p.id AND t.status = 'completed') as completed_tasks,
@@ -113,7 +116,15 @@ class ProjectService {
       ORDER BY p.created_at DESC
     `;
     
-    return result;
+    return result.map(p => ({
+      ...p,
+      id: Number(p.id),
+      leader_id: p.leader_id ? Number(p.leader_id) : null,
+      progress: p.progress ? Number(p.progress) : 0,
+      total_tasks: Number(p.total_tasks),
+      completed_tasks: Number(p.completed_tasks),
+      assignees_count: Number(p.assignees_count)
+    }));
   }
   
   async getEmployeeProjects(employeeId) {
@@ -124,6 +135,9 @@ class ProjectService {
         p.name,
         p.description,
         p.priority,
+        p.deadline,
+        p.progress,
+        p.leader_id,
         p.created_at,
         (SELECT COUNT(*) FROM tasks t WHERE t.project_id = p.id) as total_tasks,
         (SELECT COUNT(*) FROM tasks t WHERE t.project_id = p.id AND t.status = 'completed') as completed_tasks,
@@ -134,14 +148,23 @@ class ProjectService {
       ORDER BY p.created_at DESC
     `;
     
-    return result;
+    return result.map(p => ({
+      ...p,
+      id: Number(p.id),
+      leader_id: p.leader_id ? Number(p.leader_id) : null,
+      progress: p.progress ? Number(p.progress) : 0,
+      total_tasks: Number(p.total_tasks),
+      completed_tasks: Number(p.completed_tasks),
+      assignees_count: Number(p.assignees_count)
+    }));
   }
   
   async getProjectById(projectId) {
     const project = await prisma.$queryRaw`
-      SELECT p.*, u.name as created_by_name
+      SELECT p.*, u.name as created_by_name, l.name as leader_name
       FROM projects p
       LEFT JOIN users u ON u.id = p.created_by
+      LEFT JOIN users l ON l.id = p.leader_id
       WHERE p.id = ${projectId}
       LIMIT 1
     `;
@@ -151,7 +174,14 @@ class ProjectService {
       FROM tasks t
       LEFT JOIN users u ON u.id = t.assigned_to
       WHERE t.project_id = ${projectId}
-      ORDER BY t.task_number
+      ORDER BY t.created_at DESC
+    `;
+
+    const teamMembers = await prisma.$queryRaw`
+      SELECT u.id, u.name, u.email, u.job_title, u.department
+      FROM project_assignments pa
+      JOIN users u ON pa.employee_id = u.id
+      WHERE pa.project_id = ${projectId}
     `;
     
     // Convert BigInt in tasks as well
@@ -161,11 +191,133 @@ class ProjectService {
       project_id: Number(task.project_id),
       assigned_to: task.assigned_to ? Number(task.assigned_to) : null
     }));
+
+    const convertedTeamMembers = teamMembers.map(member => ({
+      ...member,
+      id: Number(member.id)
+    }));
     
     return { 
-      project: project[0] ? { ...project[0], id: Number(project[0].id) } : null, 
-      tasks: convertedTasks 
+      project: project[0] ? { 
+        ...project[0], 
+        id: Number(project[0].id),
+        leader_id: project[0].leader_id ? Number(project[0].leader_id) : null,
+        progress: project[0].progress ? Number(project[0].progress) : 0
+      } : null, 
+      tasks: convertedTasks,
+      team_members: convertedTeamMembers
     };
+  }
+
+  async assignEmployeeToProject(projectId, employeeId) {
+    try {
+      const assignment = await prisma.project_assignments.create({
+        data: {
+          project_id: projectId,
+          employee_id: employeeId,
+        },
+      });
+      return assignment;
+    } catch (error) {
+      if (error.code === 'P2002') {
+        throw new Error('Employee is already assigned to this project');
+      }
+      throw error;
+    }
+  }
+
+  async removeEmployeeFromProject(projectId, employeeId) {
+    const result = await prisma.project_assignments.deleteMany({
+      where: {
+        project_id: projectId,
+        employee_id: employeeId,
+      },
+    });
+    if (result.count === 0) {
+      throw new Error('Employee is not assigned to this project');
+    }
+  }
+
+  async createProject(data) {
+    const { name, description, priority, project_id, team_members, deadline } = data;
+    
+    return await prisma.$transaction(async (tx) => {
+      // 1. Create the project
+      const project = await tx.projects.create({
+        data: {
+          name,
+          description,
+          priority: priority || 'medium',
+          project_id: project_id || `PROJ-${Date.now()}`,
+          deadline: deadline ? new Date(deadline) : null,
+          progress: 0,
+        },
+      });
+
+      // 2. Assign team members if any
+      if (team_members && Array.isArray(team_members) && team_members.length > 0) {
+        const assignments = team_members.map(employeeId => ({
+          project_id: project.id,
+          employee_id: Number(employeeId),
+        }));
+
+        await tx.project_assignments.createMany({
+          data: assignments,
+          skipDuplicates: true,
+        });
+      }
+
+      return project;
+    });
+  }
+
+  async updateProjectProgress(projectId, progress, userId) {
+    const project = await prisma.projects.findUnique({
+      where: { id: parseInt(projectId) },
+      include: {
+        project_assignments: true
+      }
+    });
+
+    if (!project) throw new Error('Project not found');
+
+    // Check if user is leader or supervisor
+    const user = await prisma.users.findUnique({ where: { id: userId } });
+    const isLeader = project.leader_id === userId;
+    const isSupervisor = user.role === 'supervisor' || user.role === 'hr';
+
+    if (!isLeader && !isSupervisor) {
+      throw new Error('Only the project leader or supervisor can update progress');
+    }
+
+    return await prisma.projects.update({
+      where: { id: parseInt(projectId) },
+      data: { progress: parseInt(progress) }
+    });
+  }
+
+  async assignProjectLeader(projectId, leaderId, userId) {
+    const user = await prisma.users.findUnique({ where: { id: userId } });
+    if (user.role !== 'supervisor' && user.role !== 'hr') {
+      throw new Error('Only supervisors can assign project leaders');
+    }
+
+    // Verify leader is assigned to project
+    const assignment = await prisma.project_assignments.findFirst({
+      where: {
+        project_id: parseInt(projectId),
+        employee_id: parseInt(leaderId)
+      }
+    });
+
+    if (!assignment) {
+      throw new Error('Leader must be assigned to the project first');
+    }
+
+    return await prisma.projects.update({
+      where: { id: parseInt(projectId) },
+      data: { leader_id: parseInt(leaderId) }
+    });
   }
 }
 

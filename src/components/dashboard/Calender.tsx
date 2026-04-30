@@ -1,11 +1,13 @@
 'use client'
+import { useEffect } from 'react';
+import { apiFetch } from '@/lib/api'; // Or use your relative path
 
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import { useState } from 'react'
-import ProfileNotifications from '@app/(dashboard)/dashboard/employee/components/ProfileNotifications'
+// import ProfileNotifications from '@app/(dashboard)/dashboard/employee/components/ProfileNotifications'
 
 export default function Calendar() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -14,29 +16,45 @@ export default function Calendar() {
   const [newEventDuration, setNewEventDuration] = useState('1h')
   const [newEventTrend, setNewEventTrend] = useState('up')
 
-  const [events, setEvents] = useState([
-    {
-      id: '1',
-      title: "Anna's Birthday",
-      start: '2026-04-09',
-      allDay: true,
-      extendedProps: { duration: '3h', trend: 'down', color: '#c084fc' } // purple
-    },
-    {
-      id: '2',
-      title: 'Presentation of the new...',
-      start: '2026-04-17',
-      allDay: true,
-      extendedProps: { duration: '2h', trend: 'up', color: '#60a5fa' } // blue
-    },
-    {
-      id: '3',
-      title: "Ray's Birthday",
-      start: '2026-04-29',
-      allDay: true,
-      extendedProps: { duration: '3h', trend: 'down', color: '#c084fc' } // purple
+  // 1. Keep your state but start with an empty array
+  const [events, setEvents] = useState<any[]>([])
+
+  // 2. Create a function to fetch tasks from the backend
+  const fetchCalendarTasks = async () => {
+    try {
+      // Calls your new backend route
+      const response = await apiFetch('/calendar/tasks');
+      const result = await response.json();
+
+      if (result.success && result.data) {
+        // 3. Map your Postgres 'tasks' to FullCalendar 'Event' format
+        const formattedEvents = result.data.map((task: any) => ({
+          id: String(task.id),
+          title: task.title,
+          start: task.deadline, // Use the deadline field from your database
+          allDay: true, // You can configure this based on your database times
+          extendedProps: { 
+            duration: '1h', // Default fallback
+            trend: task.status === 'completed' ? 'up' : 'down', 
+            color: task.status === 'completed' ? '#60a5fa' : '#c084fc' 
+          }
+        }));
+        
+        setEvents(formattedEvents);
+      }
+    } catch (error) {
+      console.error("Failed to load calendar tasks:", error);
     }
-  ])
+  };
+
+  // 4. Fetch the events when the component loads
+  useEffect(() => {
+    fetchCalendarTasks();
+  }, []);
+
+    useEffect(() => {
+    fetchCalendarTasks();
+  }, []);
 
   const openAddEventModal = (dateStr?: string) => {
     setSelectedDate(dateStr || new Date().toISOString().split('T')[0])
@@ -49,33 +67,58 @@ export default function Calendar() {
     openAddEventModal(arg.dateStr)
   }
 
-  const handleSaveEvent = () => {
-    if (newEventTitle.trim()) {
-      setEvents([
-        ...events,
-        {
-          id: String(events.length + 1),
+
+    const handleSaveEvent = async () => {
+    if (!newEventTitle.trim()) return
+    
+    try {
+      const response = await apiFetch('/calendar/tasks', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: newEventTitle,
+          deadline: selectedDate,
+          status: 'pending'
+        })
+      })
+      
+      const result = await response.json()
+      if (result.success) {
+        setEvents([...events, {
+          id: String(result.data.id),
           title: newEventTitle,
           start: selectedDate,
           allDay: true,
-          extendedProps: { 
-            duration: newEventDuration, 
-            trend: newEventTrend, 
-            color: newEventTrend === 'up' ? '#60a5fa' : '#c084fc' 
-          }
-        }
-      ])
-      setIsModalOpen(false)
+          extendedProps: { status: 'pending', color: '#c084fc' }
+        }])
+        setIsModalOpen(false)
+      }
+    } catch (error) {
+      console.error("Failed to create task:", error)
     }
   }
 
   // DRAG & DROP
-  const handleEventDrop = (info: any) => {
-    setEvents(events.map(e =>
-      e.id === info.event.id
-        ? { ...e, start: info.event.startStr, end: info.event.endStr }
-        : e
-    ))
+  const handleEventDrop = async (info) => {
+    try {
+      const response = await apiFetch(`/calendar/tasks/${info.event.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          deadline: info.event.startStr
+        })
+      })
+      
+      const result = await response.json()
+      if (result.success) {
+        // Update local state
+        setEvents(events.map(e =>
+          e.id === info.event.id
+            ? { ...e, start: info.event.startStr }
+            : e
+        ))
+      }
+    } catch (error) {
+      console.error("Failed to update task:", error)
+    }
   }
 
   const renderEventContent = (eventInfo: any) => {
@@ -101,7 +144,7 @@ export default function Calendar() {
   }
 
   return (
-    <div className="flex-1 flex flex-col gap-4 h-full relative background-#F4F9FD;
+    <div className="relative flex h-full min-h-0 flex-1 flex-col gap-4 p-3 sm:p-4
 ">
       
       <style>{`
@@ -180,17 +223,17 @@ export default function Calendar() {
       
       <div className=' '>
 
-          <div className="flex justify-end mb-2">
+          {/* <div className="flex justify-end mb-2">
               <ProfileNotifications/>
-          </div>
+          </div> */}
 
-          <div className="flex items-center justify-between mb-2">
+          <div className="mb-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
-               <h1 className="text-3xl font-bold text-[#0f172a] ml-1">Calendar</h1> 
+               <h1 className="ml-1 text-2xl font-bold text-[#0f172a] sm:text-3xl">Calendar</h1> 
 
                 <button 
                   onClick={() => openAddEventModal()}
-                  className="bg-[#3b82f6] hover:bg-[#2563eb] text-white px-4 py-2 rounded-lg flex items-center gap-2 font-medium transition-colors shadow-sm text-sm"
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#3b82f6] px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#2563eb] sm:w-auto"
                 >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
                     Add Event
@@ -200,7 +243,7 @@ export default function Calendar() {
 
       </div>
 
-      <div className="flex-1 w-full bg-white rounded-xl shadow-sm overflow-hidden h-full p-2">
+      <div className="h-[70vh] min-h-[520px] w-full flex-1 overflow-hidden rounded-xl bg-white p-2 shadow-sm md:h-full">
         <FullCalendar
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="dayGridMonth"
@@ -223,7 +266,7 @@ export default function Calendar() {
       {/* Add Event Modal */}
       {isModalOpen && (
         <div className="text-sm fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h2 className="text-xl font-bold text-gray-800">Add New Event</h2>
               <button 
@@ -247,7 +290,7 @@ export default function Calendar() {
                 />
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
                   <input 
@@ -275,7 +318,7 @@ export default function Calendar() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Trend / Priority</label>
-                <div className="flex gap-4">
+                <div className="flex flex-col gap-4 sm:flex-row">
                   <label className="flex items-center gap-2 cursor-pointer p-3 border border-gray-200 rounded-lg flex-1 hover:bg-gray-50 transition-colors">
                     <input 
                       type="radio" 

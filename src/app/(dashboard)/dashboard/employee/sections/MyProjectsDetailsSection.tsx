@@ -3,7 +3,8 @@
 import React from 'react'
 import { motion, type Variants } from 'framer-motion'
 import { ProjectItem } from '@/components/dashboard/ProjectCard'
-import { AlertCircle, Calendar, CheckCircle, Users } from 'lucide-react'
+import { AlertCircle, Calendar, CheckCircle, Users, Crown } from 'lucide-react'
+import { apiFetch } from '@/lib/api'
 
 const formatStatus = (status?: string) => {
   if (!status) return 'Planning'
@@ -28,13 +29,41 @@ const getStatusColor = (status: string) => {
   }
 }
 
-const MyProjectsDetailsSection = ({ project }: { project: ProjectItem | null }) => {
+const MyProjectsDetailsSection = ({ project, onUpdate }: { project: ProjectItem | null; onUpdate?: () => void }) => {
+  const [updatingProgress, setUpdatingProgress] = React.useState(false)
+  const [currentUser, setCurrentUser] = React.useState<any>(null)
+
+  React.useEffect(() => {
+    const userStr = localStorage.getItem('user')
+    if (userStr) {
+      setCurrentUser(JSON.parse(userStr))
+    }
+  }, [])
+
   if (!project) {
     return (
       <div className="flex h-full min-h-0 items-center justify-center rounded-2xl bg-white p-6 text-center shadow-sm">
         <p className="text-gray-400">Select a project to view details</p>
       </div>
     )
+  }
+
+  const handleUpdateProgress = async (newProgress: number) => {
+    try {
+      setUpdatingProgress(true)
+      const response = await apiFetch(`/projects/${project.id}/progress`, {
+        method: 'PUT',
+        body: JSON.stringify({ progress: newProgress }),
+      })
+      const result = await response.json()
+      if (result.success && onUpdate) {
+        onUpdate()
+      }
+    } catch (error) {
+      console.error('Error updating progress:', error)
+    } finally {
+      setUpdatingProgress(false)
+    }
   }
 
   const details = project as any
@@ -105,7 +134,7 @@ const MyProjectsDetailsSection = ({ project }: { project: ProjectItem | null }) 
           <span className="text-sm font-semibold text-gray-700">Progress</span>
           <span className="text-sm font-bold text-[#1a472a]">{progress}%</span>
         </div>
-        <div className="h-2.5 w-full rounded-full bg-gray-200">
+        <div className="h-2.5 w-full rounded-full bg-gray-200 overflow-hidden">
           <motion.div
             className="h-2.5 rounded-full bg-emerald-500 transition-all"
             initial={{ width: 0 }}
@@ -113,6 +142,21 @@ const MyProjectsDetailsSection = ({ project }: { project: ProjectItem | null }) 
             transition={{ duration: 1, delay: 0.3 }}
           />
         </div>
+        {(details.leader_id && currentUser?.id && Number(details.leader_id) === Number(currentUser.id)) && (
+          <div className="mt-4">
+            <label className="text-[10px] text-gray-400 font-medium block mb-1 uppercase tracking-wider">
+              Update Project Progress
+            </label>
+            <input 
+              type="range" 
+              min="0" 
+              max="100" 
+              value={progress}
+              onChange={(e) => handleUpdateProgress(parseInt(e.target.value))}
+              className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+            />
+          </div>
+        )}
       </motion.div>
 
       <motion.div
@@ -193,6 +237,12 @@ const MyProjectsDetailsSection = ({ project }: { project: ProjectItem | null }) 
                     <p className="text-xs text-gray-500">{member.role || 'Team member'}</p>
                   </div>
                 </div>
+                {details.leader_id === member.id && (
+                  <div className="flex items-center gap-1.5 rounded-full bg-amber-50 px-2 py-0.5 ring-1 ring-amber-100">
+                    <Crown className="h-3 w-3 text-amber-600" />
+                    <span className="text-[10px] font-bold text-amber-700 uppercase">Leader</span>
+                  </div>
+                )}
               </motion.div>
             ))
           ) : (

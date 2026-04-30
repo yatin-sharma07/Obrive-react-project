@@ -102,11 +102,18 @@ app.use('/api/clients',   require('./src/modules/clients/client.routes'));
 app.use('/api/client',    require('./src/modules/clients/client.routes')); // alias for singular client path
 app.use('/api/hr',        require('./src/modules/hr/hr.routes'));
 app.use('/api/admin',     require('./src/modules/admin/admin.routes'));
+app.use('/api/supervisor', require('./src/modules/supervisor/supervisor.routes'));
 app.use('/api/meetings',  require('./src/modules/meeting/meeting.routes'));
 app.use('/api/projects',  require('./src/modules/projects/projects.routes'));
 app.use('/api/tasks',     require('./src/modules/tasks/tasks.routes'));
 app.use('/api/events',    require('./src/modules/events/events.routes'));
 app.use('/api/sticky-notes', require('./src/modules/sticky-notes/sticky-notes.routes'));
+// Calendar routes
+app.use('/api/calendar', require('./src/modules/calendar/calendar.routes'));
+// Vacations/Leaves routes
+app.use('/api/vacations', require('./src/modules/vacations/vacations.routes'));
+app.use('/api/leaves', require('./src/modules/leaves/leaves.routes'));
+app.use('/api/profile', require('./src/modules/profile/profile.routes'));
 // Timer routes
 app.use('/api/work-sessions', require('./src/modules/work-sessions/work-sessions.routes'));
 // ── Error handler ─────────────────────────────────────────────

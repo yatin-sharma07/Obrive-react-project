@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
 import { apiFetch } from "@/lib/api";
 import { getNext3Days } from "../constants/dates";
 import Column from "./TaskColumn";
@@ -69,16 +68,14 @@ export default function Board({
           setUserId(String(fetchedUserId));
         }
       } catch (err) {
-        throw new Error("Failed to fetch user ID");
+        console.error("Failed to fetch user ID");
       }
     };
     fetchUserId();
   }, []);
 
   useEffect(() => {
-    if (mode !== "notes" || propTasks !== undefined) {
-      return;
-    }
+    if (mode !== "notes" || propTasks !== undefined) return;
 
     const fetchTasks = async () => {
       try {
@@ -102,9 +99,7 @@ export default function Board({
     fetchTasks();
   }, [mode, propTasks, setTasks]);
 
-  const handleAddCardOpen = () => {
-    setIsModalOpen(true);
-  };
+  const handleAddCardOpen = () => setIsModalOpen(true);
 
   const handleDrop = async (e: any, column: BoardColumn) => {
     e.preventDefault();
@@ -135,13 +130,10 @@ export default function Board({
       } else if (mode === "notes") {
         await apiFetch(`/sticky-notes/${draggedTask.id}`, {
           method: "PUT",
-          body: JSON.stringify({
-            note_date: nextColumnId,
-          }),
+          body: JSON.stringify({ note_date: nextColumnId }),
         });
       }
     } catch (error) {
-      console.error("Failed to update task after drop:", error);
       setTasks(previousTasks);
     } finally {
       setDraggedTask(null);
@@ -189,7 +181,7 @@ export default function Board({
         className={
           mode === "tasks"
             ? "grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-x-auto pb-2 md:grid-cols-3"
-            : "grid min-h-0 flex-1 grid-cols-1 gap-4 pb-2 md:grid-cols-3"
+            : "grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto pb-2 md:grid-cols-2 xl:grid-cols-3"
         }
       >
         {userId !== null &&
@@ -217,16 +209,21 @@ export default function Board({
         </div>
       ) : null}
 
-      {shouldShowAddTask ? (
+      {shouldShowAddTask && (
         <>
-          <FloatingButton onClick={handleAddCardOpen} label={addButtonLabel || "Add Note +"} />
+          <div className="fixed bottom-8 right-8 z-50">
+            <FloatingButton 
+              onClick={handleAddCardOpen} 
+              label={addButtonLabel || "Add Note"} 
+            />
+          </div>
           <AddTaskModal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             onAdd={handleAddTask}
           />
         </>
-      ) : null}
+      )}
     </div>
   );
 }

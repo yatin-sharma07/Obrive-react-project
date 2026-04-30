@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Search, Bell, RotateCcw } from 'lucide-react'
+import ProfileNotifications from './ProfileNotifications'
 
 interface HeaderProps {
   userName?: string
@@ -14,7 +15,8 @@ export default function Header({ userName = 'Evan', pageTitle = 'Dashboard', onR
 
 
   return (
-    <div >
+    <div className='flex-row flex justify-between p-2'>
+      <div >
       <div className="flex items-center justify-between mb-2">
         <div className="flex-1 max-w-xs">
 
@@ -35,7 +37,7 @@ export default function Header({ userName = 'Evan', pageTitle = 'Dashboard', onR
           <button
             onClick={onRefresh}
             disabled={isRefreshing}
-            className="ml-3 p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="self-start rounded-lg p-1.5 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-50 sm:self-auto"
             title="Refresh dashboard"
           >
             <RotateCcw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
@@ -46,8 +48,12 @@ export default function Header({ userName = 'Evan', pageTitle = 'Dashboard', onR
 
       <div>
         <p className="text-[12px] text-gray-500 mb-1">Welcome back, {userName}!</p>
-        <h1 className="text-xl font-bold text-gray-900">{pageTitle}</h1>
+        <h1 className="text-lg font-bold text-gray-900 sm:text-xl">{pageTitle}</h1>
       </div>
+
+      </div>
+
+      <ProfileNotifications />
     </div>
   )
 }

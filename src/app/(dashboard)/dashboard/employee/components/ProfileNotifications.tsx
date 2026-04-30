@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, User } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { apiFetch } from '@/lib/api'
@@ -9,6 +9,8 @@ import UserPfp from '@/assets/images/employee/photo.png'
 import { Calendar } from 'lucide-react'
 import { Bell } from 'lucide-react'
 import { Timer } from './Timer'
+import {useRouter} from "next/navigation"
+
 
 export default function ProfileDropdown( 
   notificationCount = 3,    
@@ -19,24 +21,36 @@ export default function ProfileDropdown(
   , ) {
   const [user, setUser] = useState<any>(null)
   const [isOpen, setIsOpen] = useState(false)
+  const router = useRouter()
+
+
 
   useEffect(() => {
-
     const fetchUserData = async () => {
       try {
-        const res = await apiFetch('/api/users')
+        const res = await apiFetch('/auth/me');
 
         if (res.ok) {
-          const data = await res.json()
-          setUser(data)
+          const data = await res.json();
+          if (data?.success) {
+            setUser(data.data);
+          }
         }
       } catch (error) {
-        console.error('Error fetching user data:', error)
+        console.error('Error fetching user data:', error);
       }
-    }
+    };
 
-    fetchUserData()
-  }, [])
+    fetchUserData();
+  }, []);
+
+  const HandleRouting = () => {
+    if (user?.id) {
+      router.push(`/profile/${user.id}`);
+    } else {
+      router.push('/dashboard/employee');
+    }
+  };
 
   return ( 
     <div className="relative">
@@ -67,7 +81,7 @@ export default function ProfileDropdown(
             className="rounded-full object-cover"
           />
           </div>
-          <span className="text-xs font-semibold text-gray-900">{user?.name || 'Karn'}</span>
+          <span className="text-xs font-semibold text-gray-900">{user?.name}</span>
           <ChevronDown className="w-3 h-3 text-gray-600" />
         </button>
       </div>
@@ -93,7 +107,17 @@ export default function ProfileDropdown(
             
             <div className="space-y-2 text-sm text-gray-700">
 
-              <Timer />
+              <div className="space-y-2 text-sm text-gray-700">
+                <Timer />
+              </div>
+              <div className="flex gap-1 items-center justify-center rounded-sm bg-blue-600 hover:bg-blue-800 text-white h-6"
+              onClick={HandleRouting}>
+                <button >
+                  Profile
+                </button>
+                 <User className='h-4 w-4'/>
+              </div>
+
 
             </div>
 

@@ -1,0 +1,229 @@
+'use client'
+
+import Image from 'next/image'
+import supportImg from '@/assets/images/employee/illustration.png'
+import { useState, useEffect } from 'react'
+import { apiFetch } from '@/lib/api'
+import { User, Check } from 'lucide-react'
+
+interface Employee {
+  id: number
+  name: string
+  email: string
+}
+
+interface CreateProjectDialogProps {
+  open: boolean
+  onClose: () => void
+  onSubmit: (data: {
+    name: string
+    project_id: string
+    description?: string
+    priority?: string
+    deadline?: string
+    team_members: number[]
+  }) => void
+  creating: boolean
+}
+
+export default function CreateProjectDialog({
+  open,
+  onClose,
+  onSubmit,
+  creating,
+}: CreateProjectDialogProps) {
+  const [name, setName] = useState('')
+  const [projectId, setProjectId] = useState('')
+  const [description, setDescription] = useState('')
+  const [priority, setPriority] = useState('medium')
+  const [deadline, setDeadline] = useState('')
+  const [employees, setEmployees] = useState<Employee[]>([])
+  const [selectedEmployees, setSelectedEmployees] = useState<number[]>([])
+
+  useEffect(() => {
+    if (open) {
+      fetchEmployees()
+      setProjectId(`PRJ-${Date.now().toString().slice(-6)}`)
+    }
+  }, [open])
+
+  const fetchEmployees = async () => {
+    try {
+      const response = await apiFetch('/supervisor/employees', { method: 'GET' })
+      const result = await response.json()
+      if (result.success) {
+        setEmployees(result.data || [])
+      }
+    } catch (error) {
+      console.error('Error fetching employees:', error)
+    }
+  }
+
+  const toggleEmployee = (id: number) => {
+    setSelectedEmployees(prev => 
+      prev.includes(id) ? prev.filter(eId => eId !== id) : [...prev, id]
+    )
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!name.trim() || !projectId.trim()) return
+
+    onSubmit({
+      name: name.trim(),
+      project_id: projectId.trim(),
+      description: description.trim() || undefined,
+      priority,
+      deadline: deadline || undefined,
+      team_members: selectedEmployees,
+    })
+
+    setName('')
+    setProjectId('')
+    setDescription('')
+    setPriority('medium')
+    setDeadline('')
+    setSelectedEmployees([])
+  }
+
+  if (!open) return null
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-3 backdrop-blur-sm overflow-y-auto">
+      <div className="relative w-full max-w-[480px] rounded-2xl bg-white p-6 shadow-xl my-8">
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-lg hover:bg-gray-200"
+        >
+          ×
+        </button>
+
+        <h2 className="mb-4 text-center text-xl font-semibold text-[#073933]">
+          Create New Project
+        </h2>
+
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="projectId" className="mb-1 block text-sm text-gray-500">
+                Project ID *
+              </label>
+              <input
+                id="projectId"
+                type="text"
+                value={projectId}
+                onChange={(e) => setProjectId(e.target.value)}
+                placeholder="PRJ-001"
+                className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#073933]"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="name" className="mb-1 block text-sm text-gray-500">
+                Project Name *
+              </label>
+              <input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter project name"
+                className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#073933]"
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label
+              htmlFor="description"
+              className="mb-1 block text-sm text-gray-500"
+            >
+              Description
+            </label>
+            <textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Enter project description"
+              className="h-20 w-full rounded-lg border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#073933] resize-none"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="priority" className="mb-1 block text-sm text-gray-500">
+                Priority
+              </label>
+              <select
+                id="priority"
+                value={priority}
+                onChange={(e) => setPriority(e.target.value)}
+                className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#073933]"
+              >
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="deadline" className="mb-1 block text-sm text-gray-500">
+                Deadline
+              </label>
+              <input
+                id="deadline"
+                type="date"
+                value={deadline}
+                onChange={(e) => setDeadline(e.target.value)}
+                className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#073933]"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm text-gray-500">
+              Assign Team Members ({selectedEmployees.length} selected)
+            </label>
+            <div className="max-h-40 overflow-y-auto rounded-lg border p-2 space-y-1">
+              {employees.length === 0 ? (
+                <p className="text-xs text-gray-400 text-center py-2">No employees available</p>
+              ) : (
+                employees.map(employee => (
+                  <div 
+                    key={employee.id}
+                    onClick={() => toggleEmployee(employee.id)}
+                    className={`flex items-center justify-between gap-2 p-2 rounded-lg cursor-pointer transition ${
+                      selectedEmployees.includes(employee.id) ? 'bg-[#eef7ff]' : 'hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center text-[10px] font-bold">
+                        {employee.name.split(' ').map(n => n[0]).join('')}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-medium truncate">{employee.name}</p>
+                        <p className="text-[10px] text-gray-500 truncate">{employee.email}</p>
+                      </div>
+                    </div>
+                    {selectedEmployees.includes(employee.id) && (
+                      <Check className="h-4 w-4 text-[#073933] flex-shrink-0" />
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={creating || !name.trim() || !projectId.trim()}
+            className="w-full rounded-xl bg-[#073933] py-3 font-medium text-white transition hover:bg-[#0a4a42] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {creating ? 'Creating...' : 'Create Project'}
+          </button>
+        </form>
+      </div>
+    </div>
+  )
+}

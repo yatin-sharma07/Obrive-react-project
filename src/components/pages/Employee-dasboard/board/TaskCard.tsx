@@ -54,20 +54,29 @@ export default function TaskCard({
 }: Props) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errorAlert, setErrorAlert] = useState<{ isOpen: boolean; message: string }>({
+    isOpen: false,
+    message: "",
+  });
 
   const handleDelete = async () => {
     try {
       setLoading(true);
 
-      await apiFetch(`/sticky-notes/${task.id}`, {
+      const res = await apiFetch(`/sticky-notes/${task.id}`, {
         method: "DELETE",
       });
 
+      if (!res.ok) {
+        const json = await res.json();
+        throw new Error(json.message || "Failed to delete note");
+      }
+
       onDelete(task.id);
       setShowConfirm(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("Failed to delete note");
+      setErrorAlert({ isOpen: true, message: err.message || "Failed to delete note" });
     } finally {
       setLoading(false);
     }
@@ -84,9 +93,9 @@ export default function TaskCard({
         className={
           mode === "tasks"
             ? "relative mb-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm"
-            : "relative aspect-square rounded-lg border-2 bg-white p-4 shadow-sm"
+            : "relative mb-3 rounded-xl border border-gray-100 border-l-4 bg-white p-4 shadow-sm"
         }
-        style={mode === "notes" ? { borderColor: noteBorderColor } : undefined}
+        style={mode === "notes" ? { borderLeftColor: noteBorderColor } : undefined}
       >
         {mode === "tasks" ? (
           <>
@@ -152,6 +161,15 @@ export default function TaskCard({
           </div>
         </div>
       ) : null}
+
+      <ConfirmationAlert
+        isOpen={errorAlert.isOpen}
+        title="Error"
+        description={errorAlert.message}
+        type="error"
+        cancelLabel="Close"
+        onCancel={() => setErrorAlert({ isOpen: false, message: "" })}
+      />
     </>
   );
 }

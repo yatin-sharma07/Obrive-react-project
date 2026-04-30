@@ -5,7 +5,8 @@ import {
   FolderOpen,
   Calendar,
   Palmtree,
-  List
+  List,
+  Menu
 } from 'lucide-react'
 import supportImg from "@/assets/images/employee/illustration.png"
 import { useDashboardData } from '../useDashboardData'
@@ -17,13 +18,17 @@ import NearestEventsSection from './sections/NearestEventsSection'
 import Notes from './sections/Notes'
 import ProjectsSection from './sections/ProjectsSection'
 import Calender from '@/components/dashboard/Calender'
-import Vacations from './sections/Vacations'
+import Vacations from '@/components/dashboard/Vacations'
+import Header from './components/Header'
+
+export const dynamic = 'force-dynamic';
 
 export default function EmployeeDashboard() {
   const {  loading, error, refetch } = useDashboardData('employee')
   const [activeSection
     , setActiveSection] = useState('dashboard')  
   const[supportOpen,setSupportOpen]=useState(false)
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
 
   const navItems=[
     {label:'Dashboard', icon:LayoutDashboard, key:'dashboard'},
@@ -61,15 +66,28 @@ export default function EmployeeDashboard() {
     <>
     
     <div className="flex rounded-2xl flex-col">
+
           <Sidebar
             navItems={navItems}
             activeSection={activeSection}
             setActiveSection={setActiveSection}
             setSupportOpen={setSupportOpen}
+            mobileOpen={isMobileSidebarOpen}
+            onMobileClose={() => setIsMobileSidebarOpen(false)}
           />
+
+
     </div>
 
+
+
     <div className="flex-1 flex flex-col gap-2 overflow-hidden">
+
+      
+      <div>
+          <Header userName="Karn" />
+      </div>      
+      
       
     {activeSection==='dashboard'&&(
       <Dashboard setActiveSection={setActiveSection}/>
@@ -80,23 +98,22 @@ export default function EmployeeDashboard() {
     {activeSection==='calender'&&(
       <Calender/>
     )}
-    {activeSection==='Vacations'&&(
-      <Vacations/>
-    )}
-  
     {activeSection ==='events'&&(
-     <NearestEventsSection/>
+     <NearestEventsSection setActiveSection={setActiveSection}/>
     )}
     {activeSection ==='tasks'&&(
      <Notes/>
     )}
+    {activeSection ==='Vacations'&&(
+     <Vacations/>
+    )}
 
     </div>
    {supportOpen && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-3 backdrop-blur-sm">
     
     {/* Modal */}
-    <div className="relative w-[420px] bg-white rounded-2xl p-6 shadow-xl">
+    <div className="relative w-full max-w-[420px] bg-white rounded-2xl p-6 shadow-xl">
 
       {/* Close Button */}
       <button

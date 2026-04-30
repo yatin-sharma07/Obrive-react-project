@@ -27,19 +27,17 @@ export default function NearestEvents({
     return <ChevronDown className="w-4 h-4 text-green-500" />
   }
 
-  console.log("NearestEvents prop:", setActiveSection)
   return (
-    
-    <div className="w-full h-full flex flex-col">
-      <div className="flex items-center justify-between mb-2 pb-2 border-b border-gray-200">
+    <div className="flex h-full w-full flex-col">
+      <div className="mb-2 flex items-center justify-between border-b border-gray-200 pb-2">
         <h3 className="text-sm font-bold text-gray-900">Nearest Events</h3>
-       
-          <button
-            onClick={() => setActiveSection('events')}
-            className="text-xs font-semibold text-teal-600 hover:text-teal-700 transition flex items-center gap-1"
-          >
-            View all
-            <svg
+
+        <button
+          onClick={() => setActiveSection('events')}
+          className="flex items-center gap-1 text-xs font-semibold text-teal-600 transition hover:text-teal-700"
+        >
+          View all
+          <svg
             className="w-3 h-3"
             fill="none"
             stroke="currentColor"
@@ -53,34 +51,44 @@ export default function NearestEvents({
             />
           </svg>
         </button>
-     
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-2 pr-1">
         {events.map((event) => (
           <div
             key={event.id}
-            className="flex items-start gap-2 p-2 bg-gray-50  border-l-3 hover:bg-gray-100 transition cursor-pointer"
-            style={{ borderLeftColor: event.borderColor === 'bg-blue-500' ? '#3b82f6' : '#a855f7' }}
+            className="cursor-pointer overflow-hidden rounded-lg border border-[#e8f0fb] bg-white shadow-sm transition hover:bg-gray-50"
+            style={{
+              borderLeftWidth: "4px",
+              borderLeftColor: event.borderColor === "bg-blue-500" ? "#3b82f6" : "#a855f7",
+            }}
           >
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-gray-900 line-clamp-2">
-                {event.title}
-              </p>
-              <p className="text-[10px] text-gray-500 mt-0.5">{event.time}</p>
-            </div>
-
-            <div className="flex items-center gap-1 flex-shrink-0">
-              <div className="flex-shrink-0">
-                {getPriorityIcon(event.priority)}
+            <div className="flex items-start gap-3 p-3">
+              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#eef7ff] text-[#1a472a]">
+                <Clock className="h-4 w-4" />
               </div>
 
-              {event.duration && (
-                <div className="flex items-center gap-0.5 text-gray-600">
-                  <Clock className="w-3 h-3" />
-                  <span className="text-[9px] font-medium">{event.duration}</span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-bold text-gray-900 line-clamp-2">
+                      {event.title}
+                    </p>
+                    <p className="mt-0.5 text-[10px] text-gray-500">{event.time}</p>
+                  </div>
+
+                  <div className="mt-0.5 flex-shrink-0">
+                    {getPriorityIcon(event.priority)}
+                  </div>
                 </div>
-              )}
+
+                {event.duration ? (
+                  <div className="mt-2 flex items-center gap-1 text-[9px] font-medium text-gray-600">
+                    <Clock className="h-3 w-3" />
+                    <span>{event.duration}</span>
+                  </div>
+                ) : null}
+              </div>
             </div>
           </div>
         ))}

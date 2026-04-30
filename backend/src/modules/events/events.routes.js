@@ -13,9 +13,9 @@ router.get('/', ctrl.getAllEvents);
 router.get('/nearest', ctrl.getNearestEvents);
 router.get('/range', ctrl.getEventsByDateRange);
 
-// HR-only routes 
-router.post('/', authorize('hr'), ctrl.createEvent);
-router.put('/:id', authorize('hr'), ctrl.updateEvent);
-router.delete('/:id', authorize('hr'), ctrl.deleteEvent);
+// HR and Supervisor routes 
+router.post('/', authorize('hr', 'supervisor'), ctrl.createEvent);
+router.put('/:id', authorize('hr', 'supervisor'), ctrl.updateEvent);
+router.delete('/:id', authorize('hr', 'supervisor'), ctrl.deleteEvent);
 
 module.exports = router;

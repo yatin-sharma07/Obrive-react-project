@@ -21,28 +21,10 @@ const[showToast, setShowToast] = React.useState(false);
 
 
 
-const fetchUserData =async()=>{
-  try{
-    const res = await apiFetch("/auth/users");
-    if(res.ok){
-      const data = await res.json()
-    
-      if(data?.updatedAt){
-            setTimeout(() => {
-      router.push("/CreateProfile");
-    }, 1500);
-       
-      }else{
-         setTimeout(() => {
-         router.push("/dashboard/employee");
-    }, 1500);
+const isProfileIncomplete = (profile: any) => {
+  return !profile?.job_title || !profile?.department || !profile?.phone_number || !profile?.join_date || !profile?.biography;
+};
 
-      }
-    }
-  }catch(err){
-    console.error("Error fetching user data:",err);
-  }
-}
 const handleLogin = async () => {
   try {
     setLoading(true);
@@ -61,28 +43,45 @@ const handleLogin = async () => {
     if (!res.ok) {
       throw new Error(data.message || "Login failed");
     }
-    fetchUserData();
-    
-    if (data?.data?.user) {
-      localStorage.setItem('user', JSON.stringify(data.data.user));
-    }
+
     if (data?.data?.accessToken) {
       localStorage.setItem('token', data.data.accessToken);
     }
 
+    if (data?.data?.user) {
+      localStorage.setItem('user', JSON.stringify(data.data.user));
+
+      const role = data.data.user?.role || 'employee';
+      let redirectPath = '/dashboard/employee';
+      if (role === 'supervisor') {
+        redirectPath = '/dashboard/supervisor';
+      } else if (role === 'hr') {
+        redirectPath = '/dashboard/hr';
+      } else if (role === 'admin') {
+        redirectPath = '/dashboard/admin';
+      }
+
+      try {
+        const profileRes = await apiFetch('/employee/me');
+        const profileJson = await profileRes.json();
+
+        if (profileRes.ok && profileJson?.success && role === 'employee') {
+          if (isProfileIncomplete(profileJson.data)) {
+            redirectPath = `/profile/${profileJson.data.id}`;
+          }
+        }
+      } catch (profileError) {
+        console.error('Failed to fetch employee profile after login:', profileError);
+      }
+
+      router.push(redirectPath);
+    }
+
     setShowToast(true);
-
-  
-
-
-
-
-
   } catch (err: any) {
-    setError(err.message);
+    setError(err.message || 'Login failed');
   } finally {
     setLoading(false);
-      
   }
 };
 
