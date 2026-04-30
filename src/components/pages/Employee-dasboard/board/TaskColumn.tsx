@@ -14,7 +14,7 @@ export default function Column({
 }: any) {
   return (
     <div
-      className="flex min-w-[280px] flex-1 flex-col rounded-2xl bg-gray-50 p-4"
+      className=" h-full w-full flex-1 rounded-2xl bg-gray-50 p-4"
       onDrop={(e) => onDrop(e, column)}
       onDragOver={(e) => e.preventDefault()}
     >

@@ -82,7 +82,7 @@ export default function TaskCard({
     <>
       <div
         {...props}
-        className="relative mb-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm"
+        className="relative mb-3 w-full rounded-xl border border-gray-100 bg-white p-4 shadow-sm"
         style={{ borderLeft: `4px solid ${borderLeftColor}` }}
       >
         {mode === "tasks" ? (

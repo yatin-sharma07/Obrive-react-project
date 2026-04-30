@@ -107,6 +107,10 @@ app.use('/api/projects',  require('./src/modules/projects/projects.routes'));
 app.use('/api/tasks',     require('./src/modules/tasks/tasks.routes'));
 app.use('/api/events',    require('./src/modules/events/events.routes'));
 app.use('/api/sticky-notes', require('./src/modules/sticky-notes/sticky-notes.routes'));
+// Calendar routes
+app.use('/api/calendar', require('./src/modules/calendar/calendar.routes'));
+// Vacations/Leaves routes
+app.use('/api/vacations', require('./src/modules/vacations/vacations.routes'));
 // Timer routes
 app.use('/api/work-sessions', require('./src/modules/work-sessions/work-sessions.routes'));
 // ── Error handler ─────────────────────────────────────────────

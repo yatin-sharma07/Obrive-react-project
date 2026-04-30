@@ -17,6 +17,8 @@ import NearestEventsSection from './sections/NearestEventsSection'
 import Notes from './sections/Notes'
 import ProjectsSection from './sections/ProjectsSection'
 import Calender from '@/components/dashboard/Calender'
+import Vacations from '@/components/dashboard/Vacations'
+import Header from './components/Header'
 
 export default function EmployeeDashboard() {
   const {  loading, error, refetch } = useDashboardData('employee')
@@ -60,15 +62,26 @@ export default function EmployeeDashboard() {
     <>
     
     <div className="flex rounded-2xl flex-col">
+
           <Sidebar
             navItems={navItems}
             activeSection={activeSection}
             setActiveSection={setActiveSection}
             setSupportOpen={setSupportOpen}
           />
+
+
     </div>
 
+
+
     <div className="flex-1 flex flex-col gap-2 overflow-hidden">
+
+      
+      <div>
+          <Header userName="Karn" />
+      </div>      
+      
       
     {activeSection==='dashboard'&&(
       <Dashboard setActiveSection={setActiveSection}/>
@@ -85,6 +98,9 @@ export default function EmployeeDashboard() {
     )}
     {activeSection ==='tasks'&&(
      <Notes/>
+    )}
+    {activeSection ==='Vacations'&&(
+     <Vacations/>
     )}
 
     </div>

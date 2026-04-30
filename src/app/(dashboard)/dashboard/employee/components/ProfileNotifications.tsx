@@ -67,7 +67,7 @@ export default function ProfileDropdown(
             className="rounded-full object-cover"
           />
           </div>
-          <span className="text-xs font-semibold text-gray-900">{user?.name || 'Karn'}</span>
+          <span className="text-xs font-semibold text-gray-900">{user?.name}</span>
           <ChevronDown className="w-3 h-3 text-gray-600" />
         </button>
       </div>

@@ -10,6 +10,7 @@ import { ProjectItem } from "@/components/dashboard/ProjectCard"
 import { AlignJustify, ArrowLeft, Columns, FolderOpen } from "lucide-react"
 import MyProjectTasksSection, { type Task } from "./MyProjectTasksSection"
 import TaskDragDrop from "./TaskDragDrop"
+import Header from "../components/Header"
 
 type SelectedProject = ProjectItem & {
   tasks?: Task[]
@@ -42,11 +43,16 @@ const ProjectsSection = () => {
 
   return (
     <motion.div
-      className="h-screen p-4"
+      className="h-screen"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7 }}
     >
+
+      <div className="h-full flex flex-col">
+      
+
+
       <div className="flex h-full gap-4 overflow-hidden">
         <div className="h-full w-64 flex-shrink-0">
           <div className="h-full overflow-y-auto rounded-2xl bg-white p-3 shadow-sm">
@@ -110,6 +116,8 @@ const ProjectsSection = () => {
           </div>
         </div>
       </div>
+
+        </div>
     </motion.div>
   )
 }

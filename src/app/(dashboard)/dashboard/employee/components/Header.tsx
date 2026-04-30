@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Search, Bell, RotateCcw } from 'lucide-react'
+import ProfileNotifications from './ProfileNotifications'
 
 interface HeaderProps {
   userName?: string
@@ -14,7 +15,8 @@ export default function Header({ userName = 'Evan', pageTitle = 'Dashboard', onR
 
 
   return (
-    <div >
+    <div className='flex-row flex justify-between p-2'>
+      <div >
       <div className="flex items-center justify-between mb-2">
         <div className="flex-1 max-w-xs">
 
@@ -48,6 +50,10 @@ export default function Header({ userName = 'Evan', pageTitle = 'Dashboard', onR
         <p className="text-[12px] text-gray-500 mb-1">Welcome back, {userName}!</p>
         <h1 className="text-xl font-bold text-gray-900">{pageTitle}</h1>
       </div>
+
+      </div>
+
+      <ProfileNotifications />
     </div>
   )
 }

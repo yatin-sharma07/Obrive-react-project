@@ -18,7 +18,7 @@ export default function NearestEventsSection() {
   const { events, loading } = useDashboardData('employee')
 
   if (loading) {
-   <SkeletonLoading/>
+    return <SkeletonLoading />
   }
 
   const getPriorityIcon = (priority: string) => {
@@ -48,7 +48,7 @@ export default function NearestEventsSection() {
 
       {/* Grid */}
       <div className="grid grid-cols-2 gap-4">
-        {events.map((event: EventItem, i: number) => (
+        {(events ?? []).map((event: EventItem, i: number) => (
           <motion.div
             key={event.id}
             initial={{ opacity: 0, y: 10 }}

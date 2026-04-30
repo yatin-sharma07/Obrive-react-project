@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ChevronRight } from "lucide-react";
 import ProjectCard, { type ProjectItem } from "@/components/dashboard/ProjectCard";
 import { apiFetch } from "@/lib/api";
+import Header from "./Header";
 
 type ProjectCardVariant = "dashboard" | "projects";
 
@@ -124,6 +125,7 @@ export default function Projects({
   if (variant === "dashboard") {
     return (
       <section className="bg-transparent">
+
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-base font-extrabold text-[#1a472a]">
             Projects
@@ -150,19 +152,26 @@ export default function Projects({
 
   if (variant === "projects") {
     return (
-      <div className="bg-transparent">
-        <div className="flex items-center justify-center mb-3 border-b-1 p-2 border-[#1a472a]">
-          <h2 className="text-base font-extrabold text-[#1a472a]">
-            Current Projects
-          </h2>
-        </div>
 
-        <div className="space-y-4">
-          {displayProjects.map((p) => (
-            <ProjectCard key={p.id} project={p} variant={variant} onSelectProject={onSelectProject} />
-          ))}
-        </div>
-      </div>
+      <div className="flex flex-col gap-6 h-full">
+
+          
+          <div className="bg-transparent">
+            <div className="flex items-center justify-center mb-3 border-b-1 p-2 border-[#1a472a]">
+              <h2 className="text-base font-extrabold text-[#1a472a]">
+                Current Projects
+              </h2>
+            </div>
+
+            <div className="space-y-4">
+              {displayProjects.map((p) => (
+                <ProjectCard key={p.id} project={p} variant={variant} onSelectProject={onSelectProject} />
+              ))}
+            </div>
+          </div>
+  </div>
+  
+
     );
   }
 
