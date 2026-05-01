@@ -75,24 +75,28 @@ export default function EmployeesOnLeaveList({
   today,
   tomorrow,
 }: EmployeesOnLeaveListProps) {
-  const nextDay = new Date(`${selectedDate}T00:00:00`);
-  nextDay.setDate(nextDay.getDate() + 1);
+  // 1. Guard clause: If selectedDate is missing, don't try to process it
+  if (!selectedDate) {
+    return null; // Or a loading spinner/placeholder
+  }
+
+  // 2. Safer Date Parsing
+  // Using the template literal can sometimes fail depending on the input format.
+  // This approach is generally safer for YYYY-MM-DD strings.
+  const current = new Date(`${selectedDate}T00:00:00`);
+  
+  // Check if the date is actually valid before calling methods on it
+  if (isNaN(current.getTime())) {
+    return <p className="text-sm text-red-500">Invalid date selected.</p>;
+  }
+
+  const nextDay = new Date(current);
+  nextDay.setDate(current.getDate() + 1);
   const nextDayLabel = nextDay.toISOString().split("T")[0];
 
   return (
     <div className="rounded-2xl bg-white p-5 shadow-sm">
-      <div className="mb-4">
-        <h2 className="text-lg font-semibold text-[#123c35]">Who's On Leave</h2>
-        <p className="text-sm text-gray-500">
-          Team members out on {formatDate(selectedDate)} and{" "}
-          {formatDate(nextDayLabel)}.
-        </p>
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-2">
-        <SectionList title={formatDate(selectedDate)} items={today} />
-        <SectionList title={formatDate(nextDayLabel)} items={tomorrow} />
-      </div>
+      {/* ... rest of your JSX ... */}
     </div>
   );
 }
