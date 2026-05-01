@@ -119,6 +119,7 @@ app.use('/api/work-sessions', require('./src/modules/work-sessions/work-sessions
 // ── Error handler ─────────────────────────────────────────────
 app.use(require('./src/middleware/errorHandler'));
 
+
 // ── Start ─────────────────────────────────────────────────────
 async function bootstrap() {
   try {
