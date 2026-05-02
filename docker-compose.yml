@@ -1,4 +1,24 @@
 services:
+  obrive-backend:
+    build:
+      context: ./backend
+      dockerfile: ../Dockerfile.backend
+    image: obrive-backend:latest
+    container_name: obrive-backend
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      CLIENT_URL: http://obrive-web:3010
+    restart: unless-stopped
+    networks:
+      - obrive-network
+    depends_on:
+      - obrive-db
+
   obrive-web:
     build:
       context: .
@@ -12,6 +32,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3010
+      NEXT_PUBLIC_API_URL: http://obrive-backend:5000/api
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3010', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
@@ -21,6 +42,24 @@ services:
       start_period: 40s
     networks:
       - obrive-network
+    depends_on:
+      - obrive-backend
+
+  obrive-db:
+    image: postgres:15-alpine
+    container_name: obrive-db
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - obrive-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
 
 networks:
   obrive-network:

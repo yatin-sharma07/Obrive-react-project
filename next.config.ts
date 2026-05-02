@@ -54,10 +54,6 @@ const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
 
-  // Disable the RSC/HMR "fetch cache" during development
-  // (prevents server components HMR from reusing stale fetch results)
-  serverComponentsHmrCache: isDev ? false : true,
-
   // Keep dev on-demand entries from being buffered for long
   onDemandEntries: isDev
     ? {
