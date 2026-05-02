@@ -128,6 +128,27 @@ model users {
   tasks_created       tasks[]               @relation("TaskCreatedBy")
   projects_led        projects[]            @relation("ProjectLeader")
   work_sessions       work_sessions[]
+  leaves              leaves[]
+  approved_leaves     leaves[]              @relation("LeaveApprovedBy")
+}
+
+model leaves {
+  id              Int       @id @default(autoincrement())
+  user_id         Int
+  leave_type      String    @db.VarChar(50)  // 'vacation', 'sick_leave', 'work_remotely'
+  start_date      DateTime  @db.Date
+  end_date        DateTime  @db.Date
+  status          String    @default("pending") @db.VarChar(20)  // 'pending', 'approved', 'rejected'
+  reason          String?
+  approved_by     Int?
+  created_at      DateTime  @default(now()) @db.Timestamp(6)
+  updated_at      DateTime  @default(now()) @db.Timestamp(6)
+  users           users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  approver        users?    @relation("LeaveApprovedBy", fields: [approved_by], references: [id], onDelete: NoAction)
+
+  @@index([user_id], map: "idx_leaves_user_id")
+  @@index([start_date], map: "idx_leaves_start_date")
+  @@index([status], map: "idx_leaves_status")
 }
 
 model work_sessions {

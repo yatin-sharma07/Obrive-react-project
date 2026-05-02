@@ -18,7 +18,8 @@ import NearestEventsSection from './sections/NearestEventsSection'
 import Notes from './sections/Notes'
 import ProjectsSection from './sections/ProjectsSection'
 import Calender from '@/components/dashboard/Calender'
-import Vacations from './sections/Vacations'
+import Vacations from '@/components/dashboard/Vacations'
+import Header from './components/Header'
 
 export const dynamic = 'force-dynamic';
 
@@ -63,7 +64,9 @@ export default function EmployeeDashboard() {
 
   return (
     <>
-    <div className="contents md:flex md:h-full md:w-auto md:flex-col md:rounded-2xl">
+    
+    <div className="flex rounded-2xl flex-col">
+
           <Sidebar
             navItems={navItems}
             activeSection={activeSection}
@@ -72,23 +75,19 @@ export default function EmployeeDashboard() {
             mobileOpen={isMobileSidebarOpen}
             onMobileClose={() => setIsMobileSidebarOpen(false)}
           />
+
+
     </div>
 
-    <div className="flex w-full flex-1 min-w-0 flex-col gap-2 overflow-hidden">
-    <div className="sticky top-2 z-30 flex items-center justify-between rounded-2xl bg-white px-4 py-3 shadow-sm md:hidden">
-      <button
-        type="button"
-        onClick={() => setIsMobileSidebarOpen(true)}
-        className="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700"
-      >
-        <Menu className="h-4 w-4" />
-        Menu
-      </button>
 
-      <span className="text-sm font-semibold text-[#1a472a] capitalize">
-        {activeSection === 'tasks' ? 'Sticky Notes' : activeSection}
-      </span>
-    </div>
+
+    <div className="flex-1 flex flex-col gap-2 overflow-hidden">
+
+      
+      <div>
+          <Header userName="Karn" />
+      </div>      
+      
       
     {activeSection==='dashboard'&&(
       <Dashboard setActiveSection={setActiveSection}/>
@@ -99,15 +98,14 @@ export default function EmployeeDashboard() {
     {activeSection==='calender'&&(
       <Calender/>
     )}
-    {activeSection==='Vacations'&&(
-      <Vacations/>
-    )}
-  
     {activeSection ==='events'&&(
      <NearestEventsSection setActiveSection={setActiveSection}/>
     )}
     {activeSection ==='tasks'&&(
      <Notes/>
+    )}
+    {activeSection ==='Vacations'&&(
+     <Vacations/>
     )}
 
     </div>

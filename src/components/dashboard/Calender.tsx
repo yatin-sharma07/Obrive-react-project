@@ -1,11 +1,13 @@
 'use client'
+import { useEffect } from 'react';
+import { apiFetch } from '@/lib/api'; // Or use your relative path
 
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import { useState } from 'react'
-import ProfileNotifications from '@app/(dashboard)/dashboard/employee/components/ProfileNotifications'
+// import ProfileNotifications from '@app/(dashboard)/dashboard/employee/components/ProfileNotifications'
 
 export default function Calendar() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -14,29 +16,45 @@ export default function Calendar() {
   const [newEventDuration, setNewEventDuration] = useState('1h')
   const [newEventTrend, setNewEventTrend] = useState('up')
 
-  const [events, setEvents] = useState([
-    {
-      id: '1',
-      title: "Anna's Birthday",
-      start: '2026-04-09',
-      allDay: true,
-      extendedProps: { duration: '3h', trend: 'down', color: '#c084fc' } // purple
-    },
-    {
-      id: '2',
-      title: 'Presentation of the new...',
-      start: '2026-04-17',
-      allDay: true,
-      extendedProps: { duration: '2h', trend: 'up', color: '#60a5fa' } // blue
-    },
-    {
-      id: '3',
-      title: "Ray's Birthday",
-      start: '2026-04-29',
-      allDay: true,
-      extendedProps: { duration: '3h', trend: 'down', color: '#c084fc' } // purple
+  // 1. Keep your state but start with an empty array
+  const [events, setEvents] = useState<any[]>([])
+
+  // 2. Create a function to fetch tasks from the backend
+  const fetchCalendarTasks = async () => {
+    try {
+      // Calls your new backend route
+      const response = await apiFetch('/calendar/tasks');
+      const result = await response.json();
+
+      if (result.success && result.data) {
+        // 3. Map your Postgres 'tasks' to FullCalendar 'Event' format
+        const formattedEvents = result.data.map((task: any) => ({
+          id: String(task.id),
+          title: task.title,
+          start: task.deadline, // Use the deadline field from your database
+          allDay: true, // You can configure this based on your database times
+          extendedProps: { 
+            duration: '1h', // Default fallback
+            trend: task.status === 'completed' ? 'up' : 'down', 
+            color: task.status === 'completed' ? '#60a5fa' : '#c084fc' 
+          }
+        }));
+        
+        setEvents(formattedEvents);
+      }
+    } catch (error) {
+      console.error("Failed to load calendar tasks:", error);
     }
-  ])
+  };
+
+  // 4. Fetch the events when the component loads
+  useEffect(() => {
+    fetchCalendarTasks();
+  }, []);
+
+    useEffect(() => {
+    fetchCalendarTasks();
+  }, []);
 
   const openAddEventModal = (dateStr?: string) => {
     setSelectedDate(dateStr || new Date().toISOString().split('T')[0])
@@ -49,33 +67,58 @@ export default function Calendar() {
     openAddEventModal(arg.dateStr)
   }
 
-  const handleSaveEvent = () => {
-    if (newEventTitle.trim()) {
-      setEvents([
-        ...events,
-        {
-          id: String(events.length + 1),
+
+    const handleSaveEvent = async () => {
+    if (!newEventTitle.trim()) return
+    
+    try {
+      const response = await apiFetch('/calendar/tasks', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: newEventTitle,
+          deadline: selectedDate,
+          status: 'pending'
+        })
+      })
+      
+      const result = await response.json()
+      if (result.success) {
+        setEvents([...events, {
+          id: String(result.data.id),
           title: newEventTitle,
           start: selectedDate,
           allDay: true,
-          extendedProps: { 
-            duration: newEventDuration, 
-            trend: newEventTrend, 
-            color: newEventTrend === 'up' ? '#60a5fa' : '#c084fc' 
-          }
-        }
-      ])
-      setIsModalOpen(false)
+          extendedProps: { status: 'pending', color: '#c084fc' }
+        }])
+        setIsModalOpen(false)
+      }
+    } catch (error) {
+      console.error("Failed to create task:", error)
     }
   }
 
   // DRAG & DROP
-  const handleEventDrop = (info: any) => {
-    setEvents(events.map(e =>
-      e.id === info.event.id
-        ? { ...e, start: info.event.startStr, end: info.event.endStr }
-        : e
-    ))
+  const handleEventDrop = async (info) => {
+    try {
+      const response = await apiFetch(`/calendar/tasks/${info.event.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          deadline: info.event.startStr
+        })
+      })
+      
+      const result = await response.json()
+      if (result.success) {
+        // Update local state
+        setEvents(events.map(e =>
+          e.id === info.event.id
+            ? { ...e, start: info.event.startStr }
+            : e
+        ))
+      }
+    } catch (error) {
+      console.error("Failed to update task:", error)
+    }
   }
 
   const renderEventContent = (eventInfo: any) => {
@@ -180,9 +223,9 @@ export default function Calendar() {
       
       <div className=' '>
 
-          <div className="mb-2 flex justify-end">
+          {/* <div className="flex justify-end mb-2">
               <ProfileNotifications/>
-          </div>
+          </div> */}
 
           <div className="mb-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 

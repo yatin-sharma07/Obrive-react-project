@@ -18,7 +18,7 @@ export default function NearestEventsSection({setActiveSection}:{setActiveSectio
   const { events = [], loading } = useDashboardData('employee')
 
   if (loading) {
-   return <SkeletonLoading/>
+    return <SkeletonLoading />
   }
 
   const getPriorityIcon = (priority: string) => {
@@ -57,8 +57,8 @@ export default function NearestEventsSection({setActiveSection}:{setActiveSectio
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        {events.map((event: EventItem, i: number) => (
+      <div className="grid grid-cols-2 gap-4">
+        {(events ?? []).map((event: EventItem, i: number) => (
           <motion.div
             key={event.id}
             initial={{ opacity: 0, y: 18, scale: 0.98 }}

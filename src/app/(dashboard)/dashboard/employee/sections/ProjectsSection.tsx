@@ -51,7 +51,7 @@ const ProjectsSection = () => {
 
   return (
     <motion.div
-      className="h-full min-h-0 p-3 sm:p-4"
+      className="h-screen"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7 }}
@@ -161,7 +161,10 @@ const ProjectsSection = () => {
           </div>
         </div>
       </div>
-    </motion.div>
+
+
+    </motion.div>       
+
   )
 }
 

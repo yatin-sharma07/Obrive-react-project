@@ -11,14 +11,21 @@ import { Bell } from 'lucide-react'
 import { Timer } from './Timer'
 import {useRouter} from "next/navigation"
 
+type ProfileDropdownProps = {
+  notificationCount?: number
+  dateRange?: {
+    start: string
+    end: string
+  }
+}
 
-export default function ProfileDropdown( 
-  notificationCount = 3,    
-       dateRange = {
+export default function ProfileDropdown({
+  notificationCount = 3,
+  dateRange = {
     start: 'Nov 16, 2020',
     end: 'Dec 16, 2020',
-  }
-  , ) {
+  },
+}: ProfileDropdownProps) {
   const [user, setUser] = useState<any>(null)
   const [isOpen, setIsOpen] = useState(false)
   const router = useRouter()
@@ -81,7 +88,7 @@ export default function ProfileDropdown(
             className="rounded-full object-cover"
           />
           </div>
-          <span className="text-xs font-semibold text-gray-900">{user?.name || 'Karn'}</span>
+          <span className="text-xs font-semibold text-gray-900">{user?.name}</span>
           <ChevronDown className="w-3 h-3 text-gray-600" />
         </button>
       </div>
