@@ -19,9 +19,6 @@ const nextConfig: NextConfig = {
 
   pageExtensions: ["ts", "tsx", "mdx"],
 
-  // Standalone output for Docker optimization
-  output: "standalone",
-
   // Target modern browsers to eliminate legacy polyfills
   experimental: {
     optimizePackageImports: ["gsap", "framer-motion", "lucide-react"],
