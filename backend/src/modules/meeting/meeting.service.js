@@ -1,4 +1,4 @@
-const { prisma } = require('../../config/db');
+const { prisma } = require('../../../prisma');
 
 exports.getMeetings = async (userId, role) => {
   if (role === 'EMPLOYEE') {

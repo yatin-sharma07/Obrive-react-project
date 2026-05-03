@@ -1,5 +1,5 @@
 // backend/src/modules/tasks/tasks.service.js
-const { prisma } = require('../../config/db');
+const { prisma } = require('../../../prisma');
 
 class TaskService {
   async createTask(projectId, taskData, creatorId) {

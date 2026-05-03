@@ -30,7 +30,7 @@ exports.updateMyProfile       = async (req, res, next) => {
 
 exports.getMyAvailability     = async (req, res, next) => {
   try {
-    const emp = await require('../../config/db').prisma.employee.findUnique({ where: { userId: req.user.id } });
+    const emp = await require('../../../prisma').prisma.employee.findUnique({ where: { userId: req.user.id } });
     successResponse(res, await service.getAvailability(emp.id, req.query.date));
   } catch (err) { next(err); }
 };
