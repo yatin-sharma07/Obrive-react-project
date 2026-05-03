@@ -19,6 +19,9 @@ const nextConfig: NextConfig = {
 
   pageExtensions: ["ts", "tsx", "mdx"],
 
+  // Standalone output for Docker optimization
+  output: "standalone",
+
   // Target modern browsers to eliminate legacy polyfills
   experimental: {
     optimizePackageImports: ["gsap", "framer-motion", "lucide-react"],
@@ -50,6 +53,10 @@ const nextConfig: NextConfig = {
 
   compress: true,
   poweredByHeader: false,
+
+  // Disable the RSC/HMR "fetch cache" during development
+  // (prevents server components HMR from reusing stale fetch results)
+  serverComponentsHmrCache: isDev ? false : true,
 
   // Keep dev on-demand entries from being buffered for long
   onDemandEntries: isDev
