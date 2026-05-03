@@ -1,5 +1,5 @@
 // backend/src/modules/auth/auth.service.js
-const { prisma } = require('../../config/db');
+const { prisma } = require('../../../prisma');
 const { comparePassword } = require('../../utils/bcrypt');
 const bcrypt = require('bcrypt');
 const {
@@ -144,6 +144,8 @@ exports.getAllUsers = async () => {
       name,
       role,
       status,
+      job_title,
+      department,
       date_of_birth,
       bio,
       phone_number,

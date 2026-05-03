@@ -2,6 +2,7 @@ import ActivityStream from '@/components/dashboard/ActivityStream'
 import React from 'react'
 import { useDashboardData } from '../../useDashboardData'
 import Projects from '../components/Projects'
+import WorkloadSection from '../components/WorkloadSection'
 import ProfileNotifications from '../components/ProfileNotifications'
 import SkeletonLoading from '@/components/SkelitonLoading'
 import { motion } from 'framer-motion'
@@ -10,7 +11,7 @@ import NearestEvents from '../components/NearestEvents'
 const Dashboard = ({ setActiveSection }: {
   setActiveSection: (key: string) => void
 }) => {
-  const { projects, events, activities, user, loading, error, refetch } = useDashboardData('employee')
+  const { projects, events, activities, workloadMembers, user, loading, error, refetch } = useDashboardData('employee')
 
   if (loading) return <SkeletonLoading />
 
@@ -29,7 +30,8 @@ const Dashboard = ({ setActiveSection }: {
         {/* LEFT SIDE: Projects Area */}
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
    
-          <div className="flex-1 overflow-y-auto p-2 scrollbar-hide">
+          <div className="flex-1 overflow-y-auto p-4 scrollbar-hide w-full">
+            <WorkloadSection members={workloadMembers} />
             <Projects projects={projects} variant="dashboard" />
           </div>
         </div>

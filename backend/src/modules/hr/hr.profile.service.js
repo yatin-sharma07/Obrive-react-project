@@ -1,5 +1,5 @@
 // backend/src/modules/hr/hr.profile.service.js
-const { prisma } = require('../../config/db');
+const { prisma } = require('../../../prisma');
 
 class HRProfileService {
   

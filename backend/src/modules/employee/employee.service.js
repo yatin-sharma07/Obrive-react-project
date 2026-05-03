@@ -1,4 +1,4 @@
-const { prisma } = require('../../config/db');
+const { prisma } = require('../../../prisma');
 
 // ── Profile ──────────────────────────────────────────────────
 exports.getMyProfile = async (userId) => {

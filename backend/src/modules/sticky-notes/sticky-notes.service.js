@@ -1,4 +1,4 @@
-const { prisma } = require('../../config/db');
+const { prisma } = require('../../../prisma');
 
 // ── Get all sticky notes for a user ──────────────────────────
 exports.getAllStickyNotes = async (userId) => {
