@@ -23,13 +23,6 @@ export interface ProjectItem {
   activeTasks: number
   assignees: ProjectAssignee[]
   extraAssigneesCount?: number
-  description?: string
-  status?: string
-  progress?: number | string
-  completedTasks?: number
-  startDate?: string
-  endDate?: string
-  tasks?: unknown[]
 }
 
 function initials(name: string) {
@@ -72,37 +65,43 @@ export default function ProjectCard({
 
   if (variant === 'dashboard') {
     return (
-      <div className="bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-hidden mb-4">
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-3">
         <div className="flex flex-col md:flex-row">
-          
+
           {/* LEFT SECTION */}
-          <div className="flex-[1.2] p-8 lg:p-10">
-            <div className="flex items-start gap-5 lg:gap-6">
-              {/* Project Icon/Logo */}
-              <div className="relative w-16 h-16 lg:w-20 lg:h-20 rounded-2xl bg-slate-50 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm border border-slate-100">
-                 {/* Visual decoration matching image */}
-                 <div className="absolute inset-0 bg-gradient-to-br from-slate-100 to-white opacity-50" />
-                 <div className="absolute bottom-0 left-0 w-full h-1/2 bg-amber-200/40 rounded-full blur-2xl transform -translate-x-1/2 translate-y-1/2" />
-                 <div className="absolute top-0 right-0 w-8 h-8 bg-purple-500 rounded-full blur-xl opacity-60 transform translate-x-1/2 -translate-y-1/2" />
-                 <div className="z-10 w-10 h-10 lg:w-12 lg:h-12 bg-white rounded-xl shadow-sm border border-slate-50 flex items-center justify-center overflow-hidden">
-                    <div className="w-full h-full bg-gradient-to-tr from-amber-400 via-amber-200 to-purple-500" />
-                 </div>
+          <div className="flex-[1.2] p-4 sm:p-5">
+            <div className="flex items-start gap-3 sm:gap-4">
+
+              {/* ICON */}
+              <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-slate-50 flex items-center justify-center overflow-hidden flex-shrink-0 border border-slate-100">
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-100 to-white opacity-50" />
+                <div className="absolute bottom-0 left-0 w-full h-1/2 bg-amber-200/40 rounded-full blur-xl transform -translate-x-1/2 translate-y-1/2" />
+                <div className="absolute top-0 right-0 w-6 h-6 bg-purple-500 rounded-full blur-lg opacity-60 transform translate-x-1/2 -translate-y-1/2" />
+                <div className="z-10 w-8 h-8 sm:w-9 sm:h-9 bg-white rounded-lg  flex items-center justify-center">
+                  <div className="w-full h-full bg-gradient-to-tr from-amber-400 via-amber-200 to-purple-500 rounded-lg" />
+                </div>
               </div>
 
-              <div className="min-w-0 flex-1 pt-1">
-                <p className="text-base lg:text-lg font-medium text-slate-400 tracking-wider mb-1 uppercase">{project.code}</p>
-                <h3 className="text-2xl lg:text-3xl font-black text-[#073933] leading-tight mb-6">
+              <div className="min-w-0 flex-1">
+
+                {/* KEEP SAME SIZE */}
+                <p className="text-xs md:text-[10px] font-medium text-slate-400 tracking-wider mb-1 uppercase">
+                  {project.code}
+                </p>
+
+                {/* KEEP SAME SIZE */}
+                <h3 className="text-sm sm:text-sm font-black text-[#073933] leading-tight mb-3">
                   {project.name}
                 </h3>
 
-                <div className="flex items-center gap-8 lg:gap-10">
-                  <div className="flex items-center gap-2.5 text-slate-400 font-medium text-sm lg:text-base">
-                    <Calendar className="w-5 h-5 lg:w-6 lg:h-6 text-slate-400" />
-                    <span>Created {project.createdAtLabel}</span>
+                <div className="flex items-center gap-4 sm:gap-6">
+                  <div className="flex items-center gap-2 text-slate-400 text-xs sm:text-xs">
+                    <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span>{project.createdAtLabel}</span>
                   </div>
 
-                  <div className="flex items-center gap-2 font-bold text-sm lg:text-base">
-                    <PriorityIcon className={`w-5 h-5 lg:w-6 lg:h-6 ${p.color}`} />
+                  <div className="flex items-center gap-1 text-xs sm:text-xs font-semibold">
+                    <PriorityIcon className={`w-4 h-4 ${p.color}`} />
                     <span className={p.color}>{p.label}</span>
                   </div>
                 </div>
@@ -110,43 +109,46 @@ export default function ProjectCard({
             </div>
           </div>
 
-          {/* VERTICAL DIVIDER */}
-          <div className="hidden md:block w-px bg-slate-100 self-stretch my-8" />
+          {/* DIVIDER */}
+          <div className="hidden md:block w-[1px] bg-gray-200 my-4" />
 
           {/* RIGHT SECTION */}
-          <div className="flex-1 p-8 lg:p-10 flex flex-col justify-center">
-            <h4 className="text-xl lg:text-2xl font-medium text-[#073933] mb-8">Project Data</h4>
+          <div className="flex-1 p-4 sm:p-5 flex flex-col justify-center">
 
-            <div className="flex items-start justify-between gap-4 lg:gap-6">
-              <div className="flex-1">
-                <p className="text-sm lg:text-base font-medium text-slate-400 mb-2 whitespace-nowrap">All tasks</p>
-                <p className="text-2xl lg:text-3xl font-black text-[#073933]">
+            <h4 className="text-sm sm:text-sm font-medium text-[#073933] mb-4">
+              Project Data
+            </h4>
+
+            <div className="flex items-center justify-between gap-4">
+
+              <div>
+                <p className="text-xs text-slate-400">All tasks</p>
+                <p className="text-lg sm:text-sm font-bold text-[#073933]">
                   {project.allTasks}
                 </p>
               </div>
 
-              <div className="flex-1">
-                <p className="text-sm lg:text-base font-medium text-slate-400 mb-2 whitespace-nowrap">Active Tasks</p>
-                <p className="text-2xl lg:text-3xl font-black text-[#073933]">
+              <div>
+                <p className="text-xs text-slate-400">Active</p>
+                <p className="text-lg sm:text-sm font-bold text-[#073933]">
                   {project.activeTasks}
                 </p>
               </div>
 
-              <div className="flex-1 min-w-[120px]">
-                <p className="text-sm lg:text-base font-medium text-slate-400 mb-3">Assignees</p>
+              <div>
+                <p className="text-xs text-slate-400 mb-1">Assignees</p>
 
                 <div className="flex items-center">
                   {visibleAssignees.map((a, idx) => (
                     <div
                       key={a.id}
-                      className="relative w-8 h-8 lg:w-10 lg:h-10 rounded-full border-2 border-white shadow-sm overflow-hidden"
-                      style={{ marginLeft: idx === 0 ? 0 : -10, zIndex: 10 - idx }}
-                      title={a.name}
+                      className="relative w-7 h-7 sm:w-7 sm:h-7 rounded-full border-2 border-white overflow-hidden"
+                      style={{ marginLeft: idx === 0 ? 0 : -8 }}
                     >
                       {a.avatarUrl ? (
                         <Image src={a.avatarUrl} alt={a.name} fill className="object-cover" />
                       ) : (
-                        <div className="w-full h-full bg-slate-100 flex items-center justify-center text-[10px] lg:text-xs font-bold text-slate-500 uppercase">
+                        <div className="w-full h-full bg-slate-100 flex items-center justify-center text-[9px] font-bold text-slate-500">
                           {initials(a.name)}
                         </div>
                       )}
@@ -155,15 +157,15 @@ export default function ProjectCard({
 
                   {extra > 0 && (
                     <div
-                      className="relative w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-[#4293f5] text-white border-2 border-white shadow-sm flex items-center justify-center text-[10px] lg:text-xs font-bold"
-                      style={{ marginLeft: -10, zIndex: 0 }}
-                      title={`${extra} more`}
+                      className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#4293f5] text-white flex items-center justify-center text-[9px] font-bold border-2 border-white"
+                      style={{ marginLeft: -8 }}
                     >
                       +{extra}
                     </div>
                   )}
                 </div>
               </div>
+
             </div>
           </div>
         </div>
@@ -191,7 +193,7 @@ export default function ProjectCard({
             e.stopPropagation()
             onSelectProject?.(project)
           }}
-          className="text-[12px] sm:text-[11px] font-semibold hover:text-teal-800 flex items-center gap-1 mt-2"
+          className="text-[11px] font-semibold hover:text-teal-800 flex items-center gap-1 mt-2"
         >
           View details <ChevronRight className="w-4 h-4" />
         </button>
