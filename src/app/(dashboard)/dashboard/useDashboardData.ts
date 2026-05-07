@@ -56,19 +56,21 @@ export function useDashboardData(userRole: UserRole) {
       console.log('Fetching data for role:', userRole)
 
       // Use apiFetch which handles BASE_URL and credentials (cookies)
-      let projectsRes, eventsRes
+      let projectsRes, eventsRes, usersRes
       
       if (userRole === 'supervisor') {
         // For supervisor, fetch all projects and events
-        [projectsRes, eventsRes] = await Promise.all([
+        [projectsRes, eventsRes, usersRes] = await Promise.all([
           apiFetch('/projects', { method: 'GET' }),
-          apiFetch('/events/nearest', { method: 'GET' })
+          apiFetch('/events/nearest', { method: 'GET' }),
+          apiFetch('/auth/users', { method: 'GET' })
         ])
       } else {
         // For employee, fetch user's projects
-        [projectsRes, eventsRes] = await Promise.all([
+        [projectsRes, eventsRes, usersRes] = await Promise.all([
           apiFetch('/projects/user/projects', { method: 'GET' }),
-          apiFetch('/events/nearest', { method: 'GET' })
+          apiFetch('/events/nearest', { method: 'GET' }),
+          apiFetch('/auth/users', { method: 'GET' })
         ])
       }
       
@@ -81,9 +83,11 @@ export function useDashboardData(userRole: UserRole) {
 
       const projectsResult = await projectsRes.json()
       const eventsResult = await eventsRes.ok ? await eventsRes.json() : { success: false, data: [] }
+      const usersResult = await usersRes.ok ? await usersRes.json() : { success: false, data: [] }
 
       console.log('Projects API Response:', projectsResult)
       console.log('Events API Response:', eventsResult)
+      console.log('Users API Response:', usersResult)
       
       if (projectsResult.success) {
           const mappedProjects: ProjectItem[] = projectsResult.data.map((p: any) => ({
@@ -145,7 +149,7 @@ export function useDashboardData(userRole: UserRole) {
           setData({
             user: user,
             projects: mappedProjects,
-            workloadMembers: [], 
+            workloadMembers: usersResult.data || [], 
             events: mappedEvents,
             activities: []
           })

@@ -1,4 +1,4 @@
-const { prisma } = require('../../config/db');
+const { prisma } = require('../../../prisma');
 
 const LEAVE_LIMITS = { vacation: 6, sick: 2 };
 const ACTIVE_STATUSES = ['approved', 'pending'];

@@ -1,5 +1,5 @@
 // backend/src/modules/supervisor/supervisor.service.js
-const { prisma } = require('../../config/db');
+const { prisma } = require('../../../prisma');
 
 class SupervisorService {
   async getAllEmployees(supervisorId) {

@@ -3,7 +3,7 @@ const express    = require('express');
 const cors       = require('cors');
 const helmet     = require('helmet');
 const morgan     = require('morgan');
-const { prisma } = require('./src/config/db');
+const { prisma } = require('./prisma');
 const bcrypt     = require('bcrypt');
 const jwt        = require('jsonwebtoken');
 
@@ -137,7 +137,7 @@ app.post('/api/temp/add-employee', async (req, res) => {
   try {
     const { userid, email, name, password } = req.body;
     const bcrypt = require('bcrypt');
-    const { prisma } = require('./src/config/db');
+    const { prisma } = require('./prisma');
     
     const hashedPassword = await bcrypt.hash(password, 10);
     

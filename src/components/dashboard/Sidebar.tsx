@@ -69,7 +69,7 @@ export default function Sidebar({ navItems, activeSection, setActiveSection, set
               </div>
             </div>
 
-            <nav className="flex-1 space-y-2 overflow-y-auto px-4 py-6">
+            <nav className="flex-1 space-y-2 overflow-y-auto px-4 py-6 scrollbar-hide">
               {navItems.map((item) => {
                 const Icon = item.icon
                 const active = activeSection === item.key
@@ -81,14 +81,14 @@ export default function Sidebar({ navItems, activeSection, setActiveSection, set
                       setActiveSection(item.key)
                       onMobileClose?.()
                     }}
-                    className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 transition-colors ${
-                      active
-                        ? 'bg-[#1a472a] text-white'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
+                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+ active
+  ? 'bg-[#CAEDE666] text-[#074139] font-semibold'
+  : 'text-gray-400 font-normal hover:bg-gray-100'
+}`}
                   >
                     <Icon className="h-5 w-5 shrink-0" />
-                    <span className="text-sm font-medium">{item.label}</span>
+                    <span className={`text-sm ${active ? 'font-bold' : 'font-medium'}`}>{item.label}</span>
                   </button>
                 )
               })}
@@ -157,7 +157,7 @@ export default function Sidebar({ navItems, activeSection, setActiveSection, set
           )}
         </div>
 
-        <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+        <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto scrollbar-hide">
           {navItems.map((item) => {
             const Icon = item.icon
             const active = activeSection === item.key
@@ -166,16 +166,16 @@ export default function Sidebar({ navItems, activeSection, setActiveSection, set
               <button
                 key={item.key}
                 onClick={() => setActiveSection(item.key)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                  active
-                    ? 'bg-[#1a472a] text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
+               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+  active
+    ? 'bg-[#CAEDE666] text-[#074139] font-bold'
+    : 'text-gray-400 font-normal hover:bg-gray-100'
+}`}
                 title={isCollapsed ? item.label : undefined}
               >
                 <Icon className="w-5 h-5 shrink-0" />
                 {!isCollapsed && (
-                  <span className="text-sm font-medium">{item.label}</span>
+                  <span className={`text-sm ${active ? 'font-bold' : 'font-medium'}`}>{item.label}</span>
                 )}
               </button>
             )

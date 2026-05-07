@@ -83,12 +83,12 @@ export default function EmployeeDashboard() {
 
     <div className="flex-1 flex flex-col gap-2 overflow-hidden">
 
-      
-      <div>
+      {activeSection === "dashboard" ? (
+        <div>
           <Header userName="Karn" />
-      </div>      
-      
-      
+        </div>
+      ) : null}
+
     {activeSection==='dashboard'&&(
       <Dashboard setActiveSection={setActiveSection}/>
     )}

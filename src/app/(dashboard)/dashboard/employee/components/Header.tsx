@@ -6,12 +6,11 @@ import ProfileNotifications from './ProfileNotifications'
 
 interface HeaderProps {
   userName?: string
-  pageTitle?: string
   onRefresh?: () => void
   isRefreshing?: boolean
 }
 
-export default function Header({ userName = 'Evan', pageTitle = 'Dashboard', onRefresh, isRefreshing = false }: HeaderProps) {
+export default function Header({ userName = 'Evan', onRefresh, isRefreshing = false, activeSection }: HeaderProps & { activeSection: string }) {
 
 
   return (
@@ -48,7 +47,7 @@ export default function Header({ userName = 'Evan', pageTitle = 'Dashboard', onR
 
       <div>
         <p className="text-[12px] text-gray-500 mb-1">Welcome back, {userName}!</p>
-        <h1 className="text-lg font-bold text-gray-900 sm:text-xl">{pageTitle}</h1>
+        <h1 className="text-[37px] font-extrabold text-[#074139] sm:text-xl">{activeSection}</h1>
       </div>
 
       </div>
