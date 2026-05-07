@@ -218,7 +218,7 @@ export default function VacationsCalendar() {
 
       {/* --- The Dialog/Modal from your 2nd File --- */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-100 p-4">
           <div className="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md border border-gray-100">
             <h2 className="text-2xl font-bold text-gray-900 mb-1">Request Leave</h2>
             <p className="text-sm text-gray-500 mb-6">Fill in the details for your time off</p>
@@ -231,9 +231,9 @@ export default function VacationsCalendar() {
                   onChange={(e) => setNewLeave({ ...newLeave, leave_type: e.target.value })}
                   className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                 >
-                  <option value="vacation">🌴 Vacation</option>
-                  <option value="sick_leave">🤒 Sick Leave</option>
-                  <option value="work_remotely">🏠 Work Remotely</option>
+                  <option value="vacation">Vacation</option>
+                  <option value="sick_leave">Sick Leave</option>
+                  <option value="work_remotely">Work Remotely</option>
                 </select>
               </div>
 
@@ -288,3 +288,4 @@ export default function VacationsCalendar() {
     </div>
   );
 }
+
