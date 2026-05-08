@@ -94,26 +94,57 @@ exports.loginClient = async ({ clientId, password }) => {
 // Logout
 exports.logout = async ({ userId, logId }) => {
   try {
-    const log = await prisma.$queryRaw`
-      SELECT id, login_time FROM login_logs 
-      WHERE user_id = ${userId} AND id = ${logId} AND logout_time IS NULL
-      LIMIT 1
-    `;
+    const log = await prisma.login_logs.findFirst({
+      where: {
+        userId,
+        id: logId,
+        logoutTime: null
+      }
+    });
     
-    if (!log[0]) throw { status: 404, message: 'Active session not found' };
+    if (!log) throw { status: 404, message: 'Active session not found' };
     
     const logoutTime = new Date();
-    const sessionDuration = Math.floor((logoutTime - log[0].login_time) / 1000);
+    const sessionDuration = Math.floor((logoutTime - log.loginTime) / 1000);
     
-    await prisma.$executeRaw`
-      UPDATE login_logs 
-      SET logout_time = ${logoutTime}, session_duration = ${sessionDuration}
-      WHERE id = ${logId}
-    `;
+    await prisma.login_logs.update({
+      where: { id: logId },
+      data: {
+        logoutTime,
+        sessionDuration
+      }
+    });
     
     return { sessionDuration, message: 'Logged out successfully' };
   } catch (err) {
     throw { status: 404, message: 'Active session not found' };
+  }
+};
+
+// Get current user with full details (used by /auth/me endpoint)
+exports.getCurrentUserDetails = async (userId) => {
+  try {
+    const user = await prisma.$queryRaw`
+      SELECT id, userid, email, name, role, status 
+      FROM users 
+      WHERE id = ${userId}
+      LIMIT 1
+    `;
+    
+    if (!user[0]) {
+      throw { status: 401, message: 'User not found' };
+    }
+    
+    return {
+      id: user[0].id,
+      userid: user[0].userid,
+      email: user[0].email,
+      name: user[0].name,
+      role: user[0].role,
+      status: user[0].status
+    };
+  } catch (err) {
+    throw { status: 401, message: 'Failed to fetch user details' };
   }
 };
 

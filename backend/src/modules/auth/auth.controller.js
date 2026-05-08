@@ -1,6 +1,6 @@
 const service = require('./auth.service');
-const timerService = require('../timer/timer.service');
 const { successResponse, errorResponse } = require('../../utils/apiResponse');
+const workSessionService = require('../work-sessions/work-sessions.service');
 
 exports.loginUser = async (req, res, next) => {
   try {
@@ -34,11 +34,41 @@ exports.loginClient = async (req, res, next) => {
 exports.logout = async (req, res, next) => {
   try {
     // Auto-stop timer on logout
-    try {
-      await timerService.stopTimer(req.user.id);
-      console.log('⏹️  Timer auto-stopped for user:', req.user.id);
-    } catch (timerErr) {
-      console.log('ℹ️  No active timer to stop:', timerErr.message);
+    // try {
+    //   await timerService.stopTimer(req.user.id);
+    //   console.log('⏹️  Timer auto-stopped for user:', req.user.id);
+    // } catch (timerErr) {
+    //   console.log('ℹ️  No active timer to stop:', timerErr.message);
+    // }
+
+        try {
+
+      const activeSession =
+        await workSessionService.getTodaySession(
+          req.user.id
+        );
+
+      if (
+        activeSession &&
+        activeSession.status === 'active'
+      ) {
+
+        await workSessionService.endSession(
+          req.user.id,
+          activeSession.id
+        );
+
+        console.log(
+          `⏹️ Work session stopped for user ${req.user.id}`
+        );
+      }
+
+    } catch (err) {
+
+      console.error(
+        '❌ Failed to stop session during logout:',
+        err
+      );
     }
 
     const result = await service.logout({
@@ -78,7 +108,9 @@ exports.refreshToken = async (req, res, next) => {
 
 exports.getCurrentUser = async (req, res, next) => {
   try {
-    successResponse(res, req.user, 'Current user fetched');
+    // Fetch full user details from database using userId from JWT token
+    const result = await service.getCurrentUserDetails(req.user.id);
+    successResponse(res, result, 'Current user fetched');
   } catch (err) {
     next(err);
   }

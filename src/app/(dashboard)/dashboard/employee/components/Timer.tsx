@@ -1,76 +1,109 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useHeartbeat } from '../../../../../hooks/useHeartbeat';
-import { useActivityDetection } from '../../../../../hooks/useActivityDetection';
+import { useTimer }
+from '@/context/TimerContext';
 
-interface TimerDisplay {
-  hours: number;
-  minutes: number;
-  seconds: number;
+
+// =====================================================
+// FORMAT TIME
+// =====================================================
+
+function formatTime(totalSeconds: number) {
+
+  const hours =
+    Math.floor(totalSeconds / 3600);
+
+  const minutes =
+    Math.floor((totalSeconds % 3600) / 60);
+
+  const seconds =
+    totalSeconds % 60;
+
+  return [
+    hours.toString().padStart(2, '0'),
+    minutes.toString().padStart(2, '0'),
+    seconds.toString().padStart(2, '0')
+  ].join(':');
 }
 
-export const Timer: React.FC = () => {
-  const { heartbeatData } = useHeartbeat();
-  const { isActive } = useActivityDetection();
-  const [timerDisplay, setTimerDisplay] = useState<TimerDisplay>({
-    hours: 0,
-    minutes: 0,
-    seconds: 0
-  });
 
-  // Convert seconds to HH:MM:SS
-  const formatTime = (value: number): string => {
-    return String(value).padStart(2, '0');
-  };
+// =====================================================
+// TIMER COMPONENT
+// =====================================================
 
-  // Update timer display every second
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const totalSeconds = heartbeatData.totalActiveDuration;
-      
-      const hours = Math.floor(totalSeconds / 3600);
-      const minutes = Math.floor((totalSeconds % 3600) / 60);
-      const seconds = totalSeconds % 60;
+export default function Timer() {
 
-      setTimerDisplay({
-        hours,
-        minutes,
-        seconds
-      });
-    }, 1000);
+  const {
+    displaySeconds,
+    loading,
+    session
+  } = useTimer();
 
-    return () => clearInterval(interval);
-  }, [heartbeatData.totalActiveDuration]);
+
+  // ===================================================
+  // LOADING
+  // ===================================================
+
+  if (loading) {
+
+    return (
+
+      <div className="text-sm font-medium text-gray-500">
+
+        Loading timer...
+
+      </div>
+    );
+  }
+
+
+  // ===================================================
+  // NO SESSION
+  // ===================================================
+
+  if (!session) {
+
+    return (
+
+      <div className="text-sm font-medium text-gray-400">
+
+        No active session
+
+      </div>
+    );
+  }
+
+
+  // ===================================================
+  // UI
+  // ===================================================
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      {/* Timer Display */}
-      <div className="text-center">
-        <p className="text-xs text-primary/60 mb-2 font-medium">
-          {isActive ? 'Working Hours' : 'INACTIVE - No Updates'}
-        </p>
-        <div className={`font-mono text-4xl font-bold tracking-wider ${
-          heartbeatData.isSessionActive 
-            ? isActive 
-              ? 'text-primary' 
-              : 'text-yellow-500'
-            : 'text-red-500'
-        }`}>
-          {formatTime(timerDisplay.hours)}:{formatTime(timerDisplay.minutes)}:
-          {formatTime(timerDisplay.seconds)}
-        </div>
+
+    <div className="flex items-center gap-2">
+
+      {/* Status Dot */}
+
+      <div
+        className={`
+          w-2 h-2 rounded-full
+
+          ${
+            session.status === 'active'
+              ? 'bg-green-500'
+              : 'bg-red-500'
+          }
+        `}
+      />
+
+      {/* Timer */}
+
+      <div className="font-semibold text-sm">
+
+        {formatTime(displaySeconds)}
+
       </div>
 
-      {/* Status Indicator */}
-      <div className="flex items-center gap-2">
-        <div className={`w-2 h-2 rounded-full ${
-          heartbeatData.isSessionActive ? 'bg-green-500 animate-pulse' : 'bg-red-500'
-        }`} />
-        <span className="text-xs text-gray-600">
-          {heartbeatData.isSessionActive ? 'Session Active' : 'Session Ended'}
-        </span>
-      </div>
     </div>
   );
-};
+}

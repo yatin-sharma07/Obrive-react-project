@@ -8,7 +8,7 @@ import Image from 'next/image'
 import UserPfp from '@/assets/images/employee/photo.png'
 import { Calendar } from 'lucide-react'
 import { Bell } from 'lucide-react'
-import { Timer } from './Timer'
+import Timer from './Timer'
 import {useRouter} from "next/navigation"
 
 type ProfileDropdownProps = {
@@ -78,18 +78,22 @@ export default function ProfileDropdown({
  
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-1.5 px-2 py-1 hover:bg-gray-100 rounded-lg transition"
+          className="flex items-center gap-2 px-2 py-1 hover:bg-gray-100 rounded-lg transition"
         >
-          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center text-white text-[10px] font-semibold">
-            
-          <Image
-            src={UserPfp}
-            alt="pfp"
-            className="rounded-full object-cover"
-          />
+          <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+            <Image
+              src={UserPfp}
+              alt="pfp"
+              className="rounded-full object-cover w-full h-full"
+              width={32}
+              height={32}
+            />
           </div>
-          <span className="text-xs font-semibold text-gray-900">{user?.name}</span>
-          <ChevronDown className="w-3 h-3 text-gray-600" />
+          <div className="flex flex-col items-start min-w-0">
+            <span className="text-xs font-semibold text-gray-900 truncate">{user?.name || 'Employee'}</span>
+            {/* <span className="text-[10px] text-gray-500">Employee</span> */}
+          </div>
+          <ChevronDown className="w-3 h-3 text-gray-600 flex-shrink-0" />
         </button>
       </div>
  
@@ -102,35 +106,76 @@ export default function ProfileDropdown({
     </div>
 
       {/* Dropdown */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="absolute mt-2 w-full bg-white rounded-2xl shadow-lg p-4 z-50"
-          >
-            
-            <div className="space-y-2 text-sm text-gray-700">
+{/* Dropdown */}
+<AnimatePresence>
+  {isOpen && (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.2 }}
+      className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-gray-100 p-3 4-50"
+    >
+      <div className="space-y-4">
 
-              <div className="space-y-2 text-sm text-gray-700">
-                <Timer />
-              </div>
-              <div className="flex gap-1 items-center justify-center rounded-sm bg-blue-600 hover:bg-blue-800 text-white h-6"
-              onClick={HandleRouting}>
-                <button >
-                  Profile
-                </button>
-                 <User className='h-4 w-4'/>
-              </div>
+        {/* User Info */}
+        <div className="flex items-center gap-3 pb-3 border-b border-gray-100 ">
+          <div className="w-12 h-12 flex items-center rounded-full overflow-hidden">
+            <Image
+              src={UserPfp}
+              alt="pfp"
+              className="rounded-full object-cover w-full h-full"
+            />
+          </div>
+
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900">
+              {user?.name || 'Employee'}
+            </h3>
 
 
+          </div>
+        </div>
+
+        {/* Timer Section */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-2 border border-blue-100">
+          <p className="text-xs font-medium text-blue-700 mb-2 justify-center flex">
+            Up time
+          </p>
+
+          <div className="flex justify-center">
+            <Timer />
+          </div>
+        </div>
+
+        {/* Profile Button */}
+        <button
+          onClick={HandleRouting}
+          className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-gray-50 hover:bg-blue-50 border border-gray-100 hover:border-blue-200 transition-all duration-200 group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition">
+              <User className="h-4 w-4 text-blue-700" />
             </div>
 
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <div className="text-left">
+              <p className="text-sm font-medium text-gray-800">
+                Profile
+              </p>
+
+              <p className="text-xs text-gray-500">
+                Manage profile
+              </p>
+            </div>
+          </div>
+
+          <ChevronDown className="w-4 h-4 rotate-[-90deg] text-gray-400 group-hover:text-blue-600 transition" />
+        </button>
+
+      </div>
+    </motion.div>
+  )}
+</AnimatePresence>
 
     </div>
   )

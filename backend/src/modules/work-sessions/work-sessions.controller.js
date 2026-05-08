@@ -1,82 +1,162 @@
 const workSessionService = require('./work-sessions.service');
-const { successResponse, errorResponse } = require('../../utils/apiResponse');
+
+const {
+  successResponse,
+  errorResponse
+} = require('../../utils/apiResponse');
+
+
+// =====================================================
+// START / INIT SESSION
+// =====================================================
 
 exports.startSession = async (req, res) => {
+
   try {
+
     const userId = req.user.id;
-    const session = await workSessionService.startSession(userId);
-    
-    successResponse(res, {
-      sessionId: session.id,
-      sessionStart: session.sessionStart,
-      totalActiveDuration: session.totalActiveDuration
-    }, 'Session started');
+
+    const session =
+      await workSessionService.startSession(userId);
+
+    return successResponse(
+      res,
+      session,
+      'Session initialized successfully'
+    );
+
   } catch (err) {
-    errorResponse(res, err.message, 500);
+
+    console.error('❌ Start session controller error:', err);
+
+    return errorResponse(
+      res,
+      err.message || 'Failed to start session',
+      500
+    );
   }
 };
+
+
+// =====================================================
+// HEARTBEAT
+// =====================================================
 
 exports.heartbeat = async (req, res) => {
+
   try {
+
     const userId = req.user.id;
+
     const { sessionId } = req.body;
 
     if (!sessionId) {
-      return errorResponse(res, 'Session ID required', 400);
+
+      return errorResponse(
+        res,
+        'Session ID is required',
+        400
+      );
     }
 
-    const session = await workSessionService.recordHeartbeat(userId, sessionId);
-    
-    successResponse(res, {
-      sessionId: session.id,
-      totalActiveDuration: session.totalActiveDuration,
-      lastHeartbeat: session.lastHeartbeat,
-      status: session.status
-    }, 'Heartbeat recorded');
+    const session =
+      await workSessionService.recordHeartbeat(
+        userId,
+        sessionId
+      );
+
+    return successResponse(
+      res,
+      session,
+      'Heartbeat recorded'
+    );
+
   } catch (err) {
-    errorResponse(res, err.message, err.message.includes('auto-ended') ? 410 : 500);
+
+    console.error('❌ Heartbeat controller error:', err);
+
+    return errorResponse(
+      res,
+      err.message || 'Heartbeat failed',
+      500
+    );
   }
 };
+
+
+// =====================================================
+// END SESSION
+// =====================================================
 
 exports.endSession = async (req, res) => {
+
   try {
+
     const userId = req.user.id;
+
     const { sessionId } = req.body;
 
     if (!sessionId) {
-      return errorResponse(res, 'Session ID required', 400);
+
+      return errorResponse(
+        res,
+        'Session ID is required',
+        400
+      );
     }
 
-    const session = await workSessionService.endSession(userId, sessionId);
-    
-    successResponse(res, {
-      sessionId: session.id,
-      totalActiveDuration: session.totalActiveDuration,
-      sessionEnd: session.sessionEnd
-    }, 'Session ended');
+    const session =
+      await workSessionService.endSession(
+        userId,
+        sessionId
+      );
+
+    return successResponse(
+      res,
+      session,
+      'Session ended successfully'
+    );
+
   } catch (err) {
-    errorResponse(res, err.message, 500);
+
+    console.error('❌ End session controller error:', err);
+
+    return errorResponse(
+      res,
+      err.message || 'Failed to end session',
+      500
+    );
   }
 };
+
+
+// =====================================================
+// GET TODAY SESSION
+// =====================================================
 
 exports.getTodaySession = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const session = await workSessionService.getTodaySession(userId);
-    
-    successResponse(res, session, 'Today session retrieved');
-  } catch (err) {
-    errorResponse(res, err.message, 500);
-  }
-};
 
-exports.getDayStats = async (req, res) => {
   try {
+
     const userId = req.user.id;
-    const stats = await workSessionService.getDayStats(userId);
-    
-    successResponse(res, stats, 'Day statistics retrieved');
+
+    const session =
+      await workSessionService.getTodaySession(userId);
+
+    return successResponse(
+      res,
+      session,
+      'Today session fetched successfully'
+    );
+
   } catch (err) {
-    errorResponse(res, err.message, 500);
+
+    console.error('❌ Get session controller error:', err);
+
+    return errorResponse(
+      res,
+      err.message || 'Failed to fetch session',
+      500
+    );
   }
 };

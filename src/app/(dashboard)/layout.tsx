@@ -2,17 +2,27 @@
 
 import { ReactNode } from 'react'
 
+import { TimerProvider }
+from '@/context/TimerContext'
 
 interface DashboardLayoutProps {
   children: ReactNode
 }
 
-export default function DashboardLayout({ children }: DashboardLayoutProps) {
+export default function DashboardLayout({
+  children
+}: DashboardLayoutProps) {
+
   return (
-    <div className="flex min-h-screen w-full bg-[#F4F9FD] gap-2 p-2 md:h-screen">
 
-      {children}
+    <TimerProvider>
 
-    </div>
+      <div className="flex min-h-screen w-full bg-[#F4F9FD] gap-2 p-2 md:h-screen">
+
+        {children}
+
+      </div>
+
+    </TimerProvider>
   )
 }
