@@ -64,8 +64,8 @@ export default function ProfileDropdown({
 
       {/* Top Profile Bar */}
     <div className="">
-      <div className="flex items-center justify-between mb-2">
-        <button
+      <div className="flex items-center justify-end mb-2">
+        {/*<button
           // onClick={onNotificationClick}
           className="p-1 hover:bg-gray-100 rounded-lg transition relative"
           title="Notifications"

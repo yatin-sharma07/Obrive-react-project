@@ -6,6 +6,7 @@ import { Check, Upload } from 'lucide-react';
 import Image from 'next/image';
 import CustomToast from '@/components/pages/resources/components/Toast';
 import { apiFetch } from '@/lib/api';
+import SkeletonLoading from '@/components/SkelitonLoading';
 
 export const dynamic = 'force-dynamic';
 
@@ -157,11 +158,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen w-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-slate-600">Loading profile...</p>
-        </div>
-      </div>
+     <SkeletonLoading/>
     );
   }
 

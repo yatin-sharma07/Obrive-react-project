@@ -31,7 +31,7 @@ const Dashboard = ({ setActiveSection }: {
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
    
           <div className="flex-1 overflow-y-auto p-4 scrollbar-hide w-full">
-            <WorkloadSection members={workloadMembers} />
+            <WorkloadSection members={workloadMembers}  />
             <Projects projects={projects} variant="dashboard" />
           </div>
         </div>
