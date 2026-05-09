@@ -24,11 +24,13 @@ import Header from './components/Header'
 export const dynamic = 'force-dynamic';
 
 export default function EmployeeDashboard() {
-  const {  loading, error, refetch } = useDashboardData('employee')
+  const {  loading, error, refetch ,me} = useDashboardData('employee')
   const [activeSection
     , setActiveSection] = useState('dashboard')  
   const[supportOpen,setSupportOpen]=useState(false)
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
+
+  
 
   const navItems=[
     {label:'Dashboard', icon:LayoutDashboard, key:'dashboard'},
@@ -85,7 +87,7 @@ export default function EmployeeDashboard() {
 
       
       <div>
-          <Header userName="Karn" />
+          <Header userName={me?.data?.name || 'User'} activeSection={activeSection} />
       </div>      
       
       

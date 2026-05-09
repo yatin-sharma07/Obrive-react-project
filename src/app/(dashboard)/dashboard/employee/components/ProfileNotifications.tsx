@@ -64,8 +64,8 @@ export default function ProfileDropdown({
 
       {/* Top Profile Bar */}
     <div className="">
-      <div className="flex items-center justify-between mb-2">
-        <button
+      <div className="flex items-center justify-end mb-2">
+        {/*<button
           // onClick={onNotificationClick}
           className="p-1 hover:bg-gray-100 rounded-lg transition relative"
           title="Notifications"
@@ -74,13 +74,13 @@ export default function ProfileDropdown({
           {notificationCount > 0 && (
             <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full" />
           )}
-        </button>
+        </button>*/}
  
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="flex items-center gap-1.5 px-2 py-1 hover:bg-gray-100 rounded-lg transition"
         >
-          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center text-white text-[10px] font-semibold">
+          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center text-white text-[10px] font-semibold ">
             
           <Image
             src={UserPfp}

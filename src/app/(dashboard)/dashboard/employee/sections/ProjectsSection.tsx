@@ -126,8 +126,8 @@ const ProjectsSection = () => {
                   style={{ backgroundImage: `url(${s.iconSrc})` }}
                   className={`group inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-2xl border bg-[center] bg-no-repeat transition duration-200 ${
                     section === s.section
-                      ? "border-blue-600  bg-[#ffffff] bg-[length:18px_18px] "
-                      : "border-[#c9def4] bg-[#ffffff] bg-[length:16px_16px]  hover:-translate-y-1 hover:border-[#9fc5eb] hover:bg-[#e9f4ff] hover:bg-[length:20px_20px] hover:shadow-[0_16px_30px_rgba(59,130,246,0.22)]"
+                      ? "border-[#074139]  bg-[#ffffff] bg-[length:18px_18px] "
+                      : "border-[#c9def4] bg-[#ffffff] bg-[length:16px_16px]  hover:-translate-y-1 hover:border-[#074139] hover:bg-[#e9f4ff] hover:bg-[length:20px_20px] hover:shadow-[0_16px_30px_rgba(59,130,246,0.22)]"
                   }`}
                 >
                   <span className="sr-only">{s.iconAlt}</span>
