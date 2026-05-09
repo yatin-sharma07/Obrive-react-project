@@ -2,10 +2,48 @@ const router = require('express').Router();
 const authenticate = require('../../middleware/auth');
 const ctrl = require('./work-sessions.controller');
 
-router.post('/start-session', authenticate, ctrl.startSession);
-router.post('/heartbeat', authenticate, ctrl.heartbeat);
-router.post('/end-session', authenticate, ctrl.endSession);
-router.get('/today-session', authenticate, ctrl.getTodaySession);
-router.get('/day-stats', authenticate, ctrl.getDayStats);
+
+// =====================================================
+// SESSION INITIALIZATION
+// =====================================================
+
+router.post(
+  '/init',
+  authenticate,
+  ctrl.startSession
+);
+
+
+// =====================================================
+// HEARTBEAT
+// =====================================================
+
+router.post(
+  '/heartbeat',
+  authenticate,
+  ctrl.heartbeat
+);
+
+
+// =====================================================
+// GET CURRENT SESSION
+// =====================================================
+
+router.get(
+  '/current',
+  authenticate,
+  ctrl.getTodaySession
+);
+
+
+// =====================================================
+// STOP SESSION
+// =====================================================
+
+router.post(
+  '/stop',
+  authenticate,
+  ctrl.endSession
+);
 
 module.exports = router;

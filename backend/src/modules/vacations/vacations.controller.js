@@ -8,8 +8,8 @@ class VacationsController {
       return successResponse(res, employees, 'Vacations fetched successfully');
     } catch (error) {
       console.error("Get Leaves Error:", error);
-      next(error);
-    }
+      next(error); 
+    } 
   }
 
   async requestLeave(req, res, next) {

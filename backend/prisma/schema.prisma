@@ -153,20 +153,34 @@ model leaves {
 
 model work_sessions {
   id                  Int       @id @default(autoincrement())
+
   userId              Int
+
   sessionStart        DateTime  @default(now())
-  lastHeartbeat       DateTime  @default(now())
+
+  startedAt           DateTime?
+
+  lastHeartbeat       DateTime? @default(now())
+
   sessionEnd          DateTime?
+
+  workDate            DateTime? @default(now()) @db.Date
+
   totalActiveDuration Int       @default(0)
-  status              String    @default("active") @db.VarChar(20)
+
+  status              String    @default("active")
+
   isAutoEnded         Boolean   @default(false)
+
   created_at          DateTime  @default(now())
+
   updated_at          DateTime  @updatedAt
+
   users               users     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId], map: "idx_work_sessions_userId")
-  @@index([sessionStart], map: "idx_work_sessions_sessionStart")
-  @@index([status], map: "idx_work_sessions_status")
+  @@index([userId, workDate])
+
+  @@index([status])
 }
 
 model leave_requests {

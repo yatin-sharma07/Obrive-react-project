@@ -6,6 +6,7 @@ const morgan     = require('morgan');
 const { prisma } = require('./prisma');
 const bcrypt     = require('bcrypt');
 const jwt        = require('jsonwebtoken');
+const startWorkSessionCron = require('./src/jobs/workSessionCron');
 
 const app  = express();
 const PORT = process.env.PORT || 5000;
@@ -125,6 +126,7 @@ async function bootstrap() {
   try {
     await prisma.$connect();
     console.log('✅ Database connected');
+    startWorkSessionCron();
     app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
   } catch (err) {
     console.error('❌ Failed to start:', err);

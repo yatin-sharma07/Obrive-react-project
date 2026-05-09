@@ -21,7 +21,9 @@ try {
   }
   prisma = globalForPrisma.prisma;
 } catch (error) {
-  console.error('Failed to create Prisma client:', error);
+  console.error('Failed to create Prisma client:', error.message);
+  console.error('Full error:', error);
+  console.error('Stack:', error.stack);
   throw error;
 }
 

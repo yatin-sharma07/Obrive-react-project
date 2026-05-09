@@ -1,111 +1,195 @@
 const { prisma } = require('../../../prisma');
 
 class WorkSessionService {
-  
-  // 1. START NEW SESSION
+
+  // =====================================================
+  // INIT / START SESSION
+  // =====================================================
+
   async startSession(userId) {
     try {
-      // Check if there's an active session for today
+
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      
-      const existingSession = await prisma.work_sessions.findFirst({
+
+      // Find today's session
+      let session = await prisma.work_sessions.findFirst({
         where: {
-          userId: userId,
-          status: 'active',
-          sessionStart: { gte: today }
+          userId,
+          workDate: {
+            gte: today
+          }
+        },
+        orderBy: {
+          created_at: 'desc'
         }
       });
 
-      if (existingSession) {
-        return existingSession;  // Return existing session (handles multiple tabs)
+      // -------------------------------------------------
+      // CREATE NEW SESSION IF NONE EXISTS
+      // -------------------------------------------------
+
+      if (!session) {
+
+        session = await prisma.work_sessions.create({
+          data: {
+            userId,
+            workDate: new Date(),
+
+            sessionStart: new Date(),
+
+            startedAt: new Date(),
+
+            lastHeartbeat: new Date(),
+
+            totalActiveDuration: 0,
+
+            status: 'active',
+
+            isAutoEnded: false
+          }
+        });
+
+        console.log(`✅ New work session created for user ${userId}`);
       }
 
-      // Create new session
-      const session = await prisma.work_sessions.create({
-        data: {
-          userId: userId,
-          sessionStart: new Date(),
-          lastHeartbeat: new Date(),
-          totalActiveDuration: 0,
-          status: 'active'
-        }
-      });
+      // -------------------------------------------------
+      // RESUME EXISTING ENDED SESSION
+      // -------------------------------------------------
 
-      console.log(`✓ Session started for user ${userId}: ${session.id}`);
-      return session;
+      else if (session.status === 'ended') {
+
+        session = await prisma.work_sessions.update({
+          where: {
+            id: session.id
+          },
+          data: {
+            status: 'active',
+
+            startedAt: new Date(),
+
+            lastHeartbeat: new Date(),
+
+            isAutoEnded: false,
+
+            sessionEnd: null
+          }
+        });
+
+        console.log(`🔄 Existing session resumed for user ${userId}`);
+      }
+      
+      // -------------------------------------------------
+      // ENSURE SESSION IS ACTIVE
+      // -------------------------------------------------
+      
+      else if (session.status !== 'active') {
+        
+        console.warn(
+          `⚠️ Session ${session.id} has unexpected status: ${session.status}. Reactivating.`
+        );
+        
+        session = await prisma.work_sessions.update({
+          where: {
+            id: session.id
+          },
+          data: {
+            status: 'active',
+            startedAt: new Date(),
+            lastHeartbeat: new Date(),
+            isAutoEnded: false,
+            sessionEnd: null
+          }
+        });
+      }
+
+      return this.buildSessionResponse(session);
+
     } catch (err) {
-      console.error('Error starting session:', err.message);
+
+      console.error('❌ Error starting session:', err);
+
       throw err;
     }
   }
 
-  // 2. HEARTBEAT - Update session with time calculation
+  // =====================================================
+  // HEARTBEAT
+  // =====================================================
+
   async recordHeartbeat(userId, sessionId) {
+
     try {
-      const currentTime = new Date();
-      
-      // Get current session
-      const session = await prisma.work_sessions.findUnique({
-        where: { id: sessionId }
+
+      let session = await prisma.work_sessions.findUnique({
+        where: {
+          id: sessionId
+        }
       });
 
       if (!session) {
         throw new Error('Session not found');
       }
 
-      // Verify ownership
       if (session.userId !== userId) {
-        throw new Error('Unauthorized: Session does not belong to this user');
+        throw new Error('Unauthorized session access');
       }
 
-      // Check if session should be auto-ended (no heartbeat for 2 mins)
-      const timeSinceLastHeartbeat = (currentTime - session.lastHeartbeat) / 1000; // in seconds
-      
-      if (timeSinceLastHeartbeat > 120 && session.status === 'active') {
-        // Auto-end session if no heartbeat for > 2 minutes
-        await prisma.work_sessions.update({
-          where: { id: sessionId },
+      // If session is ended or inactive, try to reactivate it
+      if (session.status !== 'active') {
+        
+        console.log(
+          `⚠️ Heartbeat for inactive session ${sessionId}. Reactivating...`
+        );
+        
+        session = await prisma.work_sessions.update({
+          where: {
+            id: sessionId
+          },
           data: {
-            status: 'ended',
-            sessionEnd: currentTime,
-            isAutoEnded: true,
-            lastHeartbeat: currentTime
+            status: 'active',
+            startedAt: new Date(),
+            lastHeartbeat: new Date(),
+            isAutoEnded: false,
+            sessionEnd: null
           }
         });
-        throw new Error('Session auto-ended: No heartbeat for more than 2 minutes');
+        
+        return this.buildSessionResponse(session);
       }
 
-      // Calculate time difference (but cap at 2 minutes to avoid anomalies)
-      let timeDiff = (currentTime - session.lastHeartbeat) / 1000;
-      if (timeDiff > 120) {
-        timeDiff = 120;  // Cap at 2 minutes
-      }
-
-      // Update session with new active duration
+      // Update heartbeat
       const updatedSession = await prisma.work_sessions.update({
-        where: { id: sessionId },
+        where: {
+          id: sessionId
+        },
         data: {
-          lastHeartbeat: currentTime,
-          totalActiveDuration: session.totalActiveDuration + Math.floor(timeDiff),
-          updated_at: currentTime
+          lastHeartbeat: new Date()
         }
       });
 
-      return updatedSession;
+      return this.buildSessionResponse(updatedSession);
+
     } catch (err) {
-      console.error('Error recording heartbeat:', err.message);
+
+      console.error('❌ Heartbeat error:', err);
+
       throw err;
     }
   }
 
-  // 3. END SESSION
+  // =====================================================
+  // END SESSION
+  // =====================================================
+
   async endSession(userId, sessionId) {
+
     try {
-      const currentTime = new Date();
-      
+
       const session = await prisma.work_sessions.findUnique({
-        where: { id: sessionId }
+        where: {
+          id: sessionId
+        }
       });
 
       if (!session) {
@@ -116,112 +200,188 @@ class WorkSessionService {
         throw new Error('Unauthorized');
       }
 
-      // Calculate final duration
-      const finalDuration = session.totalActiveDuration + 
-        Math.floor((currentTime - session.lastHeartbeat) / 1000);
+      // ---------------------------------------------
+      // CALCULATE FINAL DURATION
+      // ---------------------------------------------
+
+      let totalDuration = session.totalActiveDuration;
+
+      if (session.startedAt) {
+
+        const elapsedSeconds =
+          Math.floor(
+            (Date.now() - new Date(session.startedAt).getTime()) / 1000
+          );
+
+        totalDuration += elapsedSeconds;
+      }
 
       const endedSession = await prisma.work_sessions.update({
-        where: { id: sessionId },
+        where: {
+          id: session.id
+        },
         data: {
+          totalActiveDuration: totalDuration,
+
           status: 'ended',
-          sessionEnd: currentTime,
-          totalActiveDuration: finalDuration,
-          updated_at: currentTime
+
+          sessionEnd: new Date(),
+
+          startedAt: null,
+
+          updated_at: new Date()
         }
       });
 
-      console.log(`✓ Session ended for user ${userId}. Total duration: ${finalDuration}s`);
-      return endedSession;
+      console.log(`⏹️ Session ended for user ${userId}`);
+
+      return this.buildSessionResponse(endedSession);
+
     } catch (err) {
-      console.error('Error ending session:', err.message);
+
+      console.error('❌ End session error:', err);
+
       throw err;
     }
   }
 
-  // 4. GET TODAY'S SESSION
+  // =====================================================
+  // GET TODAY SESSION
+  // =====================================================
+
   async getTodaySession(userId) {
+
     try {
+
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
       const session = await prisma.work_sessions.findFirst({
         where: {
-          userId: userId,
-          sessionStart: { gte: today }
+          userId,
+          workDate: {
+            gte: today
+          }
         },
-        orderBy: { sessionStart: 'desc' }
+        orderBy: {
+          created_at: 'desc'
+        }
       });
 
-      return session;
+      if (!session) {
+        return null;
+      }
+
+      return this.buildSessionResponse(session);
+
     } catch (err) {
-      console.error('Error fetching today session:', err.message);
+
+      console.error('❌ Error fetching session:', err);
+
       throw err;
     }
   }
 
-  // 5. GET SESSION STATS FOR DAY
-  async getDayStats(userId) {
+  // =====================================================
+  // AUTO END DEAD SESSIONS
+  // =====================================================
+
+  async autoEndInactiveSessions() {
+
     try {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const cutoff = new Date(Date.now() - 15 * 60 * 1000);
 
       const sessions = await prisma.work_sessions.findMany({
         where: {
-          userId: userId,
-          sessionStart: {
-            gte: today,
-            lt: tomorrow
+          status: 'active',
+          lastHeartbeat: {
+            lt: cutoff
           }
         }
       });
 
-      // Calculate total time
-      const totalSeconds = sessions.reduce((sum, session) => {
-        if (session.status === 'ended') {
-          return sum + session.totalActiveDuration;
-        }
-        // For active sessions, add current time diff
-        return sum + session.totalActiveDuration + 
-          Math.floor((new Date() - session.lastHeartbeat) / 1000);
-      }, 0);
+      for (const session of sessions) {
 
-      return {
-        totalSessions: sessions.length,
-        activeSessions: sessions.filter(s => s.status === 'active').length,
-        totalActiveDuration: totalSeconds,
-        sessions: sessions
-      };
+        let totalDuration = session.totalActiveDuration;
+
+        if (session.startedAt) {
+
+          const elapsedSeconds =
+            Math.floor(
+              (new Date(session.lastHeartbeat).getTime()
+                - new Date(session.startedAt).getTime()) / 1000
+            );
+
+          totalDuration += elapsedSeconds;
+        }
+
+        await prisma.work_sessions.update({
+          where: {
+            id: session.id
+          },
+          data: {
+            totalActiveDuration: totalDuration,
+
+            status: 'ended',
+
+            sessionEnd: new Date(),
+
+            startedAt: null,
+
+            isAutoEnded: true
+          }
+        });
+
+        console.log(`⚠️ Auto-ended inactive session ${session.id}`);
+      }
+
     } catch (err) {
-      console.error('Error fetching day stats:', err.message);
-      throw err;
+
+      console.error('❌ Auto-end error:', err);
     }
   }
 
-  // 6. AUTO-END INACTIVE SESSIONS (Run periodically)
-  async autoEndInactiveSessions() {
-    try {
-      const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
+  // =====================================================
+  // BUILD SESSION RESPONSE
+  // =====================================================
 
-      const inactiveSessions = await prisma.work_sessions.updateMany({
-        where: {
-          status: 'active',
-          lastHeartbeat: { lt: twoMinutesAgo }
-        },
-        data: {
-          status: 'ended',
-          sessionEnd: new Date(),
-          isAutoEnded: true
-        }
-      });
+  buildSessionResponse(session) {
 
-      console.log(`Auto-ended ${inactiveSessions.count} inactive sessions`);
-      return inactiveSessions;
-    } catch (err) {
-      console.error('Error auto-ending sessions:', err.message);
-      throw err;
+    let liveDuration = session.totalActiveDuration;
+
+    if (
+      session.status === 'active' &&
+      session.startedAt
+    ) {
+
+      const elapsedSeconds =
+        Math.floor(
+          (Date.now() - new Date(session.startedAt).getTime()) / 1000
+        );
+
+      liveDuration += elapsedSeconds;
     }
+
+    return {
+      id: session.id,
+
+      userId: session.userId,
+
+      status: session.status,
+
+      startedAt: session.startedAt,
+
+      sessionStart: session.sessionStart,
+
+      sessionEnd: session.sessionEnd,
+
+      lastHeartbeat: session.lastHeartbeat,
+
+      totalActiveDuration: liveDuration,
+
+      isAutoEnded: session.isAutoEnded
+    };
   }
 }
 
