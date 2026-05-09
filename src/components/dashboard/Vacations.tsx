@@ -149,9 +149,9 @@ export default function VacationsCalendar() {
         <h1 className="text-3xl font-bold text-slate-900">Vacation Management</h1>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 font-semibold shadow-lg transition-all"
+          className="bg-[#074139] hover:bg-[#154e47] text-white px-4 py-2.5 rounded-xl flex items-center gap-2 font-semibold shadow-lg transition-all"
         >
-          <Plus className="w-5 h-5" />
+          <Plus className="w-5 h-5 font-medium" />
           New Request
         </button>
       </div>
@@ -163,7 +163,7 @@ export default function VacationsCalendar() {
             key={tab}
             onClick={() => setActiveTab(tab as any)}
             className={`px-6 py-2 rounded-xl font-semibold capitalize transition-all ${
-              activeTab === tab ? 'bg-blue-600 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'
+              activeTab === tab ? 'bg-[#074139] text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'
             }`}
           >
             {tab}

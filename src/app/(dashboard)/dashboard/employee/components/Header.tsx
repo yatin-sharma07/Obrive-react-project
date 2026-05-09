@@ -15,18 +15,18 @@ export default function Header({ userName = 'Evan', onRefresh, isRefreshing = fa
 
   return (
     <div className='flex-row flex justify-between p-2'>
-      <div >
+      <div className='w-1/2'>
       <div className="flex items-center justify-between mb-2">
         <div className="flex-1 max-w-xs">
 
                     <div className="relative">
-            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-400" />
+            <Search className="w-2.5 absolute left-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-400" />
             <input
               type="text"
               placeholder="Search..."
               // value={searchQuery}
               // onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-7 pr-3 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1a472a] focus:border-transparent transition"
+              className="w-85 w-min-60 pl-7 pr-3 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1a472a] focus:border-transparent transition"
             />
           </div>
          
@@ -46,7 +46,7 @@ export default function Header({ userName = 'Evan', onRefresh, isRefreshing = fa
       </div>
 
       <div>
-        <p className="text-[12px] text-gray-500 mb-1">Welcome back, {userName}!</p>
+        <p className="text-[14px] text-gray-500 mb-1 mt-5 font-semibold">Welcome back, {userName}!</p>
         <h1 className="text-[37px] font-extrabold text-[#074139] sm:text-xl">{activeSection}</h1>
       </div>
 

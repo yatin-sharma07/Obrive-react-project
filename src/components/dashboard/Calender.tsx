@@ -233,7 +233,7 @@ export default function Calendar() {
 
                 <button 
                   onClick={() => openAddEventModal()}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#3b82f6] px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#2563eb] sm:w-auto"
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#074139] px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#154e47] sm:w-auto cursor-pointer"
                 >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
                     Add Event
@@ -305,7 +305,7 @@ export default function Calendar() {
                   <select 
                     value={newEventDuration}
                     onChange={(e) => setNewEventDuration(e.target.value)}
-                    className="text-sm w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#3b82f6]/20 focus:border-[#3b82f6] outline-none transition-all"
+                    className="text-sm w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#3b82f6]/20 focus:border-[#074139] outline-none transition-all"
                   >
                     <option value="30m">30 minutes</option>
                     <option value="1h">1 hour</option>
@@ -354,14 +354,14 @@ export default function Calendar() {
             <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3 rounded-b-2xl">
               <button 
                 onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 rounded-lg transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button 
                 onClick={handleSaveEvent}
                 disabled={!newEventTitle.trim()}
-                className="px-6 py-2 text-sm font-medium text-white bg-[#3b82f6] hover:bg-[#2563eb] disabled:bg-[#3b82f6]/50 disabled:cursor-not-allowed rounded-lg transition-colors shadow-sm"
+                className="px-6 py-2 text-sm font-medium text-white bg-[#074139] hover:bg-[#154e47] disabled:bg-[#074139]/50 disabled:cursor-not-allowed rounded-lg transition-colors shadow-sm cursor-pointer"
               >
                 Save Event
               </button>

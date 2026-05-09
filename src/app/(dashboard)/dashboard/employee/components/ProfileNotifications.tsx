@@ -7,7 +7,7 @@ import { apiFetch } from '@/lib/api'
 import Image from 'next/image'
 import UserPfp from '@/assets/images/employee/photo.png'
 import { Calendar } from 'lucide-react'
-import { Bell } from 'lucide-react'
+// import { Bell } from 'lucide-react'
 import Timer from './Timer'
 import {useRouter} from "next/navigation"
 
@@ -70,10 +70,10 @@ export default function ProfileDropdown({
           className="p-1 hover:bg-gray-100 rounded-lg transition relative"
           title="Notifications"
         >
-          <Bell className="w-4.5 h-4.5 text-gray-600" />
+          {/* <Bell className="w-4.5 h-4.5 text-gray-600" />
           {notificationCount > 0 && (
             <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full" />
-          )}
+          )} */}
         </button>
  
         <button
@@ -90,7 +90,7 @@ export default function ProfileDropdown({
             />
           </div>
           <div className="flex flex-col items-start min-w-0">
-            <span className="text-xs font-semibold text-gray-900 truncate">{user?.name || 'Employee'}</span>
+          <span className="text-xs font-semibold text-gray-900 truncate">{user?.name || 'Employee'}</span>
             {/* <span className="text-[10px] text-gray-500">Employee</span> */}
           </div>
           <ChevronDown className="w-3 h-3 text-gray-600 flex-shrink-0" />
@@ -119,7 +119,7 @@ export default function ProfileDropdown({
       <div className="space-y-4">
 
         {/* User Info */}
-        <div className="flex items-center gap-3 pb-3 border-b border-gray-100 ">
+        <div className="flex items-center gap-3 pb-1 border-b border-gray-100 ">
           <div className="w-12 h-12 flex items-center rounded-full overflow-hidden">
             <Image
               src={UserPfp}
@@ -140,7 +140,7 @@ export default function ProfileDropdown({
         {/* Timer Section */}
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-2 border border-blue-100">
           <p className="text-xs font-medium text-blue-700 mb-2 justify-center flex">
-            Up time
+            Work Time
           </p>
 
           <div className="flex justify-center">
@@ -169,7 +169,7 @@ export default function ProfileDropdown({
             </div>
           </div>
 
-          <ChevronDown className="w-4 h-4 rotate-[-90deg] text-gray-400 group-hover:text-blue-600 transition" />
+          <ChevronDown className="w-4 h-4 rotate-[-90deg] text-gray-400 group-hover:text-[blue-600] transition" />
         </button>
 
       </div>

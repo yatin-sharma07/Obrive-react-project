@@ -192,7 +192,7 @@ export default function Projects({
 
           
           <div className="bg-transparent">
-            <div className="flex items-center justify-center mb-3 border-b-1 p-2 border-[#1a472a]">
+            <div className="flex items-center justify-center mb-3 border-b p-2 border-[#d6d4d4]">
               <h2 className="text-base font-extrabold text-[#1a472a]">
                 Current Projects
               </h2>
