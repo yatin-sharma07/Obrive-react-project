@@ -82,10 +82,10 @@ export default function Sidebar({ navItems, activeSection, setActiveSection, set
                       onMobileClose?.()
                     }}
                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
- active
-  ? 'bg-[#CAEDE666] text-[#074139] font-semibold'
-  : 'text-gray-400 font-normal hover:bg-gray-100'
-}`}
+                              active
+                                ? 'bg-[#CAEDE666] text-[#074139] font-semibold'
+                                : 'text-gray-400 font-normal hover:bg-gray-100'
+                              }`}
                   >
                     <Icon className="h-5 w-5 shrink-0" />
                     <span className={`text-sm ${active ? 'font-bold' : 'font-medium'}`}>{item.label}</span>
@@ -120,7 +120,7 @@ export default function Sidebar({ navItems, activeSection, setActiveSection, set
               </button>
             </div>
           </div>
-        </div>
+        </div> 
       </div>
 
       <div className={`${isCollapsed ? 'w-20' : 'w-64'} hidden h-full bg-white border-r border-gray-200 md:flex md:flex-col transition-all duration-300 rounded-lg shadow-sm`}>
@@ -177,7 +177,7 @@ export default function Sidebar({ navItems, activeSection, setActiveSection, set
                 {!isCollapsed && (
                   <span className={`text-sm ${active ? 'font-bold' : 'font-medium'}`}>{item.label}</span>
                 )}
-              </button>
+              </button> 
             )
           })}
         </nav>
