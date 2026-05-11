@@ -11,7 +11,35 @@ const createPrismaClient = () => {
     log: process.env.NODE_ENV === 'development' 
       ? ['error', 'warn'] 
       : ['error'],
+    errorFormat: 'pretty',
   });
+};
+
+// Retry connection with exponential backoff
+const connectWithRetry = async (maxRetries = 5) => {
+  let retries = 0;
+  let lastError;
+
+  while (retries < maxRetries) {
+    try {
+      console.log(`🔄 Attempting database connection (attempt ${retries + 1}/${maxRetries})...`);
+      await prisma.$connect();
+      console.log('✅ Successfully connected to database');
+      return true;
+    } catch (error) {
+      lastError = error;
+      retries++;
+      
+      if (retries < maxRetries) {
+        const delay = Math.min(1000 * Math.pow(2, retries - 1), 10000); // Max 10 seconds
+        console.warn(`⏳ Connection failed. Retrying in ${delay}ms... Error: ${error.message}`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  console.error('❌ Failed to connect to database after all retries');
+  throw lastError;
 };
 
 // Initialize or reuse existing client
@@ -56,4 +84,4 @@ process.on('uncaughtException', async (error) => {
   process.exit(1);
 });
 
-module.exports = { prisma };
+module.exports = { prisma, connectWithRetry };
