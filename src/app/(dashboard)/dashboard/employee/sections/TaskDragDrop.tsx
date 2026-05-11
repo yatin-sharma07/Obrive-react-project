@@ -89,7 +89,7 @@ export default function TaskDragDrop({ project }: Props) {
           tasks={tasks}
           setTasks={setTasks}
           columns={statusColumns}
-          getTaskColumnId={(task) => task.status}
+          getTaskColumnId={(task) => task.status ?? "pending"}
           onTaskDrop={handleTaskDrop}
           showAddTask={false}
         />

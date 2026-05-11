@@ -24,7 +24,7 @@ import Header from './components/Header'
 export const dynamic = 'force-dynamic';
 
 export default function EmployeeDashboard() {
-  const {  loading, error, refetch ,me} = useDashboardData('employee')
+  const { loading, error, refetch, me } = useDashboardData('employee')
   const [activeSection
     , setActiveSection] = useState('dashboard')  
   const[supportOpen,setSupportOpen]=useState(false)
@@ -89,7 +89,7 @@ export default function EmployeeDashboard() {
       
       {activeSection === "dashboard" ? (
         <div>
-          <Header  userName={'User'} activeSection={activeSection}  />
+          <Header userName={me?.name || 'User'} activeSection={activeSection} />
         </div>
       ) : null}
 

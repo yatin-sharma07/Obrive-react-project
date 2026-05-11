@@ -8,8 +8,8 @@ import { apiFetch } from '@/lib/api'
 interface AssignEmployeesDialogProps {
   open: boolean
   onClose: () => void
-  project: any
-  onAssign: (employeeIds: number[]) => void
+  project: ProjectData | null
+  onAssign: (employeeIds: number[]) => Promise<void> | void
 }
 
 interface Employee {
@@ -18,6 +18,14 @@ interface Employee {
   email: string
   job_title?: string
   department?: string
+}
+
+type ProjectMember = {
+  id: number
+}
+
+type ProjectData = {
+  team_members?: ProjectMember[]
 }
 
 export default function AssignEmployeesDialog({
@@ -77,7 +85,7 @@ export default function AssignEmployeesDialog({
 
   // Filter out already assigned employees
   const availableEmployees = employees.filter(
-    emp => !currentMembers.some(member => member.id === emp.id)
+    emp => !currentMembers.some((member: ProjectMember) => member.id === emp.id)
   )
 
   if (!open) return null

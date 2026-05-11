@@ -25,6 +25,13 @@ interface LeaveRequest {
   }
 }
 
+const formatDate = (value?: string) => {
+  if (!value) return 'N/A'
+
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? 'N/A' : date.toLocaleDateString()
+}
+
 const Leaves = () => {
   const [leaves, setLeaves] = useState<LeaveRequest[]>([])
   const [loading, setLoading] = useState(true)
@@ -57,7 +64,7 @@ const Leaves = () => {
       if (result.success) {
         // Sort by created_at descending (recent first)
         const sortedLeaves = (result.data || []).sort((a: LeaveRequest, b: LeaveRequest) => 
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
         )
         setLeaves(sortedLeaves)
       }
@@ -130,7 +137,7 @@ const Leaves = () => {
     }
   }
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status?: string) => {
     switch (status) {
       case 'approved': return 'text-green-600 bg-green-50'
       case 'rejected': return 'text-red-600 bg-red-50'
@@ -139,7 +146,7 @@ const Leaves = () => {
     }
   }
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status?: string) => {
     switch (status) {
       case 'approved': return <Check className="h-4 w-4" />
       case 'rejected': return <X className="h-4 w-4" />
@@ -221,7 +228,7 @@ const Leaves = () => {
                   >
                     <p className="truncate font-medium">{leave.users?.name || 'Unknown'}</p>
                     <p className="text-xs opacity-75">
-                      {leave.leave_date ? new Date(leave.leave_date).toLocaleDateString() : 'N/A'}
+                      {formatDate(leave.leave_date)}
                     </p>
                     <div className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
                       selectedLeave?.id === leave.id ? 'bg-white/20 text-white' : getStatusColor(leave.status || '')
@@ -295,21 +302,21 @@ const Leaves = () => {
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <p className="text-gray-500">Leave Date</p>
-                        <p className="font-medium">{selectedLeave.leave_date ? new Date(selectedLeave.leave_date).toLocaleDateString() : 'N/A'}</p>
+                        <p className="font-medium">{formatDate(selectedLeave.leave_date)}</p>
                       </div>
                       <div>
                         <p className="text-gray-500">Leave Type</p>
-                        <p className="font-medium capitalize">{selectedLeave.leave_type}</p>
+                        <p className="font-medium capitalize">{selectedLeave.leave_type || 'N/A'}</p>
                       </div>
                       <div>
                         <p className="text-gray-500">Requested On</p>
-                        <p className="font-medium">{new Date(selectedLeave.created_at).toLocaleDateString()}</p>
+                        <p className="font-medium">{formatDate(selectedLeave.created_at)}</p>
                       </div>
                       <div>
                         <p className="text-gray-500">Status</p>
                         <div className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(selectedLeave.status)}`}>
                           {getStatusIcon(selectedLeave.status)}
-                          {selectedLeave.status}
+                          {selectedLeave.status || 'pending'}
                         </div>
                       </div>
                     </div>
@@ -325,7 +332,7 @@ const Leaves = () => {
                     <h3 className="text-sm font-semibold text-gray-900 mb-2">Update Status</h3>
                     <div className="flex items-center gap-3">
                       <select
-                        value={selectedLeave.status}
+                        value={selectedLeave.status || 'pending'}
                         onChange={(e) => handleUpdateStatus(selectedLeave.id, e.target.value)}
                         disabled={updating}
                         className={`rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium outline-none focus:ring-2 focus:ring-[#1a472a] disabled:opacity-50 ${getStatusColor(selectedLeave.status)}`}
