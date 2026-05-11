@@ -51,7 +51,7 @@ export default function Header({ userName = 'Evan', onRefresh, isRefreshing = fa
       </div>
 
       <div>
-        <p className="text-[14px] text-gray-500 mb-1 mt-5 font-semibold">Welcome back, {userName}!</p>
+        <p className="text-[14px] text-gray-500 mb-1 mt-5 font-semibold">Welcome back!</p>
         <h1 className="text-[37px] font-extrabold text-[#074139] sm:text-xl">{activeSection}</h1>
       </div>
 
