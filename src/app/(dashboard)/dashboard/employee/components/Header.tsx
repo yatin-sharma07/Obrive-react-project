@@ -19,13 +19,10 @@ export default function Header({ userName = 'Evan', onRefresh, isRefreshing = fa
       <div className="flex items-center justify-between mb-2">
         <div className="flex-1 max-w-xs">
 
-<<<<<<< HEAD
-                    <div className="relative w-110">
-            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-400" />
-=======
+
                     <div className="relative">
             <Search className="w-2.5 absolute left-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-400" />
->>>>>>> c1d9f3628b5dd8c1ae504710e29c5f65cdd92048
+
             <input
               type="text"
               placeholder="Search..."
