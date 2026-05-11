@@ -92,6 +92,7 @@ interface ProjectsProps {
   onViewAll?: () => void;
   variant?: ProjectCardVariant;
   onSelectProject?: (project: ProjectItem) => void;
+  setActiveSection?: (section: string) => void;
 }
 
 export default function Projects({
@@ -99,7 +100,7 @@ export default function Projects({
   onViewAll,
   variant,
   onSelectProject,
-  setActiveSection
+  setActiveSection,
 }: ProjectsProps) {
   const [myProjects, setMyProjects] = useState<ProjectItem[]>([]);
 
@@ -168,7 +169,7 @@ export default function Projects({
 
           <button
             type="button"
-            onClick={()=>setActiveSection("projects")}
+            onClick={() => setActiveSection?.("projects")}
             className="text-sm font-semibold text-teal-700 hover:text-teal-800 inline-flex items-center gap-1"
           >
             View all <ChevronRight className="w-4 h-4" />

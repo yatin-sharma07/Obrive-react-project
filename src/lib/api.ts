@@ -13,17 +13,17 @@ export async function apiFetch(
 
   // Get token from localStorage for fallback if cookie is not sent/working
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-  const authHeader = token ? { 'Authorization': `Bearer ${token}` } : {};
+  const headers = new Headers(rest.headers);
+  headers.set("Content-Type", "application/json");
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
 
   const response = await fetch(`${BASE_URL}${endpoint}`, {
     ...rest,
     cache: "no-store",
     credentials: "include", 
-    headers: {
-      "Content-Type": "application/json",
-      ...authHeader,
-      ...(rest.headers || {}),
-    },
+    headers,
   });
 
   //  If access token expired (usually 401)

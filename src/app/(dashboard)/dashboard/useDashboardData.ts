@@ -36,6 +36,12 @@ interface DashboardData {
   projects?: ProjectItem[]
   events?: any[]
   activities?: any[]
+  me?: {
+    id?: number | string
+    name?: string
+    email?: string
+    role?: string
+  }
   user?: {
     name: string;
     email: string;

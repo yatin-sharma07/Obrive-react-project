@@ -6,6 +6,7 @@ import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
+import type { EventContentArg, EventDropArg } from '@fullcalendar/core'
 import { useState } from 'react'
 // import ProfileNotifications from '@app/(dashboard)/dashboard/employee/components/ProfileNotifications'
 
@@ -51,11 +52,6 @@ export default function Calendar() {
   useEffect(() => {
     fetchCalendarTasks();
   }, []);
-
-    useEffect(() => {
-    fetchCalendarTasks();
-  }, []);
-
   const openAddEventModal = (dateStr?: string) => {
     setSelectedDate(dateStr || new Date().toISOString().split('T')[0])
     setNewEventTitle('')
@@ -63,7 +59,7 @@ export default function Calendar() {
   }
 
   // CREATE EVENT (Click on date)
-  const handleDateClick = (arg: any) => {
+  const handleDateClick = (arg: { dateStr: string }) => {
     openAddEventModal(arg.dateStr)
   }
 
@@ -98,7 +94,7 @@ export default function Calendar() {
   }
 
   // DRAG & DROP
-  const handleEventDrop = async (info) => {
+  const handleEventDrop = async (info: EventDropArg) => {
     try {
       const response = await apiFetch(`/calendar/tasks/${info.event.id}`, {
         method: 'PUT',
@@ -121,7 +117,7 @@ export default function Calendar() {
     }
   }
 
-  const renderEventContent = (eventInfo: any) => {
+  const renderEventContent = (eventInfo: EventContentArg) => {
     const { duration, trend, color } = eventInfo.event.extendedProps || {};
     
     return (

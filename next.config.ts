@@ -9,10 +9,6 @@ const withMDX = createMDX({
 const isDev = process.env.NODE_ENV !== "production";
 
 const nextConfig: NextConfig = {
-
-    typescript: {
-    ignoreBuildErrors: true,
-  },
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -57,10 +53,6 @@ const nextConfig: NextConfig = {
 
   compress: true,
   poweredByHeader: false,
-
-  // Disable the RSC/HMR "fetch cache" during development
-  // (prevents server components HMR from reusing stale fetch results)
-  serverComponentsHmrCache: isDev ? false : true,
 
   // Keep dev on-demand entries from being buffered for long
   onDemandEntries: isDev
