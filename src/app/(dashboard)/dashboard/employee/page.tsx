@@ -95,7 +95,7 @@ export default function EmployeeDashboard() {
 =======
       {activeSection === "dashboard" ? (
         <div>
-          <Header userName="Karn" />
+          <Header  userName={'User'} activeSection={activeSection}  />
         </div>
       ) : null}
 
