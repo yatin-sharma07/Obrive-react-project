@@ -3,7 +3,7 @@ const express    = require('express');
 const cors       = require('cors');
 const helmet     = require('helmet');
 const morgan     = require('morgan');
-const { prisma } = require('./prisma');
+const { prisma, connectWithRetry } = require('./prisma');
 const bcrypt     = require('bcrypt');
 const jwt        = require('jsonwebtoken');
 const startWorkSessionCron = require('./src/jobs/workSessionCron');
@@ -124,7 +124,7 @@ app.use(require('./src/middleware/errorHandler'));
 // ── Start ─────────────────────────────────────────────────────
 async function bootstrap() {
   try {
-    await prisma.$connect();
+    await connectWithRetry(5);
     console.log('✅ Database connected');
     startWorkSessionCron();
     app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
