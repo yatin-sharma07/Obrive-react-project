@@ -2,13 +2,13 @@
 
 type LeaveColleague = {
   id: number;
-  leaveType: string;
-  status: string;
-  leaveDate: string;
-  employee: {
+  leaveType?: string;
+  status?: string;
+  leaveDate?: string;
+  employee?: {
     id: number;
-    name: string;
-    email: string;
+    name?: string;
+    email?: string;
     job_title?: string | null;
     department?: string | null;
   };
@@ -51,16 +51,17 @@ const SectionList = ({
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="font-medium text-[#123c35]">
-                  {item.employee.name}
+                  {item.employee?.name || "Unknown employee"}
                 </p>
                 <p className="text-xs text-gray-500">
-                  {item.employee.job_title ||
-                    item.employee.department ||
-                    item.employee.email}
+                  {item.employee?.job_title ||
+                    item.employee?.department ||
+                    item.employee?.email ||
+                    "No details available"}
                 </p>
               </div>
               <span className="rounded-full bg-[#e2f5f1] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0f766e]">
-                {item.leaveType}
+                {item.leaveType || "Leave"}
               </span>
             </div>
           </div>
