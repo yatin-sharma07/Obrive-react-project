@@ -1,36 +1,42 @@
 // backend/src/modules/auth/auth.service.js
-const { prisma } = require('../../../prisma');
-const { comparePassword } = require('../../utils/bcrypt');
-const bcrypt = require('bcrypt');
+const { prisma } = require("../../../prisma");
+const bcrypt = require("bcrypt");
 const {
   signAccessToken,
   signRefreshToken,
   verifyRefreshToken,
-} = require('../../utils/jwt');
+} = require("../../utils/jwt");
 
 // Employee / HR / Admin / Supervisor login
 exports.loginUser = async ({ email, password, ip, userAgent }) => {
   // Use raw query to find user by email
   const result = await prisma.$queryRaw`
-    SELECT id, userid, email, name, role, password, status 
+    SELECT id, userid, email, name, role, password, status, is_active
     FROM users 
     WHERE email = ${email} AND (role = 'employee' OR role = 'hr' OR role = 'admin' OR role = 'supervisor')
     LIMIT 1
   `;
-  
+
   const user = result[0];
-  
+
   if (!user) {
-    throw { status: 401, message: 'Invalid credentials or inactive account' };
+    throw { status: 401, message: "Invalid credentials or inactive account" };
   }
-  
+
+  if (user.is_active === false || user.status === "inactive") {
+    throw {
+      status: 403,
+      message: "Account blocked. Contact admin or supervisor",
+    };
+  }
+
   // Compare password
   const isValid = await bcrypt.compare(password, user.password);
-  
+
   if (!isValid) {
-    throw { status: 401, message: 'Invalid credentials' };
+    throw { status: 401, message: "Invalid credentials" };
   }
-  
+
   // Log login
   let log = null;
   try {
@@ -40,53 +46,53 @@ exports.loginUser = async ({ email, password, ip, userAgent }) => {
       RETURNING id
     `;
     log = logResult[0];
-  } catch (err) {
-    console.log('Login log not recorded - table might not exist');
+  } catch (_err) {
+    console.log("Login log not recorded - table might not exist");
   }
-  
+
   const payload = { id: user.id, role: user.role, logId: log?.id };
   const accessToken = signAccessToken(payload);
   const refreshToken = signRefreshToken({ id: user.id });
-  
+
   return {
     accessToken,
     refreshToken,
     logId: log?.id,
-    user: { 
-      id: user.id, 
+    user: {
+      id: user.id,
       userid: user.userid,
-      email: user.email, 
+      email: user.email,
       name: user.name,
-      role: user.role 
+      role: user.role,
     },
   };
 };
 
 // Client login
-exports.loginClient = async ({ clientId, password }) => {
+exports.loginClient = async ({ clientId, password: _password }) => {
   const result = await prisma.$queryRaw`
     SELECT id, userid, email, name, role, password, status 
     FROM users 
     WHERE userid = ${clientId} AND role = 'client'
     LIMIT 1
   `;
-  
+
   const client = result[0];
-  
-  if (!client || client.status === 'inactive') {
-    throw { status: 401, message: 'Invalid client credentials' };
+
+  if (!client || client.status === "inactive") {
+    throw { status: 401, message: "Invalid client credentials" };
   }
-  
-  const payload = { id: client.id, role: 'CLIENT', clientId: client.userid };
+
+  const payload = { id: client.id, role: "CLIENT", clientId: client.userid };
   const accessToken = signAccessToken(payload);
-  
+
   return {
     accessToken,
-    client: { 
-      id: client.id, 
-      clientId: client.userid, 
+    client: {
+      id: client.id,
+      clientId: client.userid,
       name: client.name,
-      email: client.email
+      email: client.email,
     },
   };
 };
@@ -98,26 +104,26 @@ exports.logout = async ({ userId, logId }) => {
       where: {
         userId,
         id: logId,
-        logoutTime: null
-      }
+        logoutTime: null,
+      },
     });
-    
-    if (!log) throw { status: 404, message: 'Active session not found' };
-    
+
+    if (!log) throw { status: 404, message: "Active session not found" };
+
     const logoutTime = new Date();
     const sessionDuration = Math.floor((logoutTime - log.loginTime) / 1000);
-    
+
     await prisma.login_logs.update({
       where: { id: logId },
       data: {
         logoutTime,
-        sessionDuration
-      }
+        sessionDuration,
+      },
     });
-    
-    return { sessionDuration, message: 'Logged out successfully' };
-  } catch (err) {
-    throw { status: 404, message: 'Active session not found' };
+
+    return { sessionDuration, message: "Logged out successfully" };
+  } catch (_err) {
+    throw { status: 404, message: "Active session not found" };
   }
 };
 
@@ -125,26 +131,27 @@ exports.logout = async ({ userId, logId }) => {
 exports.getCurrentUserDetails = async (userId) => {
   try {
     const user = await prisma.$queryRaw`
-      SELECT id, userid, email, name, role, status 
+      SELECT id, userid, email, name, role, status, is_active
       FROM users 
       WHERE id = ${userId}
       LIMIT 1
     `;
-    
+
     if (!user[0]) {
-      throw { status: 401, message: 'User not found' };
+      throw { status: 401, message: "User not found" };
     }
-    
+
     return {
       id: user[0].id,
       userid: user[0].userid,
       email: user[0].email,
       name: user[0].name,
       role: user[0].role,
-      status: user[0].status
+      status: user[0].status,
+      is_active: user[0].is_active,
     };
-  } catch (err) {
-    throw { status: 401, message: 'Failed to fetch user details' };
+  } catch (_err) {
+    throw { status: 401, message: "Failed to fetch user details" };
   }
 };
 
@@ -153,15 +160,18 @@ exports.refreshToken = async (token) => {
   try {
     const payload = verifyRefreshToken(token);
     const user = await prisma.$queryRaw`
-      SELECT id, role FROM users WHERE id = ${payload.id} LIMIT 1
+      SELECT id, role, status, is_active FROM users WHERE id = ${payload.id} LIMIT 1
     `;
-    
-    if (!user[0]) throw { status: 401, message: 'User not found' };
-    
+
+    if (!user[0]) throw { status: 401, message: "User not found" };
+    if (user[0].is_active === false || user[0].status === "inactive") {
+      throw { status: 403, message: "Account blocked" };
+    }
+
     const newAccess = signAccessToken({ id: user[0].id, role: user[0].role });
     return { accessToken: newAccess };
   } catch {
-    throw { status: 403, message: 'Invalid or expired refresh token' };
+    throw { status: 403, message: "Invalid or expired refresh token" };
   }
 };
 
@@ -184,6 +194,6 @@ exports.getAllUsers = async () => {
     FROM users
     ORDER BY created_at DESC
   `;
-  
+
   return result;
 };

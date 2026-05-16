@@ -71,7 +71,7 @@ export default function Board({
 	useEffect(() => {
 		const fetchUserId = async () => {
 			try {
-				const res = await apiFetch("/employee/me");
+				const res = await apiFetch("/auth/me");
 				if (res.ok) {
 					const json = await res.json();
 					const fetchedUserId = json.data.id || json.data.userid;

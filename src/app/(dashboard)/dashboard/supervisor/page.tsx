@@ -9,8 +9,8 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import Sidebar from '@/components/dashboard/Sidebar'
+import Calender from '@/components/dashboard/Calender'
 import Dashboard from './sections/Dashboard'
-import SkeletonLoading from '@/components/SkelitonLoading'
 import Projects from './sections/Projects'
 import StickyNotes from './sections/StickyNotes'
 import Leaves from './sections/Leaves'
@@ -26,6 +26,7 @@ export default function SupervisorDashboard() {
   const navItems = [
     { label: 'Dashboard', icon: LayoutDashboard, key: 'dashboard' },
     { label: 'Projects', icon: FolderOpen, key: 'projects' },
+    { label: 'Calender', icon: Calendar, key: 'calender' },
     { label: 'Leaves', icon: Calendar, key: 'leaves' },
     { label: 'Sticky Notes', icon: List, key: 'sticky-notes' },
   ]
@@ -64,6 +65,9 @@ export default function SupervisorDashboard() {
         )}
         {activeSection === 'projects' && (
           <Projects />
+        )}
+        {activeSection === 'calender' && (
+          <Calender />
         )}
         {activeSection === 'leaves' && (
           <Leaves />
