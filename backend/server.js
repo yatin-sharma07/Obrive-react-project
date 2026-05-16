@@ -94,9 +94,11 @@ app.post('/api/employee/login-direct', async (req, res) => {
 // ============================================
 app.get('/api/health', (req, res) => res.json({ status: 'OK', timestamp: new Date() }));
 
-// ============================================
+// ======================================================================================
 // 🔒 PROTECTED ROUTES (Require Authentication)
-// ============================================
+// ======================================================================================
+
+//CRM Routes ===========================================================================
 app.use('/api/auth',      require('./src/modules/auth/auth.routes'));
 app.use('/api/employee',  require('./src/modules/employee/employee.routes'));
 app.use('/api/clients',   require('./src/modules/clients/client.routes'));
@@ -121,13 +123,20 @@ app.use('/api/work-sessions', require('./src/modules/work-sessions/work-sessions
 app.use(require('./src/middleware/errorHandler'));
 
 
+// AUDIO-ROOM Routes ===========================================================================
+app.use('/api/audio-room', require('./src/modules/AUDIO_ROOM/room-config/roomConfig.routes'));
+
+
+
+
+
 // ── Start ─────────────────────────────────────────────────────
 async function bootstrap() {
   try {
     await connectWithRetry(5);
     console.log('✅ Database connected');
     startWorkSessionCron();
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+    app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Server running on port ${PORT}`));
   } catch (err) {
     console.error('❌ Failed to start:', err);
     process.exit(1);

@@ -9,7 +9,7 @@ const {
 } = require('../../utils/jwt');
 
 // Employee / HR / Admin / Supervisor login
-exports.loginUser = async ({ email, password, ip, userAgent }) => {
+exports.loginUser = async ({ email, password, ip, userAgent }) => { //ip and userAgent are optional parameters for logging purposes
   // Use raw query to find user by email
   const result = await prisma.$queryRaw`
     SELECT id, userid, email, name, role, password, status 
@@ -62,22 +62,30 @@ exports.loginUser = async ({ email, password, ip, userAgent }) => {
   };
 };
 
-// Client login
+
 exports.loginClient = async ({ clientId, password }) => {
   const result = await prisma.$queryRaw`
     SELECT id, userid, email, name, role, password, status 
     FROM users 
-    WHERE userid = ${clientId} AND role = 'client'
+    WHERE (email = ${clientId} OR userid = ${clientId}) AND role = 'client'
     LIMIT 1
   `;
   
   const client = result[0];
   
+
   if (!client || client.status === 'inactive') {
     throw { status: 401, message: 'Invalid client credentials' };
   }
   
-  const payload = { id: client.id, role: 'CLIENT', clientId: client.userid };
+  const isValid = await bcrypt.compare(password, client.password);
+  
+  if (!isValid) {
+    throw { status: 401, message: 'Invalid client credentials' };
+  }
+  
+
+  const payload = { id: client.id, role: 'client', clientId: client.userid };
   const accessToken = signAccessToken(payload);
   
   return {

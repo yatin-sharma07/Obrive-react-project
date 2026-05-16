@@ -1,7 +1,7 @@
 "use client";
 import FONTS from "@/assets/fonts";
 import CustomToast from "@/components/pages/resources/components/Toast";
-
+import { useRouter } from "next/navigation";
 import WhiteLogo from "@/components/shared/logo/WhiteLogo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,52 +10,70 @@ import { apiFetch } from "@/lib/api";
 import React from "react";
 
 export default function ClientLogin() {
-  const [loading , setLoading] = React.useState(false);
- const [clientId, setClientId] = React.useState(""); 
+ const [loading , setLoading] = React.useState(false);
+ const [clientId, setClientId] = React.useState(""); //client email can be considerd as clientId for login
+ const router = useRouter(); 
  const[showToast, setShowToast] = React.useState(false);
+ const [password, setPassword] = React.useState("");
+ const [error, setError] = React.useState("");
 
 const handleLogin = async () => {
   try {
     setLoading(true);
+    setError("");
 
-    const res = await apiFetch("/auth/client/login", {
+    // Add validation before sending
+    // if (!clientId.trim()) {
+    //   setError("Please enter your Client ID");
+    //   setLoading(false);
+    //   return;
+    // }
+
+    // if (!password.trim()) {
+    //   setError("Please enter your password");
+    //   setLoading(false);
+    //   return;
+    // }
+
+    console.log('Sending:', { clientId, password });
+
+    const res = await apiFetch("/auth/client/login", { 
       method: "POST",
-      body: JSON.stringify({ clientId }),
+      body: JSON.stringify({
+        clientId: clientId.trim(),
+        password: password.trim(),
+        // clientId,
+        // password,
+      }),
     });
 
     const data = await res.json();
+    console.log('Response:', data);
 
     if (!res.ok) {
       throw new Error(data.message || "Login failed");
     }
 
-    // Save client info for the dashboard
-    if (data?.data?.client) {
-      localStorage.setItem('user', JSON.stringify({
-        ...data.data.client,
-        role: 'client'
-      }));
-    }
     if (data?.data?.accessToken) {
       localStorage.setItem('token', data.data.accessToken);
     }
 
+    if (data?.data?.client) {
+      localStorage.setItem('user', JSON.stringify(data.data.client));
+      router.push('/dashboard/client');
+    }
+
     setShowToast(true);
-
-   
-
-     setTimeout(() => {
-      window.location.href = "/client/dashboard";
-    }, 1500);
-
   } catch (err: any) {
-    console.error(err.message);
-    alert(err.message);
+    setError(err.message || 'Login failed');
   } finally {
     setLoading(false);
-    
   }
 };
+
+
+
+
   return (
     <div className="grid grid-cols-[2.5fr_2fr] w-full h-screen">
       <div className="bg-primary flex items-center justify-center">
@@ -93,7 +111,19 @@ const handleLogin = async () => {
                 placeholder="Type your client Id "
                 className="border mt-2 py-6 border-primary outline-none"
                 value={clientId}
-  onChange={(e) => setClientId(e.target.value)}
+                onChange={(e) => setClientId(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="password">Password</Label>
+              <Input
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                type="password"
+                id="password"
+                placeholder="Type your Password"
+                className="border mt-2 py-6 border-primary outline-none"
               />
             </div>
             
@@ -106,6 +136,11 @@ const handleLogin = async () => {
             >
              {loading?"Logging in...":"Log-in"}
             </Button>
+
+{error && (
+  <div className="text-red-600 text-sm mt-2">{error}</div>
+)}
+
           </form>
         </div>
         </div>
@@ -113,3 +148,7 @@ const handleLogin = async () => {
       </div>
   );
 }
+
+
+
+

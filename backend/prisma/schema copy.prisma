@@ -64,8 +64,6 @@ model projects {
   progress            Int                   @default(0)
   leader_id           Int?
   created_at          DateTime?             @default(now()) @db.Timestamp(6)
-  project_status  String?  @db.Text
-  client_id       String?  @db.VarChar(255)
   project_assignments project_assignments[]
   tasks               tasks[]
   leader              users?                @relation("ProjectLeader", fields: [leader_id], references: [id])

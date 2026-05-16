@@ -74,6 +74,12 @@ export function useDashboardData(userRole: UserRole) {
         ])
       }
       
+      // if (userRole === 'client') {
+      //   [projectsRes] = await Promise.all([
+      //     apiFetch('/projects/client/projects', { method: 'GET' })
+      //   ])
+      // }
+
       if (!projectsRes.ok) {
         if (projectsRes.status === 401) {
           throw new Error('Unauthorized: Please login again')

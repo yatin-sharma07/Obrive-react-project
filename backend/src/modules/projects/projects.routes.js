@@ -4,13 +4,15 @@ const ctrl = require('./projects.controller');
 
 // Specific routes first
 router.get('/user/projects', authenticate, ctrl.getUserProjects);
+router.get('/client/projects', authenticate, ctrl.getClientProjects); 
 
 // Generic routes after
 router.get('/', authenticate, ctrl.getProjects);
 router.post('/', authenticate, ctrl.createProject);
 
 router.get('/:id', authenticate, ctrl.getProjectById);
-router.put('/:id/progress', authenticate, ctrl.updateProjectProgress);
+router.get('/:id/status', authenticate, ctrl.getProjectStatus);
+// router.put('/:id/progress', authenticate, ctrl.updateProjectProgress);
 router.put('/:id/leader', authenticate, ctrl.assignProjectLeader);
 
 router.post('/:id/assign', authenticate, ctrl.assignEmployeeToProject);
