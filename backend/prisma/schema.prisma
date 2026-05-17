@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -133,6 +132,7 @@ model users {
   work_sessions       work_sessions[]
   leaves              leaves[]
   approved_leaves     leaves[]              @relation("LeaveApprovedBy")
+  room_configs        room_configs[]
 }
 
 model leaves {
@@ -228,11 +228,7 @@ model room_configs {
   notificationSettings Json?
 
   createdBy          Int?
-  creator            users?
-    @relation(
-      fields: [createdBy],
-      references: [id]
-    )
+  creator            users?    @relation(fields: [createdBy], references: [id])
 
   endedBy            Int?
   endedAt            DateTime?

@@ -282,7 +282,7 @@ class ProjectService {
   }
 
   async createProject(data) {
-    const { name, description, priority, project_id, team_members, deadline } = data;
+    const { name, description, priority, project_id, team_members, deadline, client_id } = data;
     
     return await prisma.$transaction(async (tx) => {
       // 1. Create the project
@@ -294,6 +294,7 @@ class ProjectService {
           project_id: project_id || `PROJ-${Date.now()}`,
           deadline: deadline ? new Date(deadline) : null,
           progress: 0,
+          client_id: client_id ? String(client_id) : null,
         },
       });
 
@@ -352,9 +353,10 @@ class ProjectService {
     // Check if user is leader or supervisor
     const user = await prisma.users.findUnique({ where: { id: userId } });
     const isClient = project.client_id === userId;
+    const isSupervisor = user.role === 'supervisor' || user.role === 'hr';
 
     if (!isClient && !isSupervisor) {
-      throw new Error('client can see progress');
+      throw new Error('Only client or supervisor can view progress');
     }
 
     return await prisma.projects.update({
@@ -364,18 +366,121 @@ class ProjectService {
   }
 
 
+async updateProject(id, projectData, userId) {
+  // 1. Check if project exists
+  const targetProject = await prisma.projects.findUnique({
+    where: { id: parseInt(id) },
+  });
+  
+  if (!targetProject) {
+    throw new Error('Project not found');
+  }
+
+  // 2. Check User Role
+  const requestingUser = await prisma.users.findUnique({
+    where: { id: parseInt(userId) },
+  });
+
+  if (!requestingUser) {
+    throw new Error('User not found');
+  }
+
+  if (requestingUser.role !== 'supervisor' && requestingUser.role !== 'hr' && requestingUser.role !== 'admin') {
+    throw new Error('Only supervisors, HR, or admins can update projects');
+  }
+
+// 3. STRICT CLEANING: Jo fields schema me nahi hain ya relational hain unhe nikalein
+const { 
+  id: _, 
+  created_at, 
+  updated_at, 
+  tasks, 
+  project_assignments,
+  leader,
+  status, // 👈 Frontend se aane wale galat 'status' ko yahan extract karke alag kiya
+  team_members,
+  ...rawCleanData 
+} = projectData;
+
+const cleanData = { ...rawCleanData };
+
+// 4. Sahi Column Map Karein (Agar frontend ka status database ke project_status me save karna hai)
+if (status) {
+  cleanData.project_status = status; // 👈 status ki jagah project_status use karein
+}
+
+// Data Types Validation
+if (cleanData.leader_id) {
+  cleanData.leader_id = parseInt(cleanData.leader_id);
+}
+if (cleanData.progress) {
+  cleanData.progress = parseInt(cleanData.progress);
+}
+if (cleanData.deadline) {
+  cleanData.deadline = new Date(cleanData.deadline);
+}
+
+// 5. Final Prisma Query
+const result = await prisma.$transaction(async (tx) => {
+  const updatedProject = await tx.projects.update({
+    where: { id: parseInt(id) },
+    data: cleanData,
+  });
+
+  if (Array.isArray(team_members)) {
+    await tx.project_assignments.deleteMany({
+      where: { project_id: parseInt(id) },
+    });
+
+    const normalizedTeamMembers = team_members
+      .map((member) => Number(member))
+      .filter((memberId) => Number.isInteger(memberId));
+
+    if (normalizedTeamMembers.length > 0) {
+      await tx.project_assignments.createMany({
+        data: normalizedTeamMembers.map((employeeId) => ({
+          project_id: parseInt(id),
+          employee_id: employeeId,
+        })),
+        skipDuplicates: true,
+      });
+    }
+  }
+
+  return updatedProject;
+});
+
+return result;
+}
+
+
   async assignProjectLeader(projectId, leaderId, userId) {
     const user = await prisma.users.findUnique({ where: { id: userId } });
     if (user.role !== 'supervisor' && user.role !== 'hr') {
       throw new Error('Only supervisors can assign project leaders');
     }
 
-
-
     return await prisma.projects.update({
       where: { id: parseInt(projectId) },
       data: { leader_id: parseInt(leaderId) }
     });
+  }
+
+  async getAllClients() {
+    // Fetch all clients (users with role = 'client')
+    const result = await prisma.$queryRaw`
+      SELECT id, userid, email, name
+      FROM users
+      WHERE role = 'client'
+      ORDER BY name ASC
+    `;
+
+    return result.map(client => ({
+      id: Number(client.id),
+      userid: client.userid,
+      email: client.email,
+      name: client.name
+    }));
   }
 }
 
