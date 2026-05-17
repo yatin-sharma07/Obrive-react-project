@@ -15,6 +15,8 @@ import Projects from './sections/Projects'
 import StickyNotes from './sections/StickyNotes'
 import Leaves from './sections/Leaves'
 import supportImg from "@/assets/images/employee/illustration.png"
+import Messenger from '@/components/chat/Messenger'
+import { MessageSquare } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,6 +31,7 @@ export default function SupervisorDashboard() {
     { label: 'Calender', icon: Calendar, key: 'calender' },
     { label: 'Leaves', icon: Calendar, key: 'leaves' },
     { label: 'Sticky Notes', icon: List, key: 'sticky-notes' },
+    { label: 'Messenger', icon: MessageSquare, key: 'messenger' },
   ]
 
   return (
@@ -74,6 +77,11 @@ export default function SupervisorDashboard() {
         )}
         {activeSection === 'sticky-notes' && (
           <StickyNotes />
+        )}
+        {activeSection === 'messenger' && (
+          <div className="flex-1 p-4 overflow-hidden h-full">
+            <Messenger />
+          </div>
         )}
       </div>
 

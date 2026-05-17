@@ -134,7 +134,8 @@ export function useDashboardData(userRole: UserRole) {
       console.log("Me API Response:", meResult.data);
 
       if (projectsResult.success) {
-        const mappedProjects: ProjectItem[] = projectsResult.data.map(
+        const projectsData = Array.isArray(projectsResult.data) ? projectsResult.data : [];
+        const mappedProjects: ProjectItem[] = projectsData.map(
           (p: any) => ({
             id: String(p.id),
             code: p.project_id || `PN${String(p.id).padStart(7, "0")}`,
