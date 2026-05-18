@@ -7,13 +7,33 @@ const inputClass = "w-full rounded-[5px] border border-slate-200 bg-white/50 px-
 const selectClass = "w-full rounded-[5px] border border-slate-200 bg-white/50 px-1.5 py-1.5 text-[9px] text-slate-700 outline-none transition-all focus:border-slate-300 focus:bg-white";
 const sectionClass = "rounded-[5px] border border-slate-200/70 bg-white/40 backdrop-blur-[10px] p-3 shadow-[10px] ";
 
+interface FormData {
+  roomName: string;
+  roomDescription: string;
+  roomType: string;
+  startTime: string;
+  participantLimit: number | string;
+  visibility: string;
+}
 
+interface RoleStates {
+  Host: string[];
+  Moderators: string[];
+  Speakers: string[];
+  Joinees: string[];
+}
 
+interface RoleInputStates {
+  Host: string;
+  Moderators: string;
+  Speakers: string;
+  Joinees: string;
+}
 
 const CreateRoom = () => {
   // ============ FORM STATE ============
   // Store user input from form fields
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     roomName: "",
     roomDescription: "",
     roomType: "live", // "live" or "scheduled"
@@ -22,12 +42,9 @@ const CreateRoom = () => {
     visibility: "private", // "public", "private", "invite-only"
   });
 
-
-
-
   // ============ PERMISSION STATE ============
   // Track which roles are selected per role
-  const [rolePermissions, setRolePermissions] = useState({
+  const [rolePermissions, setRolePermissions] = useState<RoleStates>({
     Host: [],
     Moderators: [],
     Speakers: [],
@@ -35,14 +52,14 @@ const CreateRoom = () => {
   });
 
   // Store custom user IDs for "other" option
-  const [otherUserIds, setOtherUserIds] = useState({
+  const [otherUserIds, setOtherUserIds] = useState<RoleStates>({
     Host: [],
     Moderators: [],
     Speakers: [],
     Joinees: [],
   });
 
-  const [currentOtherId, setCurrentOtherId] = useState({
+  const [currentOtherId, setCurrentOtherId] = useState<RoleInputStates>({
     Host: "",
     Moderators: "",
     Speakers: "",
@@ -81,7 +98,7 @@ const CreateRoom = () => {
    * FRONTEND DISPLAYS: Success message or error message to user
    */
 
-  const handleFormChange = (field, value) => {
+  const handleFormChange = (field: keyof FormData, value: string | number) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setError(""); // Clear error when user modifies form
   };
@@ -192,24 +209,24 @@ console.table(payload);
     Joinees: ["Admin", "Moderator", "HR", "Employee", "Client", "other"],
   };
 
-              const handleCheckboxChange = (role, option) => {
-                setRolePermissions((prev) => {
-                  const currentOptions = prev[role] || [];
-                  if (currentOptions.includes(option)) {
-                    return {
-                      ...prev,
-                      [role]: currentOptions.filter((opt) => opt !== option),
-                    };
-                  } else {
-                    return {
-                      ...prev,
-                      [role]: [...currentOptions, option],
-                    };
-                  }
-                });
-              };
+  const handleCheckboxChange = (role: keyof RoleStates, option: string) => {
+    setRolePermissions((prev) => {
+      const currentOptions = prev[role] || [];
+      if (currentOptions.includes(option)) {
+        return {
+          ...prev,
+          [role]: currentOptions.filter((opt) => opt !== option),
+        };
+      } else {
+        return {
+          ...prev,
+          [role]: [...currentOptions, option],
+        };
+      }
+    });
+  };
 
-  const handleAddOtherId = (role, userId) => {
+  const handleAddOtherId = (role: keyof RoleStates, userId: string) => {
     if (userId.trim()) {
       setOtherUserIds((prev) => ({
         ...prev,
@@ -222,7 +239,7 @@ console.table(payload);
     }
   };
 
-  const handleRemoveOtherId = (role, index) => {
+  const handleRemoveOtherId = (role: keyof RoleStates, index: number) => {
     setOtherUserIds((prev) => ({
       ...prev,
       [role]: prev[role].filter((_, i) => i !== index),
@@ -239,7 +256,7 @@ console.table(payload);
     setPasscode(newPasscode);
   };
 
-  const copyToClipboard = (text) => {
+  const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
   };
 
@@ -503,7 +520,7 @@ console.table(payload);
                             <input
                               type="text"
                               placeholder="Enter user ID"
-                              value={currentOtherId[role]}
+                              value={currentOtherId[role as keyof RoleInputStates]}
                               onChange={(e) =>
                                 setCurrentOtherId((prev) => ({
                                   ...prev,
@@ -516,8 +533,8 @@ console.table(payload);
                             <button
                               onClick={() =>
                                 handleAddOtherId(
-                                  role,
-                                  currentOtherId[role]
+                                  role as keyof RoleStates,
+                                  currentOtherId[role as keyof RoleInputStates]
                                 )
                               }
                               className="rounded-[5px] bg-blue-500 px-2 py-1 text-[8px] font-medium text-white hover:bg-blue-600 transition"
