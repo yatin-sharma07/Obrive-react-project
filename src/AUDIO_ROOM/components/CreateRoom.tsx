@@ -131,7 +131,7 @@ const CreateRoom = () => {
         roomDescription: formData.roomDescription || "", // Empty string instead of undefined
         roomType: formData.roomType,
         startTime: formData.startTime || "", // Empty string for optional field
-        participantLimit: parseInt(formData.participantLimit) || 50,
+        participantLimit: parseInt(String(formData.participantLimit)) || 50,
         visibility: formData.visibility,
         allowGuestUsers: allowGuests,
         whoCanHost: [...(rolePermissions.Host || []), ...(otherUserIds.Host || [])],
