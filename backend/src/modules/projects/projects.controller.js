@@ -75,6 +75,35 @@ exports.updateProjectProgress = async (req, res) => {
   }
 };
 
+exports.getProjectStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { progress } = req.body;
+    const project = await projectService.getProjectStatus(id, progress, req.user.id);
+    successResponse(res, project, 'Project progress updated');
+  } catch (err) {
+    errorResponse(res, err.message, 400);
+  }
+};
+
+      exports.updateProject = async (req, res) => {
+        try {
+          const { id } = req.params;
+          const projectData = req.body;
+          
+          // req.user.id aapke authentication middleware se aana chahiye
+          const userId = req.user.id; 
+
+          const project = await projectService.updateProject(id, projectData, userId);
+          
+          return successResponse(res, project, 'Project updated successfully');
+        } catch (err) {
+          // Agar authorization fail hui toh 403 (Forbidden), warna 400 (Bad Request)
+          const statusCode = err.message.includes('can update projects') ? 403 : 400;
+          return errorResponse(res, err.message, statusCode);
+        }
+      };
+
 exports.assignProjectLeader = async (req, res) => {
   try {
     const { id } = req.params;
@@ -83,5 +112,25 @@ exports.assignProjectLeader = async (req, res) => {
     successResponse(res, project, 'Project leader assigned');
   } catch (err) {
     errorResponse(res, err.message, 400);
+  }
+};
+
+exports.getClientProjects = async (req, res) => {
+  try {
+    // Prefer numeric user id from token (set during client login), fall back to any provided clientId
+    const clientId =  req.user.clientId; // 
+    const projects = await projectService.getClientProjects(clientId);
+    successResponse(res, projects, 'Client projects retrieved');
+  } catch (err) {
+    errorResponse(res, err.message, 500);
+  }
+};
+
+exports.getAllClients = async (req, res) => {
+  try {
+    const clients = await projectService.getAllClients();
+    successResponse(res, clients, 'Clients retrieved');
+  } catch (err) {
+    errorResponse(res, err.message, 500);
   }
 };

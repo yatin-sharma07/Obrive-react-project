@@ -20,6 +20,8 @@ import ProjectsSection from './sections/ProjectsSection'
 import Calender from '@/components/dashboard/Calender'
 import Vacations from '@/components/dashboard/Vacations'
 import Header from './components/Header'
+import Messenger from '@/components/chat/Messenger'
+import { MessageSquare } from 'lucide-react'
 
 export const dynamic = 'force-dynamic';
 
@@ -38,8 +40,7 @@ export default function EmployeeDashboard() {
     {label:'Calender', icon:Calendar, key:'calender'},
     {label:'Vacations', icon:Palmtree, key:'Vacations'},
     {label:"Sticky Notes", icon:List, key:'tasks'},
-   
-
+    {label:'Messenger', icon:MessageSquare, key:'messenger'},
   ]
 
   if (loading) {
@@ -111,6 +112,11 @@ export default function EmployeeDashboard() {
     )}
     {activeSection ==='Vacations'&&(
      <Vacations/>
+    )}
+    {activeSection ==='messenger'&&(
+     <div className="flex-1 p-4 overflow-hidden h-full">
+       <Messenger />
+     </div>
     )}
 
     </div>

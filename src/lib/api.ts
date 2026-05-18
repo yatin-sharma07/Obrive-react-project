@@ -1,5 +1,9 @@
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+// Base API URL already includes /api
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+// Export for use in components (already includes /api)
+export const API_BASE_URL = BASE_URL;
 
 type FetchOptions = RequestInit & {
   retry?: boolean;

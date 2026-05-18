@@ -14,8 +14,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@prisma/client": "^5.22.0",
+    "@prisma/client": "^6.19.3",
     "bcrypt": "^6.0.0",
+    "cookie": "^1.1.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^16.6.1",
@@ -28,9 +29,12 @@
     "pg": "^8.20.0",
     "pg-pool": "^3.13.0",
     "prism": "^1.0.0",
-    "prisma": "^5.22.0"
+    "prisma": "^6.19.3",
+    "socket.io": "^4.8.3",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@types/socket.io": "^3.0.1",
     "nodemon": "^3.1.14"
   }
 }

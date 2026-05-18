@@ -7,6 +7,7 @@ import CreateTaskDialog from './CreateTaskDialog'
 import EditTaskDialog from './EditTaskDialog'
 import AssignEmployeesDialog from './AssignEmployeesDialog'
 import ConfirmationAlert from '@/components/ConfirmationAlert'
+import CreateProjectDialog from './CreateProjectDialog'
 
 interface Task {
   id: number
@@ -48,6 +49,7 @@ export default function ProjectDetailsView({
   const [loading, setLoading] = useState(false)
   const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false)
   const [isEditTaskOpen, setIsEditTaskOpen] = useState(false)
+  const [isEditProjectOpen, setIsEditProjectOpen] = useState(false) // 1. NEW: Project Edit Modal State
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [taskToEdit, setTaskToEdit] = useState<Task | null>(null)
   const [isAssignEmployeesOpen, setIsAssignEmployeesOpen] = useState(false)
@@ -146,6 +148,35 @@ export default function ProjectDetailsView({
         isOpen: true,
         title: 'Error',
         description: error.message || 'Failed to update task',
+        type: 'error',
+      })
+    }
+  }
+
+  // 2. NEW: Project Update Handler Function
+  const handleEditProjectSubmit = async (data: any) => {
+    try {
+      const response = await apiFetch(`/projects/${project.id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      })
+
+      const result = await response.json() 
+      if (result.success) {
+        setAlertConfig({
+          isOpen: true,
+          title: 'Success',
+          description: 'Project updated successfully',
+          type: 'success',
+        })
+        setIsEditProjectOpen(false)
+        onProjectUpdate() // Parent component ko refresh karne ke liye
+      }
+    } catch (error: any) {
+      setAlertConfig({
+        isOpen: true,
+        title: 'Error',
+        description: error.message || 'Failed to update project',
         type: 'error',
       })
     }
@@ -265,7 +296,6 @@ export default function ProjectDetailsView({
   const handleAssignEmployees = async (employeeIds: number[]) => {
     try {
       setLoading(true)
-      // Assign new employees
       for (const employeeId of employeeIds) {
         if (!project.team_members?.some(member => member.id === employeeId)) {
           await apiFetch(`/projects/${project.id}/assign`, {
@@ -330,19 +360,37 @@ export default function ProjectDetailsView({
       <div className="flex h-full min-h-0 flex-col gap-4 overflow-hidden rounded-2xl bg-white shadow-sm">
         {/* Project Info */}
         <div className="border-b border-gray-100 p-4 sm:p-6">
-          <h3 className="mb-2 text-sm text-gray-500">Project Priority</h3>
-          <div className="flex items-center gap-2">
-            <span
-              className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider ${
-                project.priority === 'high'
-                  ? 'bg-red-100 text-red-700'
-                  : project.priority === 'medium'
-                    ? 'bg-yellow-100 text-yellow-700'
-                    : 'bg-green-100 text-green-700'
-              }`}
-            >
-              {project.priority || 'Medium'}
-            </span>
+          {/* 3. UPDATED: Added Edit Icon here next to Priority title */}
+          <div className="flex items-center justify-between mb-2">
+            <div>
+              <h3 className="text-sm text-gray-500">Project Priority</h3>
+              <div className="flex items-center gap-2 mt-1">
+                <span
+                  className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider ${
+                    project.priority === 'high'
+                      ? 'bg-red-100 text-red-700'
+                      : project.priority === 'medium'
+                        ? 'bg-yellow-100 text-yellow-700'
+                        : 'bg-green-100 text-green-700'
+                  }`}
+                >
+                  {project.priority || 'Medium'}
+                </span>
+              </div>
+            </div>
+            
+            {/* Show edit button only for supervisor / admin / hr */}
+            {(currentUser?.role === 'supervisor' || currentUser?.role === 'hr' || currentUser?.role === 'admin') && (
+              <button
+                type="button"
+                onClick={() => setIsEditProjectOpen(true)}
+                className="flex items-center gap-1 rounded-lg border border-gray-200 p-2 text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition"
+                title="Edit Project Details"
+              >
+                <Edit className="h-4 w-4" />
+                <span className="text-xs font-medium hidden sm:inline">Edit Details</span>
+              </button>
+            )}
           </div>
 
           {project.deadline && (
@@ -521,6 +569,15 @@ export default function ProjectDetailsView({
           )}
         </div>
       </div>
+
+      {/* 4. NEW: Render CreateProjectDialog in "Edit mode" */}
+      <CreateProjectDialog
+        open={isEditProjectOpen}
+        onClose={() => setIsEditProjectOpen(false)}
+        onSubmit={handleEditProjectSubmit}
+        project={project} // Current project data ko pass kiya taaki input fields pre-fill ho jayein
+        isEdit={true} // Taaki modal ka title "Create" se badal kar "Edit" ho sake
+      />
 
       {/* Create Task Dialog */}
       <CreateTaskDialog

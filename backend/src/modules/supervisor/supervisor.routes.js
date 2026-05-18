@@ -1,8 +1,7 @@
 // backend/src/modules/supervisor/supervisor.routes.js
-const router = require('express').Router();
-const ctrl = require('./supervisor.controller');
-const authenticate = require('../../middleware/auth');
-const { authorize } = require('../../middleware/rbac');
+const router = require("express").Router();
+const ctrl = require("./supervisor.controller");
+const authenticate = require("../../middleware/auth");
 
 // All supervisor routes require authentication
 router.use(authenticate);
@@ -11,15 +10,18 @@ router.use(authenticate);
 // Later, this should be: router.use(authorize('supervisor'));
 
 // Employee endpoints
-router.get('/employees', ctrl.getAllEmployees);
-router.get('/employees/:employeeId', ctrl.getEmployeeStatus);
-router.get('/employees/:employeeId/projects', ctrl.getEmployeeProjects);
+router.get("/employees", ctrl.getAllEmployees);
+router.patch("/employees/:employeeId/block", ctrl.blockEmployeeAccess);
+router.get("/employees/:employeeId", ctrl.getEmployeeStatus);
+router.get("/employees/:employeeId/projects", ctrl.getEmployeeProjects);
+router.delete("/employees/:employeeId", ctrl.deleteEmployee);
 
 // Project endpoints
-router.get('/projects', ctrl.getSupervisorProjects);
+router.get("/projects", ctrl.getSupervisorProjects);
 
 // Leave endpoints
-router.get('/leaves', ctrl.getAllLeaveRequests);
-router.put('/leaves/:id/status', ctrl.updateLeaveStatus);
+router.get("/leaves", ctrl.getAllLeaveRequests);
+router.put("/leaves/:id/status", ctrl.updateLeaveStatus);
+router.delete("/leaves/:id", ctrl.deleteLeaveRequest);
 
 module.exports = router;

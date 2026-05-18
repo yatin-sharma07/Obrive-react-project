@@ -8,9 +8,16 @@ class ProjectService {
     
     if (role === 'hr') {
       projects = await this.getAllProjects();
-    } else {
+    } 
+    
+    if (role === 'employee') {
       projects = await this.getEmployeeProjects(userId);
     }
+
+    // if (role === 'client') {
+    //   projects = await this.getClientProjects(userId);
+    // }
+    
     
     // Convert BigInt to Number for JSON serialization
     return projects.map(project => ({
@@ -126,6 +133,41 @@ class ProjectService {
       assignees_count: Number(p.assignees_count)
     }));
   }
+
+  async getClientProjects(clientId) {
+    // Fetch projects associated with a client. Note: this assumes a numeric `client_id` column
+    // exists on the `projects` table. If your schema uses a different relationship, update
+    // the WHERE clause accordingly.
+    const result = await prisma.$queryRaw`
+      SELECT 
+        p.id,
+        p.project_id,
+        p.name,
+        p.description,
+        p.priority,
+        p.deadline,
+        p.progress,
+        p.leader_id,
+        p.created_at,
+        p.project_status,
+        (SELECT COUNT(*) FROM tasks t WHERE t.project_id = p.id) as total_tasks,
+        (SELECT COUNT(*) FROM tasks t WHERE t.project_id = p.id AND t.status = 'completed') as completed_tasks,
+        (SELECT COUNT(*) FROM project_assignments pa WHERE pa.project_id = p.id) as assignees_count
+      FROM projects p
+      WHERE p.client_id = ${clientId}
+      ORDER BY p.created_at DESC
+    `;
+
+    return result.map(p => ({
+      ...p,
+      id: Number(p.id),
+      leader_id: p.leader_id ? Number(p.leader_id) : null,
+      progress: p.progress ? Number(p.progress) : 0,
+      total_tasks: Number(p.total_tasks || 0),
+      completed_tasks: Number(p.completed_tasks || 0),
+      assignees_count: Number(p.assignees_count || 0)
+    }));
+  }
   
   async getEmployeeProjects(employeeId) {
     const result = await prisma.$queryRaw`
@@ -148,7 +190,7 @@ class ProjectService {
       ORDER BY p.created_at DESC
     `;
     
-    return result.map(p => ({
+    return result.map(p => ({ // returns an array so that we can map through it and convert BigInt to Number for JSON serialization
       ...p,
       id: Number(p.id),
       leader_id: p.leader_id ? Number(p.leader_id) : null,
@@ -158,6 +200,7 @@ class ProjectService {
       assignees_count: Number(p.assignees_count)
     }));
   }
+
   
   async getProjectById(projectId) {
     const project = await prisma.$queryRaw`
@@ -239,7 +282,7 @@ class ProjectService {
   }
 
   async createProject(data) {
-    const { name, description, priority, project_id, team_members, deadline } = data;
+    const { name, description, priority, project_id, team_members, deadline, client_id } = data;
     
     return await prisma.$transaction(async (tx) => {
       // 1. Create the project
@@ -251,6 +294,7 @@ class ProjectService {
           project_id: project_id || `PROJ-${Date.now()}`,
           deadline: deadline ? new Date(deadline) : null,
           progress: 0,
+          client_id: client_id ? String(client_id) : null,
         },
       });
 
@@ -296,28 +340,147 @@ class ProjectService {
     });
   }
 
+    async getProjectStatus(projectId, progress, userId) {
+    const project = await prisma.projects.findUnique({
+      where: { id: parseInt(projectId) },
+      include: {
+        project_assignments: true
+      }
+    });
+
+    if (!project) throw new Error('Project not found');
+
+    // Check if user is leader or supervisor
+    const user = await prisma.users.findUnique({ where: { id: userId } });
+    const isClient = project.client_id === userId;
+    const isSupervisor = user.role === 'supervisor' || user.role === 'hr';
+
+    if (!isClient && !isSupervisor) {
+      throw new Error('Only client or supervisor can view progress');
+    }
+
+    return await prisma.projects.update({
+      where: { id: parseInt(projectId) },
+      data: { progress: parseInt(progress) }
+    });
+  }
+
+
+async updateProject(id, projectData, userId) {
+  // 1. Check if project exists
+  const targetProject = await prisma.projects.findUnique({
+    where: { id: parseInt(id) },
+  });
+  
+  if (!targetProject) {
+    throw new Error('Project not found');
+  }
+
+  // 2. Check User Role
+  const requestingUser = await prisma.users.findUnique({
+    where: { id: parseInt(userId) },
+  });
+
+  if (!requestingUser) {
+    throw new Error('User not found');
+  }
+
+  if (requestingUser.role !== 'supervisor' && requestingUser.role !== 'hr' && requestingUser.role !== 'admin') {
+    throw new Error('Only supervisors, HR, or admins can update projects');
+  }
+
+// 3. STRICT CLEANING: Jo fields schema me nahi hain ya relational hain unhe nikalein
+const { 
+  id: _, 
+  created_at, 
+  updated_at, 
+  tasks, 
+  project_assignments,
+  leader,
+  status, // 👈 Frontend se aane wale galat 'status' ko yahan extract karke alag kiya
+  team_members,
+  ...rawCleanData 
+} = projectData;
+
+const cleanData = { ...rawCleanData };
+
+// 4. Sahi Column Map Karein (Agar frontend ka status database ke project_status me save karna hai)
+if (status) {
+  cleanData.project_status = status; // 👈 status ki jagah project_status use karein
+}
+
+// Data Types Validation
+if (cleanData.leader_id) {
+  cleanData.leader_id = parseInt(cleanData.leader_id);
+}
+if (cleanData.progress) {
+  cleanData.progress = parseInt(cleanData.progress);
+}
+if (cleanData.deadline) {
+  cleanData.deadline = new Date(cleanData.deadline);
+}
+
+// 5. Final Prisma Query
+const result = await prisma.$transaction(async (tx) => {
+  const updatedProject = await tx.projects.update({
+    where: { id: parseInt(id) },
+    data: cleanData,
+  });
+
+  if (Array.isArray(team_members)) {
+    await tx.project_assignments.deleteMany({
+      where: { project_id: parseInt(id) },
+    });
+
+    const normalizedTeamMembers = team_members
+      .map((member) => Number(member))
+      .filter((memberId) => Number.isInteger(memberId));
+
+    if (normalizedTeamMembers.length > 0) {
+      await tx.project_assignments.createMany({
+        data: normalizedTeamMembers.map((employeeId) => ({
+          project_id: parseInt(id),
+          employee_id: employeeId,
+        })),
+        skipDuplicates: true,
+      });
+    }
+  }
+
+  return updatedProject;
+});
+
+return result;
+}
+
+
   async assignProjectLeader(projectId, leaderId, userId) {
     const user = await prisma.users.findUnique({ where: { id: userId } });
     if (user.role !== 'supervisor' && user.role !== 'hr') {
       throw new Error('Only supervisors can assign project leaders');
     }
 
-    // Verify leader is assigned to project
-    const assignment = await prisma.project_assignments.findFirst({
-      where: {
-        project_id: parseInt(projectId),
-        employee_id: parseInt(leaderId)
-      }
-    });
-
-    if (!assignment) {
-      throw new Error('Leader must be assigned to the project first');
-    }
-
     return await prisma.projects.update({
       where: { id: parseInt(projectId) },
       data: { leader_id: parseInt(leaderId) }
     });
+  }
+
+  async getAllClients() {
+    // Fetch all clients (users with role = 'client')
+    const result = await prisma.$queryRaw`
+      SELECT id, userid, email, name
+      FROM users
+      WHERE role = 'client'
+      ORDER BY name ASC
+    `;
+
+    return result.map(client => ({
+      id: Number(client.id),
+      userid: client.userid,
+      email: client.email,
+      name: client.name
+    }));
   }
 }
 

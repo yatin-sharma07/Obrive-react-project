@@ -11,6 +11,22 @@ class LeavesService {
     return Math.ceil((e - s) / (1000 * 60 * 60 * 24)) + 1;
   }
 
+  // Helper to calculate days of a leave that fall within a specific month
+  calculateDaysInMonth(start, end, monthStart, monthEnd) {
+    const s = new Date(start);
+    const e = new Date(end);
+    
+    // If leave doesn't overlap with the month, return 0
+    if (e < monthStart || s > monthEnd) return 0;
+    
+    // The actual start is the later of leave start or month start
+    const actualStart = s > monthStart ? s : monthStart;
+    // The actual end is the earlier of leave end or month end
+    const actualEnd = e < monthEnd ? e : monthEnd;
+    
+    return Math.ceil((actualEnd - actualStart) / (1000 * 60 * 60 * 24)) + 1;
+  }
+
   async getDashboard(userId, selectedDate) {
     const referenceDate = selectedDate && selectedDate !== 'undefined' ? new Date(selectedDate) : new Date();
     
@@ -29,14 +45,14 @@ class LeavesService {
       orderBy: { start_date: 'asc' },
     });
 
-    // Calculate Balance (Logic: Sum days of approved/pending requests in this month)
-    const usage = { vacation: 0, sick: 0 };
-    userRequests.forEach(req => {
-      const type = req.leave_type.toLowerCase().includes('sick') ? 'sick' : 'vacation';
-      if (ACTIVE_STATUSES.includes(req.status) && usage[type] !== undefined) {
-        usage[type] += this.calculateDays(req.start_date, req.end_date);
-      }
-    });
+     // Calculate Balance (Logic: Sum days of approved/pending requests that fall within this month)
+     const usage = { vacation: 0, sick: 0 };
+     userRequests.forEach(req => {
+       const type = req.leave_type.toLowerCase().includes('sick') ? 'sick' : 'vacation';
+       if (ACTIVE_STATUSES.includes(req.status) && usage[type] !== undefined) {
+         usage[type] += this.calculateDaysInMonth(req.start_date, req.end_date, startOfMonth, endOfMonth);
+       }
+     });
 
     return {
       selectedDate: referenceDate.toISOString().split('T')[0],
