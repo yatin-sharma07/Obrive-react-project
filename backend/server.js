@@ -147,12 +147,12 @@ async function bootstrap() {
     await connectWithRetry(5);
     console.log('✅ Database connected');
     startWorkSessionCron();
-    app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Server running on port ${PORT}`));
     
     // Initialize Socket.io
     initializeSocket(server);
     
-    server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+    // Use server.listen instead of app.listen to support both Express and Socket.io on the same port
+    server.listen(PORT, '0.0.0.0', () => console.log(`🚀 Server running on port ${PORT}`));
   } catch (err) {
     console.error('❌ Failed to start:', err);
     process.exit(1);
