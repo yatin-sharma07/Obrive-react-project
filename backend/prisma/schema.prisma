@@ -133,6 +133,12 @@ model users {
   leaves              leaves[]
   approved_leaves     leaves[]              @relation("LeaveApprovedBy")
   room_configs        room_configs[]
+  
+  // Chat relations
+  created_conversations conversations[]     @relation("CreatedConversations")
+  conversations         conversation_participants[]
+  messages              messages[]
+  unread_conversations  conversation_unread[]
 }
 
 model leaves {
@@ -242,3 +248,74 @@ model room_configs {
   @@index([createdBy])
 }
 
+model conversations {
+  id            Int       @id @default(autoincrement())
+  type          String    @default("direct") // direct | group
+  name          String?   @db.VarChar(255)
+  created_by    Int
+  created_at    DateTime  @default(now())
+
+  creator       users     @relation("CreatedConversations", fields: [created_by], references: [id])
+
+  participants  conversation_participants[]
+  messages      messages[]
+  unread_counts conversation_unread[]
+
+  @@index([created_by])
+}
+
+model conversation_participants {
+  id               Int      @id @default(autoincrement())
+  conversation_id  Int
+  user_id          Int
+  joined_at        DateTime @default(now())
+  is_hidden        Boolean  @default(false)
+  deleted_until    DateTime? // Hide messages sent before this date
+  last_read_at     DateTime?
+
+  conversation     conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+
+  user             users @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([conversation_id, user_id])
+
+  @@index([user_id])
+  @@index([conversation_id])
+}
+
+model messages {
+  id               BigInt    @id @default(autoincrement())
+  conversation_id  Int
+  sender_id        Int?
+  content          String
+  type             String    @default("text") // text | system
+
+  created_at       DateTime  @default(now())
+
+  is_edited        Boolean   @default(false)
+
+  conversation     conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+
+  sender           users? @relation(fields: [sender_id], references: [id])
+
+  @@index([conversation_id, created_at])
+  @@index([sender_id])
+}
+
+model conversation_unread {
+  id               Int      @id @default(autoincrement())
+
+  user_id          Int
+  conversation_id  Int
+
+  unread_count     Int      @default(0)
+
+  updated_at       DateTime @updatedAt
+
+  user             users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  conversation     conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, conversation_id])
+
+  @@index([user_id])
+}

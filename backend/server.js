@@ -1,4 +1,10 @@
 require('dotenv').config();
+
+// Fix for BigInt serialization
+BigInt.prototype.toJSON = function() {
+  return this.toString();
+};
+
 const express    = require('express');
 const cors       = require('cors');
 const helmet     = require('helmet');
@@ -7,10 +13,13 @@ const { prisma, connectWithRetry } = require('./prisma');
 const bcrypt     = require('bcrypt');
 const jwt        = require('jsonwebtoken');
 const startWorkSessionCron = require('./src/jobs/workSessionCron');
+const http = require('http');
+const { initializeSocket } = require('./src/socket');
 
 const app  = express();
+const server = http.createServer(app);
 const PORT = process.env.PORT || 5000;
-const cookieParser = require('cookie-parser'); // 👈 ADD THIS
+const cookieParser = require('cookie-parser');
 
 // ── Middleware ───────────────────────────────────────────────
 app.use(helmet());
@@ -119,6 +128,8 @@ app.use('/api/leaves', require('./src/modules/leaves/leaves.routes'));
 app.use('/api/profile', require('./src/modules/profile/profile.routes'));
 // Timer routes
 app.use('/api/work-sessions', require('./src/modules/work-sessions/work-sessions.routes'));
+// Chat routes
+app.use('/api/chat', require('./src/modules/chat/chat.routes'));
 // ── Error handler ─────────────────────────────────────────────
 app.use(require('./src/middleware/errorHandler'));
 
@@ -137,6 +148,11 @@ async function bootstrap() {
     console.log('✅ Database connected');
     startWorkSessionCron();
     app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Server running on port ${PORT}`));
+    
+    // Initialize Socket.io
+    initializeSocket(server);
+    
+    server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
   } catch (err) {
     console.error('❌ Failed to start:', err);
     process.exit(1);
@@ -173,4 +189,3 @@ process.on('SIGINT', async () => {
   console.log('🔌 DB disconnected. Shutting down.');
   process.exit(0);
 });
-

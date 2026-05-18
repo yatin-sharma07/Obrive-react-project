@@ -54,26 +54,13 @@ const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
 
-  // Keep dev on-demand entries from being buffered for long
-  onDemandEntries: isDev
-    ? {
-        maxInactiveAge: 1_000, // 1s - evict quickly in dev
-        pagesBufferLength: 1,
-      }
-    : {
-        maxInactiveAge: 25 * 1000,
-        pagesBufferLength: 2,
-      },
+  // Keep Next's default dev entry lifecycle to avoid manifest races on Windows/OneDrive.
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 2,
+  },
 
-  // Webpack tweaks: explicitly disable webpack cache in dev
   webpack: (config, { isServer, dev }) => {
-    if (dev && !isServer) {
-      // disable webpack module/chunk caching in dev
-      // (Webpack default is memory cache; turning this off forces rebuilds)
-      // @ts-ignore
-      config.cache = false;
-    }
-
     // Keep your other bundling optimizations for prod unchanged:
     if (!isServer && !dev) {
       config.target = ["web", "es2020"];
