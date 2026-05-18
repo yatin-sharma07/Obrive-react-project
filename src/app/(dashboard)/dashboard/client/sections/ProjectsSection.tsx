@@ -8,9 +8,7 @@ import SkeletonLoading from "@/components/SkelitonLoading"
 import MyProjectsDetailsSection from "./MyProjectsDetailsSection"
 import { ProjectItem } from "@/components/dashboard/ProjectCard"
 import { ArrowLeft, Menu, X } from "lucide-react"
-// import { Task } from "../../employee/sections/MyProjectTasksSection"
-// import MyProjectTasksSection, { type Task } from "./MyProjectTasksSection"
-// import TaskDragDrop from "./TaskDragDrop"
+import { Task } from "../../employee/sections/MyProjectTasksSection"
 
 type SelectedProject = ProjectItem & 
 {
@@ -95,6 +93,7 @@ const ProjectsSection = () => {
             <Projects
               projects={projects}
               variant="projects"
+              setActiveSection={setSection}
               onSelectProject={(project) => {
                 setSelectedProject(project)
                 setIsProjectListOpen(false)
