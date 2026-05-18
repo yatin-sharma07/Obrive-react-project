@@ -4,14 +4,14 @@
  * Business logic layer: Takes validated data from controller and saves to database
  */
 
-// Import Prisma - try the config file first, fallback to direct PrismaClient
+// Import Prisma - consolidate to the main prisma.js file
 let prisma;
 try {
-  const dbConfig = require('../../../config/db');
-  prisma = dbConfig.prisma;
-  console.log("✅ Prisma imported from config/db.js");
+  const db = require('../../../../prisma');
+  prisma = db.prisma;
+  console.log("✅ Prisma imported from main prisma.js");
 } catch (err) {
-  console.error("⚠️ Failed to import from config/db.js, using PrismaClient directly:", err.message);
+  console.error("⚠️ Failed to import from main prisma.js, falling back:", err.message);
   const { PrismaClient } = require('@prisma/client');
   prisma = new PrismaClient();
 }
