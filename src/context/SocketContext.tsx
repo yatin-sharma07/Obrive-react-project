@@ -26,7 +26,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (!me?.id) return
 
-    const socketInstance = io(process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000', {
+    const socketInstance = io(process.env.NEXT_PUBLIC_BACKEND_URL || 'https://obrive-backend-q92a.onrender.com', {
       withCredentials: true,
       auth: {
         token: localStorage.getItem('token') || localStorage.getItem('accessToken'),
