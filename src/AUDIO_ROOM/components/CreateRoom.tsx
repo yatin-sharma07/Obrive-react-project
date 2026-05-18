@@ -477,98 +477,101 @@ console.table(payload);
               </p>
 
               <div className="grid grid-cols-1 gap-4">
-                {Object.entries(roleOptions).map(([role, options]) => (
-                  <div key={role} className="border-b border-slate-200/50 pb-4 last:border-0">
-                    <label className="text-[9px] font-medium text-slate-700 mb-2 block">
-                      {role}
-                    </label>
+                {Object.entries(roleOptions).map(([roleKey, options]) => {
+                  const role = roleKey as keyof RoleStates;
+                  return (
+                    <div key={role} className="border-b border-slate-200/50 pb-4 last:border-0">
+                      <label className="text-[9px] font-medium text-slate-700 mb-2 block">
+                        {role}
+                      </label>
 
-                    {/* Checkboxes and Other IDs Container */}
-                    <div className="flex flex-col lg:flex-row gap-3">
-                      {/* Checkboxes */}
-                      <div className="flex flex-wrap gap-2 flex-1">
-                        {options.map((option) => (
-                          <label
-                            key={option}
-                            className="flex items-center gap-2 text-[9px] text-slate-700 cursor-pointer"
-                          >
-                            <input
-                              type="checkbox"
-                              checked={
-                                rolePermissions[role]?.includes(
-                                  option
-                                ) || false
-                              }
-                              onChange={() =>
-                                handleCheckboxChange(role, option)
-                              }
-                              className="w-3 h-3 rounded border-slate-300 cursor-pointer"
-                            />
-                            {option}
-                          </label>
-                        ))}
-                      </div>
-
-                      {/* Other User IDs Section */}
-                      {rolePermissions[role]?.includes("other") && (
-                        <div className="bg-white/30 rounded-[5px] p-2 flex-1">
-                          <label className="text-[8px] font-medium text-slate-700 block mb-1">
-                            Add User IDs
-                          </label>
-
-                          <div className="flex gap-1 mb-2">
-                            <input
-                              type="text"
-                              placeholder="Enter user ID"
-                              value={currentOtherId[role as keyof RoleInputStates]}
-                              onChange={(e) =>
-                                setCurrentOtherId((prev) => ({
-                                  ...prev,
-                                  [role]: e.target.value,
-                                }))
-                              }
-                              className={`${inputClass} text-[8px] py-1`}
-                            />
-
-                            <button
-                              onClick={() =>
-                                handleAddOtherId(
-                                  role as keyof RoleStates,
-                                  currentOtherId[role as keyof RoleInputStates]
-                                )
-                              }
-                              className="rounded-[5px] bg-blue-500 px-2 py-1 text-[8px] font-medium text-white hover:bg-blue-600 transition"
+                      {/* Checkboxes and Other IDs Container */}
+                      <div className="flex flex-col lg:flex-row gap-3">
+                        {/* Checkboxes */}
+                        <div className="flex flex-wrap gap-2 flex-1">
+                          {options.map((option) => (
+                            <label
+                              key={option}
+                              className="flex items-center gap-2 text-[9px] text-slate-700 cursor-pointer"
                             >
-                              Add
-                            </button>
-                          </div>
-
-                          {/* Display Added User IDs */}
-                          {otherUserIds[role]?.length > 0 && (
-                            <div className="flex flex-wrap gap-1">
-                              {otherUserIds[role].map((userId, idx) => (
-                                <div
-                                  key={idx}
-                                  className="bg-blue-100 border border-blue-300 rounded-full px-2 py-0.5 flex items-center gap-1 text-[8px] text-blue-700"
-                                >
-                                  {userId}
-                                  <button
-                                    onClick={() =>
-                                      handleRemoveOtherId(role, idx)
-                                    }
-                                    className="text-blue-700 hover:text-blue-900 font-bold"
-                                  >
-                                    ×
-                                  </button>
-                                </div>
-                              ))}
-                            </div>
-                          )}
+                              <input
+                                type="checkbox"
+                                checked={
+                                  rolePermissions[role]?.includes(
+                                    option
+                                  ) || false
+                                }
+                                onChange={() =>
+                                  handleCheckboxChange(role, option)
+                                }
+                                className="w-3 h-3 rounded border-slate-300 cursor-pointer"
+                              />
+                              {option}
+                            </label>
+                          ))}
                         </div>
-                      )}
+
+                        {/* Other User IDs Section */}
+                        {rolePermissions[role]?.includes("other") && (
+                          <div className="bg-white/30 rounded-[5px] p-2 flex-1">
+                            <label className="text-[8px] font-medium text-slate-700 block mb-1">
+                              Add User IDs
+                            </label>
+
+                            <div className="flex gap-1 mb-2">
+                              <input
+                                type="text"
+                                placeholder="Enter user ID"
+                                value={currentOtherId[role as keyof RoleInputStates]}
+                                onChange={(e) =>
+                                  setCurrentOtherId((prev) => ({
+                                    ...prev,
+                                    [role]: e.target.value,
+                                  }))
+                                }
+                                className={`${inputClass} text-[8px] py-1`}
+                              />
+
+                              <button
+                                onClick={() =>
+                                  handleAddOtherId(
+                                    role,
+                                    currentOtherId[role as keyof RoleInputStates]
+                                  )
+                                }
+                                className="rounded-[5px] bg-blue-500 px-2 py-1 text-[8px] font-medium text-white hover:bg-blue-600 transition"
+                              >
+                                Add
+                              </button>
+                            </div>
+
+                            {/* Display Added User IDs */}
+                            {otherUserIds[role]?.length > 0 && (
+                              <div className="flex flex-wrap gap-1">
+                                {otherUserIds[role].map((userId, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="bg-blue-100 border border-blue-300 rounded-full px-2 py-0.5 flex items-center gap-1 text-[8px] text-blue-700"
+                                  >
+                                    {userId}
+                                    <button
+                                      onClick={() =>
+                                        handleRemoveOtherId(role, idx)
+                                      }
+                                      className="text-blue-700 hover:text-blue-900 font-bold"
+                                    >
+                                      ×
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
 
