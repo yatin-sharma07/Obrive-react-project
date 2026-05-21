@@ -123,7 +123,13 @@ export default function EmployeeLogin() {
 
       {/* RIGHT SIDE */}
       <div className="bg-accent flex flex-col items-center justify-center gap-12 lg:gap-30 px-6 py-10">
-        
+        {/* Mobile Logo */}
+        <div className="lg:hidden mb-4">
+          <div className="bg-primary p-4 rounded-xl">
+            <WhiteLogo />
+          </div>
+        </div>
+
         <div className="text-center">
           <h1
             className={`${FONTS.microgrammaBold.className} text-2xl lg:text-4xl uppercase`}
