@@ -28,6 +28,7 @@ type AddTaskModalProps = {
 		color?: string;
 		position?: number;
 		user_id?: string;
+		author_name?: string;
 	}) => void;
 	dateOptions?: NoteDateSlot[];
 };
