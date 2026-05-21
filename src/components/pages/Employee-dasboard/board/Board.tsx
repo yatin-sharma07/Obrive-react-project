@@ -22,6 +22,7 @@ type BoardTask = {
 	color?: string;
 	position?: number;
 	user_id?: string;
+	author_name?: string;
 	description?: string;
 	task_number?: string;
 };
@@ -99,6 +100,7 @@ export default function Board({
 						color: task.color,
 						position: task.position,
 						user_id: task.user_id != null ? String(task.user_id) : undefined,
+						author_name: task.users?.name,
 					}));
 					setTasks(formattedTasks);
 				}

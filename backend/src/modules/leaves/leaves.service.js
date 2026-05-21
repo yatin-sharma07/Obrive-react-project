@@ -65,6 +65,7 @@ class LeavesService {
         leaveType: r.leave_type,
         startDate: r.start_date,
         endDate: r.end_date,
+        leaveDate: r.start_date, // Added for frontend compatibility
         status: r.status,
         reason: r.reason
       }))
@@ -72,9 +73,9 @@ class LeavesService {
   }
 
   async applyLeave(userId, payload) {
-    const { leaveType, startDate, endDate, reason } = payload;
-    const start = new Date(startDate);
-    const end = new Date(endDate || startDate); // Default to single day if no end date
+    const { leaveType, leaveDate, startDate, endDate, reason } = payload;
+    const start = new Date(startDate || leaveDate);
+    const end = new Date(endDate || startDate || leaveDate); // Default to single day if no end date
 
     // Check for overlapping requests
     const overlap = await prisma.leaves.findFirst({
@@ -102,6 +103,30 @@ class LeavesService {
         status: 'pending'
       }
     });
+  }
+
+  async deleteLeave(leaveId, userId) {
+    const id = parseInt(leaveId, 10);
+    
+    const leave = await prisma.leaves.findUnique({
+      where: { id }
+    });
+
+    if (!leave) throw new Error('Leave request not found');
+    
+    // Check if it belongs to the user
+    if (leave.user_id !== userId) {
+      throw new Error('Unauthorized to delete this leave request');
+    }
+
+    // Optional: Only allow deleting pending or rejected requests?
+    // For now, let's just allow deleting their own requests as requested.
+
+    await prisma.leaves.delete({
+      where: { id }
+    });
+
+    return { message: 'Leave request deleted successfully' };
   }
 }
 
