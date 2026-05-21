@@ -10,15 +10,35 @@ import type { EventContentArg, EventDropArg } from '@fullcalendar/core'
 import { useState } from 'react'
 // import ProfileNotifications from '@app/(dashboard)/dashboard/employee/components/ProfileNotifications'
 
+import { Clock, MapPin, AlignLeft, User, Trash2 } from 'lucide-react'
+
 export default function Calendar() {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
+  const [selectedEvent, setSelectedEvent] = useState<any>(null)
+  const [currentUser, setCurrentUser] = useState<any>(null)
   const [selectedDate, setSelectedDate] = useState('')
   const [newEventTitle, setNewEventTitle] = useState('')
+  const [newEventDescription, setNewEventDescription] = useState('')
+  const [newEventLocation, setNewEventLocation] = useState('')
   const [newEventDuration, setNewEventDuration] = useState('1h')
   const [newEventTrend, setNewEventTrend] = useState('up')
 
   // 1. Keep your state but start with an empty array
   const [events, setEvents] = useState<any[]>([])
+
+  // Fetch current user
+  const fetchUser = async () => {
+    try {
+      const response = await apiFetch('/auth/me')
+      const result = await response.json()
+      if (result.success) {
+        setCurrentUser(result.data)
+      }
+    } catch (error) {
+      console.error("Failed to fetch user:", error)
+    }
+  }
 
   // 2. Create a function to fetch tasks from the backend
   const fetchCalendarTasks = async () => {
@@ -35,6 +55,9 @@ export default function Calendar() {
           start: task.deadline, // Use the deadline field from your database
           allDay: true, // You can configure this based on your database times
           extendedProps: { 
+            description: task.description,
+            location: task.location,
+            created_by: task.created_by,
             duration: '1h', // Default fallback
             trend: task.status === 'completed' ? 'up' : 'down', 
             color: task.status === 'completed' ? '#60a5fa' : '#c084fc' 
@@ -50,17 +73,31 @@ export default function Calendar() {
 
   // 4. Fetch the events when the component loads
   useEffect(() => {
+    fetchUser();
     fetchCalendarTasks();
   }, []);
   const openAddEventModal = (dateStr?: string) => {
     setSelectedDate(dateStr || new Date().toISOString().split('T')[0])
     setNewEventTitle('')
+    setNewEventDescription('')
+    setNewEventLocation('')
     setIsModalOpen(true)
   }
 
   // CREATE EVENT (Click on date)
   const handleDateClick = (arg: { dateStr: string }) => {
     openAddEventModal(arg.dateStr)
+  }
+
+  // VIEW EVENT DETAILS (Click on event)
+  const handleEventClick = (info: any) => {
+    setSelectedEvent({
+      id: info.event.id,
+      title: info.event.title,
+      start: info.event.startStr,
+      ...info.event.extendedProps
+    })
+    setIsDetailModalOpen(true)
   }
 
 
@@ -72,8 +109,11 @@ export default function Calendar() {
         method: 'POST',
         body: JSON.stringify({
           title: newEventTitle,
+          description: newEventDescription,
+          location: newEventLocation,
           deadline: selectedDate,
-          status: 'pending'
+          status: 'pending',
+          created_by: currentUser?.id
         })
       })
       
@@ -84,7 +124,13 @@ export default function Calendar() {
           title: newEventTitle,
           start: selectedDate,
           allDay: true,
-          extendedProps: { status: 'pending', color: '#c084fc' }
+          extendedProps: { 
+            description: newEventDescription,
+            location: newEventLocation,
+            created_by: currentUser?.id,
+            status: 'pending', 
+            color: '#c084fc' 
+          }
         }])
         setIsModalOpen(false)
       }
@@ -95,6 +141,15 @@ export default function Calendar() {
 
   // DRAG & DROP
   const handleEventDrop = async (info: EventDropArg) => {
+    const eventCreatedBy = info.event.extendedProps.created_by;
+    
+    // Check if the current user is the creator
+    if (currentUser && eventCreatedBy && Number(currentUser.id) !== Number(eventCreatedBy)) {
+      alert("Only the person who created this event can move it.");
+      info.revert();
+      return;
+    }
+
     try {
       const response = await apiFetch(`/calendar/tasks/${info.event.id}`, {
         method: 'PUT',
@@ -114,6 +169,24 @@ export default function Calendar() {
       }
     } catch (error) {
       console.error("Failed to update task:", error)
+      info.revert();
+    }
+  }
+
+  const handleDeleteEvent = async (eventId: string) => {
+    if (!window.confirm("Are you sure you want to delete this event?")) return;
+
+    try {
+      const response = await apiFetch(`/calendar/tasks/${eventId}`, {
+        method: 'DELETE'
+      });
+      const result = await response.json();
+      if (result.success) {
+        setEvents(events.filter(e => e.id !== eventId));
+        setIsDetailModalOpen(false);
+      }
+    } catch (error) {
+      console.error("Failed to delete event:", error);
     }
   }
 
@@ -252,6 +325,7 @@ export default function Calendar() {
             selectable={true}
             events={events}
             dateClick={handleDateClick} // create event
+            eventClick={handleEventClick} // view details
             eventDrop={handleEventDrop} // drag
             eventContent={renderEventContent} // custom render
             height="100%"
@@ -284,6 +358,31 @@ export default function Calendar() {
                   placeholder="e.g. Design Sync"
                   autoFocus
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea 
+                  value={newEventDescription}
+                  onChange={(e) => setNewEventDescription(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#3b82f6]/20 focus:border-[#3b82f6] outline-none transition-all resize-none"
+                  placeholder="Add more details..."
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                  <input 
+                    type="text" 
+                    value={newEventLocation}
+                    onChange={(e) => setNewEventLocation(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#3b82f6]/20 focus:border-[#3b82f6] outline-none transition-all"
+                    placeholder="Office, Zoom, etc."
+                  />
+                </div>
               </div>
               
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -360,6 +459,92 @@ export default function Calendar() {
                 className="px-6 py-2 text-sm font-medium text-white bg-[#074139] hover:bg-[#154e47] disabled:bg-[#074139]/50 disabled:cursor-not-allowed rounded-lg transition-colors shadow-sm cursor-pointer"
               >
                 Save Event
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Event Details Modal */}
+      {isDetailModalOpen && selectedEvent && (
+        <div className="text-sm fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl animate-in fade-in zoom-in-95 duration-200">
+            <div className={`h-2 w-full ${selectedEvent.trend === 'up' ? 'bg-blue-400' : 'bg-purple-400'}`} />
+            
+            <div className="flex items-center justify-between px-6 py-4">
+              <h2 className="text-xl font-bold text-gray-800">{selectedEvent.title}</h2>
+              <button 
+                onClick={() => setIsDetailModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-100"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+            </div>
+            
+            <div className="px-6 pb-6 space-y-5">
+              <div className="flex items-center gap-3 text-gray-600">
+                <div className="p-2 bg-gray-50 rounded-lg">
+                  <Clock className="h-4 w-4 text-gray-400" />
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider font-bold text-gray-400">Date & Time</p>
+                  <p className="text-sm font-medium">{new Date(selectedEvent.start).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                </div>
+              </div>
+
+              {selectedEvent.location && (
+                <div className="flex items-center gap-3 text-gray-600">
+                  <div className="p-2 bg-gray-50 rounded-lg">
+                    <MapPin className="h-4 w-4 text-gray-400" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wider font-bold text-gray-400">Location</p>
+                    <p className="text-sm font-medium">{selectedEvent.location}</p>
+                  </div>
+                </div>
+              )}
+
+              {selectedEvent.description && (
+                <div className="flex gap-3 text-gray-600">
+                  <div className="p-2 bg-gray-50 rounded-lg h-fit">
+                    <AlignLeft className="h-4 w-4 text-gray-400" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-[10px] uppercase tracking-wider font-bold text-gray-400">Description</p>
+                    <p className="text-sm font-medium leading-relaxed">{selectedEvent.description}</p>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center gap-3 text-gray-600">
+                <div className="p-2 bg-gray-50 rounded-lg">
+                  <User className="h-4 w-4 text-gray-400" />
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider font-bold text-gray-400">Created By</p>
+                  <p className="text-sm font-medium">{Number(selectedEvent.created_by) === Number(currentUser?.id) ? 'You' : `User ID: ${selectedEvent.created_by}`}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-between items-center rounded-b-2xl">
+              {Number(selectedEvent.created_by) === Number(currentUser?.id) ? (
+                <button 
+                  onClick={() => handleDeleteEvent(selectedEvent.id)}
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete
+                </button>
+              ) : (
+                <div />
+              )}
+              
+              <button 
+                onClick={() => setIsDetailModalOpen(false)}
+                className="px-6 py-2 text-sm font-medium text-white bg-[#074139] hover:bg-[#154e47] rounded-lg transition-colors shadow-sm cursor-pointer"
+              >
+                Close
               </button>
             </div>
           </div>

@@ -91,6 +91,7 @@ export default function AddTaskModal({
 				position: saved.position,
 				user_id:
 					saved.user_id != null ? String(saved.user_id) : undefined,
+				author_name: saved.users?.name,
 			});
 
 			setTitle("");
