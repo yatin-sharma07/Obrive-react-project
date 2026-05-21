@@ -27,6 +27,8 @@ type LeaveSummary = {
     id: number;
     leaveType?: string;
     leaveDate?: string;
+    startDate?: string;
+    endDate?: string;
     reason?: string | null;
     status?: string;
   }>;
