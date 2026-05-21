@@ -224,7 +224,7 @@ class SupervisorService {
 
         await tx.conversations.updateMany({
           where: { created_by: employeeId },
-          data: { created_by: 1 }, // Fallback to a system/admin user or handle more gracefully
+          data: { created_by: 1 }, // Fallback to a system/admin user
         });
 
         await tx.room_configs.updateMany({
@@ -237,6 +237,9 @@ class SupervisorService {
             id: employeeId,
           },
         });
+      }, {
+        timeout: 30000, // 30 seconds timeout
+        maxWait: 5000,   // 5 seconds max wait for connection
       });
 
       return { id: employeeId };
