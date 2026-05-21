@@ -1,80 +1,237 @@
-/**
- * ROOM CONFIG SERVICE
- * 
- * Business logic layer: Takes validated data from controller and saves to database
- */
+const { ro } = require("zod/v4/locales");
+const { prisma } = require("../../../../prisma");
 
-// Import Prisma - try the config file first, fallback to direct PrismaClient
-let prisma;
-try {
-  const dbConfig = require('../../../config/db');
-  prisma = dbConfig.prisma;
-  console.log("✅ Prisma imported from config/db.js");
-} catch (err) {
-  console.error("⚠️ Failed to import from config/db.js, using PrismaClient directly:", err.message);
-  const { PrismaClient } = require('@prisma/client');
-  prisma = new PrismaClient();
-}
+const createRoomConfigService =
+  async (payload, userId) => {
+    const {
+      roomConfig,
+      roleAssignments,
+      joinPermissions,
+      notifications,
+      invites,
+    } = payload;
 
-// Verify prisma is available
-if (!prisma) {
-  throw new Error("❌ CRITICAL: Prisma client initialization failed!");
-}
+    return await prisma.$transaction(
+      async (tx) => {
+        // ==================================
+        // CREATE ROOM CONFIG
+        // ==================================
 
-// Verify room_configs model exists
-if (!prisma.room_configs) {
-  console.error("❌ prisma.room_configs is undefined. Available models:", Object.keys(prisma));
-  throw new Error("room_configs model not found in Prisma client. Try running: npx prisma generate");
-}
+        const createdRoom =
+          await tx.room_configs.create(
+            {
+              data: {
+                roomName:
+                  roomConfig.roomName,
 
-/**
- * CREATE ROOM CONFIG SERVICE
- * @param {Object} roomData - Validated room configuration data
- * @returns {Object} - Saved room config object from database
- * 
- * FLOW:
- * 1. Data arrives already validated from controller
- * 2. Call prisma.room_configs.create() to save to database
- * 3. Return saved object (includes auto-generated ID, timestamps)
- */
-const createRoomConfigService = async (roomData) => {
-  try {
-    console.log("📝 Saving room config to database...");
-    console.log("Input data:", JSON.stringify(roomData, null, 2));
+                roomDescription:
+                  roomConfig.roomDescription,
 
-    // SAVE TO DATABASE using Prisma
-    console.log("🔄 Calling prisma.room_configs.create()...");
-    
-    const savedRoom = await prisma.room_configs.create({
-      data: {
-        roomName: roomData.roomName,
-        roomDescription: roomData.roomDescription || null,
-        roomType: roomData.roomType,
-        startTime: roomData.startTime ? new Date(roomData.startTime) : null,
-        participantLimit: roomData.participantLimit,
-        visibility: roomData.visibility,
-        whoCanHost: roomData.whoCanHost || [],
-        whoCanModerate: roomData.whoCanModerate || [],
-        whoCanSpeak: roomData.whoCanSpeak || [],
-        whoCanJoin: roomData.whoCanJoin || [],
-        allowGuestUsers: roomData.allowGuestUsers,
-      },
-    });
+                roomType:
+                  roomConfig.roomType,
 
-    console.log("✅ Room saved successfully!");
-    console.log("Saved room:", JSON.stringify(savedRoom, null, 2));
-    return savedRoom;
-  } catch (error) {
-    console.error("❌ Error details:", {
-      message: error.message,
-      code: error.code,
-      meta: error.meta,
-      stack: error.stack,
-    });
-    throw error;
-  }
-};
+                roomStatus:
+                  roomConfig.roomStatus,
 
-module.exports = {
+                startTime:
+                  roomConfig.startTime
+                    ? new Date(
+                        roomConfig.startTime
+                      )
+                    : null,
+
+                endTime:
+                  roomConfig.endTime
+                    ? new Date(
+                        roomConfig.endTime
+                      )
+                    : null,
+
+                participantLimit:
+                  roomConfig.participantLimit,
+
+                visibility:
+                  roomConfig.visibility,
+
+                allowGuestUsers:
+                  roomConfig.allowGuestUsers,
+
+                redirectAfterRoomEnd:
+                  roomConfig.redirectAfterRoomEnd,
+
+                createdBy: userId,
+              },
+            }
+          );
+
+        // ==================================
+        // ROLE ASSIGNMENTS
+        // ==================================
+
+        // Auto-add creator as host
+        const allRoleAssignments = [
+          {
+            roomConfigId: createdRoom.id,
+            assignmentType: "specific-user",
+            crmRole: null,
+            assignedRoomRole: "host",
+            userId: userId,
+          },
+          ...(roleAssignments?.map(
+            (
+              role
+            ) => ({
+              roomConfigId:
+                createdRoom.id,
+
+              assignmentType:
+                role.assignmentType,
+
+              crmRole:
+role.assignmentType ===
+"crm-role"
+  ? role.crmRole
+  : null,
+
+              assignedRoomRole:
+                role.assignedRoomRole,
+
+              userId:
+                role.userId
+                  ? Number(
+                      role.userId
+                    )
+                        : null,
+            })
+          ) || [])
+        ];
+
+        if (allRoleAssignments.length) {
+          await tx.room_role_assignments.createMany(
+            {
+              data: allRoleAssignments,
+            }
+          );
+        }
+
+        // ==================================
+        // JOIN PERMISSIONS
+        // ==================================
+
+        if (
+          joinPermissions?.length
+        ) {
+          await tx.room_join_permissions.createMany(
+            {
+              data:
+                joinPermissions.map(
+                  (
+                    permission
+                  ) => ({
+                    roomConfigId:
+                      createdRoom.id,
+
+                    permissionType:
+                      permission.permissionType,
+
+                    crmRole:
+                      permission.crmRole ||
+                      null,
+                  })
+                ),
+            }
+          );
+        }
+
+        // ==================================
+        // NOTIFICATIONS
+        // ==================================
+
+        if (
+          notifications?.length
+        ) {
+          await tx.room_notifications.createMany(
+            {
+              data:
+                notifications.map(
+                  (
+                    notification
+                  ) => ({
+                    roomConfigId:
+                      createdRoom.id,
+
+                    notificationType:
+                      notification.notificationType,
+
+                    scheduledTime:
+                      new Date(),
+                  })
+                ),
+            }
+          );
+        }
+
+console.log(
+  "✅ Room Created:",
+  createdRoom
+);
+
+console.table(
+  roleAssignments || []
+);
+
+console.table(
+  joinPermissions || []
+);
+
+console.table(
+  notifications || []
+);
+
+console.table(
+  invites || []
+);
+
+
+        // ==================================
+        // INVITES (LATER)
+        // ==================================
+
+        return createdRoom;
+      }
+    );
+  };
+
+
+
+
+        // ==================================
+        // Get list of users
+        // ==================================
+
+
+        const getAllUsers = async () => {
+          try {
+            const users = await prisma.users.findMany({
+              select: {
+                id: true,
+                userid: true,
+                name: true,
+                role: true,
+              },
+              orderBy: {
+                name: "asc",
+              },
+            });
+
+            return users;
+          } catch (error) {
+            throw new Error(error.message);
+          }
+        };
+
+
+  module.exports = {
   createRoomConfigService,
+  getAllUsers,
 };

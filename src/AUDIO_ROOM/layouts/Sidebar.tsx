@@ -37,13 +37,13 @@ const sidebarItems = [
     icon: LayoutTemplate,
   },
   {
-    id: "active-rooms",
-    label: "Active Rooms",
+    id: "rooms-history",
+    label: "Rooms & History",
     icon: Radio,
   },
   {
-    id: "schedule-room",
-    label: "Schedule Room",
+    id: "rooms-scheduled",
+    label: "Scheduled Rooms",
     icon: CalendarClock,
   },
   {

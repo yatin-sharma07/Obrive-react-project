@@ -130,12 +130,18 @@ app.use('/api/profile', require('./src/modules/profile/profile.routes'));
 app.use('/api/work-sessions', require('./src/modules/work-sessions/work-sessions.routes'));
 // Chat routes
 app.use('/api/chat', require('./src/modules/chat/chat.routes'));
+// AUDIO-ROOM Routes ===========================================================================
+app.use( "/api/audio-room", require( "./src/modules/AUDIO_ROOM/room-config/roomConfig.routes"));
+app.use( "/api/audio-room", require( "./src/modules/AUDIO_ROOM/room-start/roomStart.routes"));
+app.use( "/api/audio-room", require( "./src/modules/AUDIO_ROOM/room-end/roomEnd.routes"));
+app.use( "/api/audio-room", require( "./src/modules/AUDIO_ROOM/room-join/roomJoin.routes"));
+app.use( "/api/audio-room",  require("./src/modules/AUDIO_ROOM/room-list/roomList.routes"));
+app.use( "/api/audio-room",  require("./src/modules/AUDIO_ROOM/room-details/roomDetails.routes"));
+
+
 // ── Error handler ─────────────────────────────────────────────
 app.use(require('./src/middleware/errorHandler'));
 
-
-// AUDIO-ROOM Routes ===========================================================================
-app.use('/api/audio-room', require('./src/modules/AUDIO_ROOM/room-config/roomConfig.routes'));
 
 
 
@@ -145,16 +151,31 @@ app.use('/api/audio-room', require('./src/modules/AUDIO_ROOM/room-config/roomCon
 async function bootstrap() {
   try {
     await connectWithRetry(5);
-    console.log('✅ Database connected');
+
+    console.log(
+      '✅ Database connected'
+    );
+
     startWorkSessionCron();
-    app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Server running on port ${PORT}`));
-    
+
     // Initialize Socket.io
     initializeSocket(server);
-    
-    server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
+    server.listen(
+      PORT,
+      '0.0.0.0',
+      () => {
+        console.log(
+          `🚀 Server running on port ${PORT}`
+        );
+      }
+    );
   } catch (err) {
-    console.error('❌ Failed to start:', err);
+    console.error(
+      '❌ Failed to start:',
+      err
+    );
+
     process.exit(1);
   }
 }

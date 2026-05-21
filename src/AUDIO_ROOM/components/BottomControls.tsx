@@ -9,28 +9,102 @@ import {
   PhoneOff,
   Shield,
   MessageCircle,
+  Square,
 } from "lucide-react";
 
+import {
+  API_BASE_URL,
+} from "@/lib/api";
+
 interface BottomControlsProps {
+  roomId: string;
+
   role:
-    | "ADMIN"
-    | "HOST"
-    | "MODERATOR"
-    | "SPEAKER"
-    | "LISTENER";
+    | "admin"
+    | "host"
+    | "moderator"
+    | "speaker"
+    | "listener";
+
   isChatOpen?: boolean;
-  setIsChatOpen?: (value: boolean) => void;
+
+  setIsChatOpen?: (
+    value: boolean
+  ) => void;
 }
 
+
 const BottomControls = ({
+  roomId,
   role,
   isChatOpen = false,
   setIsChatOpen,
 }: BottomControlsProps) => {
   const canSpeak =
-    role !== "LISTENER";
+    role !== "listener";
 
   const isMuted = true;
+  console.log(
+  "Current Role:",
+  role
+);
+
+  const handleEndRoom = async () => {
+    try {
+      console.log(
+        "END BUTTON CLICKED"
+      );
+
+      const response =
+        await fetch(
+          `${API_BASE_URL}/audio-room/end-room`,
+          {
+            method:
+              "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body:
+              JSON.stringify(
+                {
+                  roomId,
+                }
+              ),
+          }
+        );
+
+      const data =
+        await response.json();
+
+      if (
+        !response.ok
+      ) {
+        throw new Error(
+          data.message ||
+            "Failed to end room"
+        );
+      }
+
+      console.log(
+        "✅ Room Ended:",
+        data
+      );
+
+      // Redirect
+      window.location.href =
+        "/audio-room";
+    } catch (
+      error
+    ) {
+      console.error(
+        "❌ End Room Error:",
+        error
+      );
+    }
+  };
 
   return (
     <div
@@ -44,6 +118,9 @@ const BottomControls = ({
       "
     >
       <div className="flex items-center justify-center gap-4 flex-wrap">
+        {/* <div className="text-xs text-red-600 font-bold">
+              Role: {role}
+        </div> */}
         {/* Mic Button */}
         {canSpeak && (
           <button
@@ -103,7 +180,7 @@ const BottomControls = ({
 
         {/* Raise Hand */}
         {role ===
-          "LISTENER" && (
+          "listener" && (
           <button
             className="
               flex
@@ -129,10 +206,10 @@ const BottomControls = ({
 
         {/* Moderator Controls */}
         {(role ===
-          "MODERATOR" ||
-          role === "HOST" ||
+          "moderator" ||
+          role === "host" ||
           role ===
-            "ADMIN") && (
+            "admin") && (
           <button
             className="
               flex
@@ -186,6 +263,35 @@ const BottomControls = ({
             }
           />
         </button>
+
+        {/* End Room */}
+{role ===
+  "host" && (
+  <button
+    onClick={
+      handleEndRoom
+    }
+    className="
+      flex
+      h-12
+      w-12
+      items-center
+      justify-center
+      rounded-full
+      border
+      border-red-300
+      bg-red-600
+      shadow-sm
+      transition
+      hover:bg-red-700
+    "
+  >
+    <Square
+      size={22}
+      className="text-white"
+    />
+  </button>
+)}
 
         {/* Leave Room */}
         <button

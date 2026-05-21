@@ -139,6 +139,10 @@ model users {
   conversations         conversation_participants[]
   messages              messages[]
   unread_conversations  conversation_unread[]
+
+  //Room relations
+  room_role_assignments room_role_assignments[] @relation("RoomRoleAssignmentUser")
+  room_invites room_invites[] @relation("RoomInviteUser")
 }
 
 model leaves {
@@ -209,44 +213,6 @@ model leave_requests {
   @@index([status], map: "idx_leave_requests_status")
 }
 
-model room_configs {
-  id                 Int       @id @default(autoincrement())
-
-  roomName           String    @db.VarChar(100)
-  roomDescription    String?   @db.Text
-
-  roomType           String    @db.VarChar(50)
-  roomStatus         String    @default("scheduled") @db.VarChar(50)
-
-  startTime          DateTime?
-
-  participantLimit   Int
-
-  visibility         String    @db.VarChar(50)
-
-  whoCanHost         Json
-  whoCanModerate     Json
-  whoCanSpeak        Json
-  whoCanJoin         Json
-
-  allowGuestUsers    Boolean   @default(false)
-
-  notificationSettings Json?
-
-  createdBy          Int?
-  creator            users?    @relation(fields: [createdBy], references: [id])
-
-  endedBy            Int?
-  endedAt            DateTime?
-
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-
-  @@index([createdAt])
-  @@index([visibility])
-  @@index([roomStatus])
-  @@index([createdBy])
-}
 
 model conversations {
   id            Int       @id @default(autoincrement())
@@ -318,4 +284,148 @@ model conversation_unread {
   @@unique([user_id, conversation_id])
 
   @@index([user_id])
+}
+
+
+
+//=======================================================================================
+//|| ROOM MODELS
+//=======================================================================================
+
+//=======================================================================================
+model room_configs {
+  id                      Int      @id @default(autoincrement())
+
+  roomName                String   @db.VarChar(100)
+  roomDescription         String?  @db.Text
+
+  roomType                String   @db.VarChar(50)
+  roomStatus              String   @default("draft") @db.VarChar(50)
+
+  startTime               DateTime?
+  endTime                 DateTime?
+
+  participantLimit        Int
+
+  visibility              String   @db.VarChar(50)
+
+  allowGuestUsers         Boolean  @default(false)
+
+  guestJoinMode           String?  @db.VarChar(50)
+
+  createdBy               Int?
+  creator                 users?   @relation(fields: [createdBy], references: [id])
+
+  notificationSettings    Json?
+
+  redirectAfterRoomEnd    String?  @default("/room-ended")
+
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  roleAssignments         room_role_assignments[]
+  joinPermissions         room_join_permissions[]
+  invites                 room_invites[]
+  notifications           room_notifications[]
+
+  @@index([createdBy])
+  @@index([roomStatus])
+  @@index([visibility])
+  @@index([startTime])
+}
+//=======================================================================================
+model room_join_permissions {
+  id                 Int      @id @default(autoincrement())
+
+  roomConfigId       Int
+  roomConfig         room_configs @relation(fields: [roomConfigId], references: [id], onDelete: Cascade)
+
+  permissionType     String   @db.VarChar(50)
+  crmRole            String?  @db.VarChar(50)
+
+  createdAt          DateTime @default(now())
+
+  @@index([roomConfigId])
+}
+
+//=======================================================================================
+model room_role_assignments {
+  id                   Int      @id @default(autoincrement())
+
+  roomConfigId         Int
+  roomConfig           room_configs @relation(fields: [roomConfigId], references: [id], onDelete: Cascade)
+
+  assignmentType       String   @db.VarChar(50)
+  crmRole              String?  @db.VarChar(50)
+
+  userId               Int?
+  user                 users? @relation("RoomRoleAssignmentUser", fields: [userId], references: [id])
+
+  assignedRoomRole     String   @db.VarChar(50)
+
+  createdAt            DateTime @default(now())
+
+  @@index([roomConfigId])
+  @@index([userId])
+}
+
+//=======================================================================================
+model room_invites {
+  id                  Int      @id @default(autoincrement())
+
+  roomConfigId        Int
+  roomConfig          room_configs @relation(fields: [roomConfigId], references: [id], onDelete: Cascade)
+
+  inviteToken         String   @unique
+
+  inviteRole          String   @db.VarChar(50)
+
+  invitedUserId       Int?
+
+  invitedUser users? @relation("RoomInviteUser", fields: [invitedUserId], references: [id])
+
+  guestEmail          String?
+
+  requiresPasskey     Boolean  @default(false)
+
+  passkey             String?
+
+  status              String   @default("active") @db.VarChar(50)
+
+  expiresAt           DateTime?
+
+  createdBy           Int?
+
+  createdAt           DateTime @default(now())
+
+  @@index([roomConfigId])
+}
+//=======================================================================================
+model room_templates {
+  id                   Int      @id @default(autoincrement())
+
+  templateName         String   @db.VarChar(100)
+
+  createdBy            Int?
+
+  configurationData    Json
+
+  createdAt            DateTime @default(now())
+}
+//=======================================================================================
+model room_notifications {
+  id                  Int      @id @default(autoincrement())
+
+  roomConfigId        Int
+  roomConfig          room_configs @relation(fields: [roomConfigId], references: [id], onDelete: Cascade)
+
+  notificationType    String   @db.VarChar(50)
+
+  scheduledTime       DateTime
+
+  status              String   @default("pending") @db.VarChar(50)
+
+  createdAt           DateTime @default(now())
+
+  @@index([roomConfigId])
 }

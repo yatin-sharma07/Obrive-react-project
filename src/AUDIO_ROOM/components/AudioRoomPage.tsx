@@ -1,78 +1,151 @@
 "use client";
 
-import React, { useState } from "react";
+import React, {useEffect,useState,} from "react";
 import RoomHeader from "./RoomHeader";
 import ParticipantSection from "./ParticipantSection";
 import ChatPanel from "./ChatPanel";
 import BottomControls from "./BottomControls";
+import { useParams,} from "next/navigation";
+import { API_BASE_URL } from "@/lib/api";
 
-const mockParticipants = {
-  hostAndSpeakers: [
-    {
-      id: 1,
-      name: "Rohan Sharma",
-      role: "HOST",
-    },
-    {
-      id: 2,
-      name: "Amit Kumar",
-      role: "SPEAKER",
-    },
-    {
-      id: 3,
-      name: "Neha Verma",
-      role: "SPEAKER",
-    },
-  ],
 
-  moderators: [
-    {
-      id: 4,
-      name: "Priya Singh",
-      role: "MODERATOR",
-    },
-    {
-      id: 5,
-      name: "Arjun Mehta",
-      role: "MODERATOR",
-    },
-  ],
 
-  listeners: [
-    {
-      id: 6,
-      name: "Karan",
-      role: "LISTENER",
-    },
-    {
-      id: 7,
-      name: "Riya",
-      role: "LISTENER",
-    },
-    {
-      id: 8,
-      name: "Anjali",
-      role: "LISTENER",
-    },
-    {
-      id: 9,
-      name: "Rahul",
-      role: "LISTENER",
-    },
-  ],
-};
+// const mockParticipants = {
+//   hostAndSpeakers: [
+//     {
+//       id: 1,
+//       name: "Rohan Sharma",
+//       role: "HOST",
+//     },
+//     {
+//       id: 2,
+//       name: "Amit Kumar",
+//       role: "SPEAKER",
+//     },
+//     {
+//       id: 3,
+//       name: "Neha Verma",
+//       role: "SPEAKER",
+//     },
+//   ],
+
+//   moderators: [
+//     {
+//       id: 4,
+//       name: "Priya Singh",
+//       role: "MODERATOR",
+//     },
+//     {
+//       id: 5,
+//       name: "Arjun Mehta",
+//       role: "MODERATOR",
+//     },
+//   ],
+
+//   listeners: [
+//     {
+//       id: 6,
+//       name: "Karan",
+//       role: "LISTENER",
+//     },
+//     {
+//       id: 7,
+//       name: "Riya",
+//       role: "LISTENER",
+//     },
+//     {
+//       id: 8,
+//       name: "Anjali",
+//       role: "LISTENER",
+//     },
+//     {
+//       id: 9,
+//       name: "Rahul",
+//       role: "LISTENER",
+//     },
+//   ],
+// };
 
 const AudioRoomPage = () => {
   const [isChatOpen, setIsChatOpen] =
     useState(true);
 
-  const currentUserRole =
-    "LISTENER";
+const params = useParams();
+const roomId = params.roomId;
+const [roomData, setRoomData] = useState<any>(null);
+const [loading, setLoading] = useState(true);
+const currentUserRole = roomData?.myRole || "listener";
+
+
+
+
+
+useEffect(() => {
+  fetchRoomDetails();
+}, []);
+
+const fetchRoomDetails =
+  async () => {
+    try {
+      const userId = 1;
+
+      const response =
+        await fetch(
+          `${API_BASE_URL}/audio-room/room-details/${roomId}?userId=${userId}`
+        );
+
+      const data =
+        await response.json();
+
+      if (
+        !response.ok
+      ) {
+        throw new Error(
+          data.message
+        );
+      }
+
+      console.log(
+        "✅ Room Details:",
+        data
+      );
+
+      setRoomData(
+        data.data
+      );
+    } catch (
+      error
+    ) {
+      console.error(
+        error
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+if (loading) {
+  return (
+    <div className="flex h-screen items-center justify-center">
+      Loading room...
+    </div>
+  );
+}
 
   return (
+
+    
     <div className="h-screen w-full overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100">
       <div className="h-full flex flex-col min-h-0">
         {/* Header */}
+
+          {/* <div className="bg-red-100 p-2 text-sm">
+              Room ID: {String(roomId)}
+          </div> */}
+
+
+
         <RoomHeader />
 
         {/* Content Area - Participants and Chat */}
@@ -84,15 +157,19 @@ const AudioRoomPage = () => {
               <ParticipantSection
                 title="Host & Speakers"
                 participants={
-                  mockParticipants.hostAndSpeakers
-                }
+                        roomData?.participants
+                          ?.hostAndSpeakers ||
+                        []
+                      }
               />
 
               {/* Moderators */}
               <ParticipantSection
                 title="Moderators"
                 participants={
-                  mockParticipants.moderators
+                  roomData?.participants
+                    ?.moderators ||
+                  []
                 }
               />
 
@@ -100,7 +177,9 @@ const AudioRoomPage = () => {
               <ParticipantSection
                 title="Listeners"
                 participants={
-                  mockParticipants.listeners
+                  roomData?.participants
+                    ?.listeners ||
+                  []
                 }
               />
             </div>
@@ -118,11 +197,18 @@ const AudioRoomPage = () => {
         </div>
 
         {/* Bottom Controls */}
-        <BottomControls 
-          role={currentUserRole}
-          isChatOpen={isChatOpen}
-          setIsChatOpen={setIsChatOpen}
-        />
+            <BottomControls
+              roomId={
+                roomId as string
+              }
+              role={currentUserRole}
+              isChatOpen={
+                isChatOpen
+              }
+              setIsChatOpen={
+                setIsChatOpen
+              }
+            />
       </div>
     </div>
   );

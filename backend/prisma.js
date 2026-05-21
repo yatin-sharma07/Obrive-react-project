@@ -15,6 +15,8 @@ const createPrismaClient = () => {
   });
 };
 
+// C:\practicals\next_js_projects\obrive\Obrive-react-project\backend\prisma.js
+
 // Retry connection with exponential backoff
 const connectWithRetry = async (maxRetries = 5) => {
   let retries = 0;

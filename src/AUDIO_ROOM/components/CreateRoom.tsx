@@ -1,251 +1,693 @@
 "use client";
 
-import React, { useState } from "react";
-import { API_BASE_URL } from "@/lib/api"; // API endpoint config
+import React, { useEffect, useState } from "react";
+import { API_BASE_URL } from "@/lib/api";
 
-const inputClass = "w-full rounded-[5px] border border-slate-200 bg-white/50 px-1.5 py-1.5 text-[9px] text-slate-700 outline-none transition-all placeholder:text-slate-400 focus:border-slate-300 focus:bg-white";
-const selectClass = "w-full rounded-[5px] border border-slate-200 bg-white/50 px-1.5 py-1.5 text-[9px] text-slate-700 outline-none transition-all focus:border-slate-300 focus:bg-white";
-const sectionClass = "rounded-[5px] border border-slate-200/70 bg-white/40 backdrop-blur-[10px] p-3 shadow-[10px] ";
+// ======================================================
+// UI CLASSES
+// ======================================================
 
+const inputClass =
+  "w-full rounded-[5px] border border-slate-200 bg-white/50 px-1.5 py-1.5 text-[9px] text-slate-700 outline-none transition-all placeholder:text-slate-400 focus:border-slate-300 focus:bg-white";
 
+const sectionClass =
+  "rounded-[5px] border border-slate-200/70 bg-white/40 backdrop-blur-[10px] p-3 shadow-[10px]";
 
+// ======================================================
+// TYPES
+// ======================================================
+
+type RoomRole =
+  | "host"
+  | "moderator"
+  | "speaker"
+  | "listener";
+
+type RoleKey =
+  | "Host"
+  | "Moderators"
+  | "Speakers"
+  | "Joinees";
+
+interface RoleAssignment {
+  assignmentType: "crm-role" | "specific-user";
+  crmRole?: string;
+  userId?: number;
+  assignedRoomRole: RoomRole;
+}
+
+interface JoinPermission {
+  permissionType: "crm-role" | "guest";
+  crmRole?: string;
+}
+
+interface Invite {
+  inviteRole: "speaker" | "listener";
+  guestEmail?: string;
+  requiresPasskey: boolean;
+  passkey?: string;
+}
+
+// ======================================================
+// COMPONENT
+// ======================================================
 
 const CreateRoom = () => {
-  // ============ FORM STATE ============
-  // Store user input from form fields
+  // ======================================================
+  // FORM STATE
+  // ======================================================
+
   const [formData, setFormData] = useState({
     roomName: "",
     roomDescription: "",
-    roomType: "live", // "live" or "scheduled"
+    roomType: "live",
     startTime: "",
     participantLimit: 50,
-    visibility: "private", // "public", "private", "invite-only"
+    visibility: "private",
   });
 
+  // ======================================================
+  // ROOM ROLE PERMISSIONS
+  // ======================================================
 
+  const [rolePermissions, setRolePermissions] =
+    useState<Record<RoleKey, string[]>>({
+      Host: [],
+      Moderators: [],
+      Speakers: [],
+      Joinees: [],
+    });
 
+  // ======================================================
+  // SPECIFIC USER IDS (stores user objects)
+  // ======================================================
 
-  // ============ PERMISSION STATE ============
-  // Track which roles are selected per role
-  const [rolePermissions, setRolePermissions] = useState({
-    Host: [],
-    Moderators: [],
-    Speakers: [],
-    Joinees: [],
-  });
+  const [otherUserIds, setOtherUserIds] =
+    useState<Record<RoleKey, any[]>>({
+      Host: [],
+      Moderators: [],
+      Speakers: [],
+      Joinees: [],
+    });
 
-  // Store custom user IDs for "other" option
-  const [otherUserIds, setOtherUserIds] = useState({
-    Host: [],
-    Moderators: [],
-    Speakers: [],
-    Joinees: [],
-  });
+  const [currentOtherId, setCurrentOtherId] =
+    useState<Record<RoleKey, string>>({
+      Host: "",
+      Moderators: "",
+      Speakers: "",
+      Joinees: "",
+    });
 
-  const [currentOtherId, setCurrentOtherId] = useState({
+  // ======================================================
+  // ACCESS CONTROL
+  // ======================================================
+
+  const [allowGuests, setAllowGuests] =
+    useState(false);
+
+  const [joinLink, setJoinLink] =
+    useState("");
+
+  const [passcode, setPasscode] =
+    useState("");
+
+  // ======================================================
+  // NOTIFICATION SETTINGS
+  // ======================================================
+
+  const [notifications, setNotifications] =
+    useState({
+      notifyLive: false,
+      notify1DayBefore: false,
+      notify1HourBefore: false,
+    });
+
+  // ======================================================
+  // API STATE
+  // ======================================================
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+
+  const [userSearch, setUserSearch] = useState({
     Host: "",
     Moderators: "",
     Speakers: "",
     Joinees: "",
   });
 
-  // ============ ACCESS CONTROL STATE ============
-  const [joinLink, setJoinLink] = useState(""); // Store generated join link and default to empty string
-  const [passcode, setPasscode] = useState("");
-  const [allowGuests, setAllowGuests] = useState(false);
 
-  // ============ API STATE ============
-  // Track loading, errors, and success messages
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
-
-  /**
-   * FLOW EXPLANATION: How Data Moves from Frontend to Backend
-   * 
-   * USER INPUTS FORM → REACT STATE UPDATES → SAVE BUTTON CLICKED
-   *     ↓
-   * saveRoomToDatabase() CALLED
-   *     ↓
-   * BUILD PAYLOAD: Combine form data + permissions
-   *     ↓
-   * VALIDATE: Check required fields (roomName, etc)
-   *     ↓
-   * POST TO: http://localhost:5000/api/audio-room/create
-   *     ↓
-   * BACKEND VALIDATES: Zod schema checks types, lengths, enums
-   *     ↓
-   * SUCCESS? → Database saves room, returns ID
-   * ERROR? → Backend returns 400/500 with error message
-   *     ↓
-   * FRONTEND DISPLAYS: Success message or error message to user
-   */
-
-  const handleFormChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    setError(""); // Clear error when user modifies form
-  };
-
-  //above function is a generic handler for all form fields, it updates the formData state based on the field name and value. It also clears any existing error messages when the user starts modifying the form again.
-  // Example usage: onChange={(e) => handleFormChange("roomName", e.target.value)}
-  // ...prev holds the existing formData, and we overwrite the specific field that changed with the new value. This way we can manage all form inputs with a single handler function.
-
-  // ============ API FUNCTIONS ============
-  
-  /**
-   * SAVE ROOM TO DATABASE
-   * 
-   * STEP 1: Prepare state (loading=true, clear old error)
-   * STEP 2: Build payload from form inputs + permissions, here used funcion 
-   * STEP 3: Validate required fields on frontend using simple checks (e.g. roomName not empty)
-   * STEP 4: Send POST with payload to backend
-   * STEP 5: Backend validates (Zod schema) + saves to DB
-   * STEP 6: Show success/error message to user
-   */
-  const saveRoomToDatabase = async () => {
-    try {
-      // STEP 1: Set UI state (show loading spinner, clear old errors)
-      setIsLoading(true);
-      setError("");
-
-      // Build the payload - don't send undefined values
-      const payload = {
-        roomName: formData.roomName,
-        roomDescription: formData.roomDescription || "", // Empty string instead of undefined
-        roomType: formData.roomType,
-        startTime: formData.startTime || "", // Empty string for optional field
-        participantLimit: parseInt(formData.participantLimit) || 50,
-        visibility: formData.visibility,
-        allowGuestUsers: allowGuests,
-        whoCanHost: [...(rolePermissions.Host || []), ...(otherUserIds.Host || [])],
-        whoCanModerate: [...(rolePermissions.Moderators || []), ...(otherUserIds.Moderators || [])],
-        whoCanSpeak: [...(rolePermissions.Speakers || []), ...(otherUserIds.Speakers || [])],
-        whoCanJoin: [...(rolePermissions.Joinees || []), ...(otherUserIds.Joinees || [])],
-      };
-
-// Log payload for debugging
-console.log("📤 Sending payload:", payload);
-console.table(payload);
-
-      // STEP 3: Frontend validation (before sending to backend)
-      if (!payload.roomName.trim()) {
-        setError("Room name is required");
-        setIsLoading(false);
-        return; // Don't send invalid data
-      }
-
-      // STEP 4: Send POST request to backend API endpoint
-      // Backend URL: http://localhost:5000/api/audio-room/create
-      // API_BASE_URL already includes /api, so just add /audio-room/create
-      const response = await fetch(`${API_BASE_URL}/audio-room/create`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      // STEP 5: Parse backend response (always JSON)
-      const data = await response.json();
-
-      // Check if response status is NOT OK (400, 500, etc)
-      if (!response.ok) {
-        // Backend validation failed or server error
-        console.error("❌ Response:", { status: response.status, data });
-        
-        // Extract error messages from backend response
-        if (data.errors && Array.isArray(data.errors)) {
-          // Format: "field: message" for each error
-          const errorMessages = data.errors
-            .map((err: { field: string; message: string }) => `${err.field}: ${err.message}`)
-            .join(" | ");
-          setError(`⚠️ ${errorMessages}`);
-        } else {
-          const errorMsg = data.message || "Failed to create room";
-          setError(`❌ ${errorMsg}`);
-        }
-        setIsLoading(false);
-        return;
-      }
-
-      // STEP 6: Success! Room created in database with an ID
-      setSuccess(true);
-      console.log("✅ Room created:", data.data); // Log the saved room object
-      
-      // STEP 7: Reset form after 2 seconds
-      setTimeout(() => {
-        setFormData({ roomName: "", roomDescription: "", roomType: "live", startTime: "", participantLimit: 50, visibility: "private" });
-        setSuccess(false);
-      }, 2000);
-    } catch (err) {
-      // STEP 8: Catch network errors (no internet, server down, etc)
-      setError(`Network error: ${err instanceof Error ? err.message : "Unknown error"}`);
-      console.error("❌ API Error:", err);
-    } finally {
-      // Always run this: hide loading spinner
-      setIsLoading(false);
-    }
-  };
+  // ======================================================
+  // ROLE OPTIONS
+  // ======================================================
 
   const roleOptions = {
-    Host: ["Admin", "Moderator", "HR", "other"],
-    Moderators: ["Admin", "Moderator", "HR", "other"],
-    Speakers: ["Admin", "Moderator", "HR", "other"],
-    Joinees: ["Admin", "Moderator", "HR", "Employee", "Client", "other"],
+    Host: [
+      "Moderator",
+      "HR",
+      "other",
+    ],
+
+    Moderators: [
+      "Moderator",
+      "HR",
+      "other",
+    ],
+
+    Speakers: [
+      "Moderator",
+      "HR",
+      "other",
+    ],
+
+    Joinees: [
+      "Moderator",
+      "HR",
+      "Employee",
+      "Client",
+      "Guests",
+    ],
   };
 
-              const handleCheckboxChange = (role, option) => {
-                setRolePermissions((prev) => {
-                  const currentOptions = prev[role] || [];
-                  if (currentOptions.includes(option)) {
-                    return {
-                      ...prev,
-                      [role]: currentOptions.filter((opt) => opt !== option),
-                    };
-                  } else {
-                    return {
-                      ...prev,
-                      [role]: [...currentOptions, option],
-                    };
-                  }
-                });
-              };
+  // ======================================================
+  // HANDLE FORM CHANGES
+  // ======================================================
 
-  const handleAddOtherId = (role, userId) => {
-    if (userId.trim()) {
-      setOtherUserIds((prev) => ({
-        ...prev,
-        [role]: [...(prev[role] || []), userId],
-      }));
-      setCurrentOtherId((prev) => ({
-        ...prev,
-        [role]: "",
-      }));
-    }
+  const handleFormChange = (
+    field: string,
+    value: string | number
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+
+    setError("");
   };
 
-  const handleRemoveOtherId = (role, index) => {
+  // ======================================================
+  // HANDLE ROLE CHECKBOX
+  // ======================================================
+
+  const handleCheckboxChange = (
+    role: RoleKey,
+    option: string
+  ) => {
+    setRolePermissions((prev) => {
+      const currentOptions =
+        prev[role] || [];
+
+      const alreadySelected =
+        currentOptions.includes(option);
+
+      return {
+        ...prev,
+        [role]: alreadySelected
+          ? currentOptions.filter(
+              (item) =>
+                item !== option
+            )
+          : [
+              ...currentOptions,
+              option,
+            ],
+      };
+    });
+  };
+
+  // ======================================================
+  // ADD SPECIFIC USER ID
+  // ======================================================
+
+const handleAddOtherId = (
+  role: RoleKey,
+  user: any
+) => {
+  if (!user || !user.id) {
+    console.warn("❌ Invalid user object:", user);
+    return;
+  }
+
+  console.log("✅ Adding user to role:", { role, user });
+
+  setOtherUserIds((prev) => ({
+    ...prev,
+    [role]: [
+      ...(prev[role] || []),
+      user,
+    ],
+  }));
+
+  setUserSearch((prev) => ({
+    ...prev,
+    [role]: "",
+  }));
+};
+
+  // ======================================================
+  // REMOVE USER ID
+  // ======================================================
+
+  const handleRemoveOtherId = (
+    role: RoleKey,
+    index: number
+  ) => {
     setOtherUserIds((prev) => ({
       ...prev,
-      [role]: prev[role].filter((_, i) => i !== index),
+      [role]: prev[role].filter(
+        (_, i) => i !== index
+      ),
     }));
   };
 
+  // ======================================================
+  // GENERATE TEMP JOIN LINK
+  // ======================================================
+
   const generateJoinLink = () => {
-    const roomId = Math.random().toString(36).substring(2, 11);
-    const baseUrl = window.location.origin;
-    const newLink = `${baseUrl}/audio-room/${roomId}`;
-    const newPasscode = Math.floor(100000 + Math.random() * 900000).toString();
-    
-    setJoinLink(newLink);
-    setPasscode(newPasscode);
+    const roomId =
+      Math.random()
+        .toString(36)
+        .substring(2, 11);
+
+    const baseUrl =
+      window.location.origin;
+
+    const generatedLink =
+      `${baseUrl}/audio-room/${roomId}`;
+
+    const generatedPasscode =
+      Math.floor(
+        100000 +
+          Math.random() * 900000
+      ).toString();
+
+    setJoinLink(generatedLink);
+    setPasscode(generatedPasscode);
   };
 
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
+
+  // ======================================================
+  // Get users list
+  // ======================================================
+  useEffect(() => { fetchUsers(); }, []);
+
+  const fetchUsers = async () => {
+    try {
+      setLoadingUsers(true);
+
+      const response = await fetch( `${API_BASE_URL}/audio-room/users`);
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Failed to fetch users"
+        );
+      }
+
+      setAllUsers(data.data || []);
+
+      console.log("✅ Users loaded:", data.data);
+    } catch (error) {
+      console.error(
+        "❌ Error fetching users:",
+        error
+      );
+    } finally {
+      setLoadingUsers(false);
+    }
   };
+
+  // ======================================================
+  // COPY TO CLIPBOARD
+  // ======================================================
+
+  const copyToClipboard = (
+    text: string
+  ) => {
+    navigator.clipboard.writeText(
+      text
+    );
+  };
+
+  // ======================================================
+  // BUILD ROLE ASSIGNMENTS
+  // ======================================================
+
+  const buildRoleAssignments =
+    (): RoleAssignment[] => {
+      const assignments:
+        RoleAssignment[] = [];
+
+      const roleMap = {
+        Host: "host",
+        Moderators:
+          "moderator",
+        Speakers: "speaker",
+      } as const;
+
+      (
+        Object.keys(
+          roleMap
+        ) as Array<
+          keyof typeof roleMap
+        >
+      ).forEach((roleKey) => {
+        const assignedRole =
+          roleMap[roleKey];
+
+        // CRM Roles
+        (
+          rolePermissions[
+            roleKey
+          ] || []
+        )
+          .filter(
+            (role) =>
+              role !== "other"
+          )
+          .forEach(
+            (crmRole) => {
+              assignments.push({
+                assignmentType:
+                  "crm-role",
+                crmRole,
+                assignedRoomRole:
+                  assignedRole,
+              });
+            }
+          );
+
+        // Specific User IDs
+        (otherUserIds[
+          roleKey
+        ] || []
+        ).forEach((userObj: any) => {
+          if (userObj?.id) {
+            assignments.push({
+              assignmentType:
+                "specific-user",
+
+              crmRole: undefined,
+
+
+              userId: Number(userObj.id),
+
+              assignedRoomRole:
+                assignedRole,
+            });
+          }
+        });
+      });
+
+      return assignments;
+    };
+
+  // ======================================================
+  // BUILD JOIN PERMISSIONS
+  // ======================================================
+
+  const buildJoinPermissions =
+    (): JoinPermission[] => {
+      const permissions:
+        JoinPermission[] = [];
+
+      (
+        rolePermissions
+          .Joinees || []
+      ).forEach((role) => {
+        if (role === "Guests") {
+          permissions.push({
+            permissionType:
+              "guest",
+          });
+        } else {
+          permissions.push({
+            permissionType:
+              "crm-role",
+            crmRole: role,
+          });
+        }
+      });
+
+      return permissions;
+    };
+
+  // ======================================================
+  // BUILD NOTIFICATIONS
+  // ======================================================
+
+  const buildNotifications =
+    () => {
+      const list = [];
+
+      if (
+        notifications.notifyLive
+      ) {
+        list.push({
+          notificationType:
+            "room-live",
+        });
+      }
+
+      if (
+        notifications.notify1DayBefore
+      ) {
+        list.push({
+          notificationType:
+            "1-day-before",
+        });
+      }
+
+      if (
+        notifications.notify1HourBefore
+      ) {
+        list.push({
+          notificationType:
+            "1-hour-before",
+        });
+      }
+
+      return list;
+    };
+
+  // ======================================================
+  // BUILD PAYLOAD
+  // ======================================================
+
+  const buildPayload =
+    () => {
+      return {
+        roomConfig: {
+          roomName:
+            formData.roomName,
+
+          roomDescription:
+            formData.roomDescription,
+
+          roomType:
+            formData.roomType,
+
+          roomStatus:
+            formData.roomType ===
+            "live"
+              ? "live"
+              : "scheduled",
+
+          startTime:
+            formData.startTime ||
+            null,
+
+          participantLimit:
+            Number(
+              formData.participantLimit
+            ),
+
+          visibility:
+            formData.visibility,
+
+          allowGuestUsers:
+            allowGuests,
+
+          redirectAfterRoomEnd:
+            "/room-ended",
+        },
+
+        roleAssignments:
+          buildRoleAssignments(),
+
+        joinPermissions:
+          buildJoinPermissions(),
+
+        notifications:
+          buildNotifications(),
+
+        invites: [],
+      };
+    };
+
+  // ======================================================
+  // SAVE ROOM TO DATABASE
+  // ======================================================
+
+  const saveRoomToDatabase =
+    async () => {
+      try {
+        setIsLoading(true);
+        setError("");
+
+        const payload =
+          buildPayload();
+
+        console.log(
+          "📤 Payload:",
+          payload
+        );
+
+                console.log(
+          "🎭 Role Assignments:",
+          payload.roleAssignments
+        );
+
+        console.table(
+          payload.roleAssignments
+        );
+
+        // VALIDATION
+        if (
+          !payload.roomConfig.roomName.trim()
+        ) {
+          setError(
+            "Room name is required"
+          );
+          return;
+        }
+
+        const response =
+          await fetch(
+            `${API_BASE_URL}/audio-room/create`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type":
+                  "application/json",
+              },
+              body: JSON.stringify(
+                payload
+              ),
+            }
+          );
+
+        const data =
+          await response.json();
+
+        if (
+          !response.ok
+        ) {
+          setError(
+            data.message ||
+              "Failed to create room"
+          );
+
+          console.error(
+            "❌ API Error:",
+            data
+          );
+
+          return;
+        }
+
+        console.log(
+          "✅ Room created:",
+          data
+        );
+
+        setSuccess(true);
+
+        setTimeout(() => {
+          setSuccess(false);
+        }, 2000);
+      } catch (error) {
+        console.error(
+          error
+        );
+
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Unknown error"
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  // const roleOptions = {
+  //   Host: ["Admin", "Moderator", "HR", "other"],
+  //   Moderators: ["Admin", "Moderator", "HR", "other"],
+  //   Speakers: ["Admin", "Moderator", "HR", "other"],
+  //   Joinees: ["Admin", "Moderator", "HR", "Employee", "Client", "other"],
+  // };
+
+
+
+              // const handleCheckboxChange = (role, option) => {
+              //   setRolePermissions((prev) => {
+              //     const currentOptions = prev[role] || [];
+              //     if (currentOptions.includes(option)) {
+              //       return {
+              //         ...prev,
+              //         [role]: currentOptions.filter((opt) => opt !== option),
+              //       };
+              //     } else {
+              //       return {
+              //         ...prev,
+              //         [role]: [...currentOptions, option],
+              //       };
+              //     }
+              //   });
+              // };
+
+  // const handleAddOtherId = (role, userId) => {
+  //   if (userId.trim()) {
+  //     setOtherUserIds((prev) => ({
+  //       ...prev,
+  //       [role]: [...(prev[role] || []), userId],
+  //     }));
+  //     setCurrentOtherId((prev) => ({
+  //       ...prev,
+  //       [role]: "",
+  //     }));
+  //   }
+  // };
+
+  // const handleRemoveOtherId = (role, index) => {
+  //   setOtherUserIds((prev) => ({
+  //     ...prev,
+  //     [role]: prev[role].filter((_, i) => i !== index),
+  //   }));
+  // };
+
+  // const generateJoinLink = () => {
+  //   const roomId = Math.random().toString(36).substring(2, 11);
+  //   const baseUrl = window.location.origin;
+  //   const newLink = `${baseUrl}/audio-room/${roomId}`;
+  //   const newPasscode = Math.floor(100000 + Math.random() * 900000).toString();
+    
+  //   setJoinLink(newLink);
+  //   setPasscode(newPasscode);
+  // };
+
+  // const copyToClipboard = (text) => {
+  //   navigator.clipboard.writeText(text);
+  // };
 
   return (
     <div className="w-full h-full overflow-y-auto">
-      <div className="max-w-[1600px] mx-auto flex flex-col xl:flex-row gap-6">
+      <div className="max-w-6xl mx-auto flex flex-col xl:flex-row gap-6">
         {/* Left Form Section */}
         <div className="flex-1 min-w-0 flex flex-col gap-1">
           {/* Header */}
@@ -460,10 +902,12 @@ console.table(payload);
               </p>
 
               <div className="grid grid-cols-1 gap-4">
-                {Object.entries(roleOptions).map(([role, options]) => (
-                  <div key={role} className="border-b border-slate-200/50 pb-4 last:border-0">
+                {Object.entries(roleOptions).map(([role, options]) => {
+                  const roleKey = role as RoleKey;
+                  return (
+                  <div key={roleKey} className="border-b border-slate-200/50 pb-4 last:border-0">
                     <label className="text-[9px] font-medium text-slate-700 mb-2 block">
-                      {role}
+                      {roleKey}
                     </label>
 
                     {/* Checkboxes and Other IDs Container */}
@@ -478,12 +922,12 @@ console.table(payload);
                             <input
                               type="checkbox"
                               checked={
-                                rolePermissions[role]?.includes(
+                                rolePermissions[roleKey]?.includes(
                                   option
                                 ) || false
                               }
                               onChange={() =>
-                                handleCheckboxChange(role, option)
+                                handleCheckboxChange(roleKey, option)
                               }
                               className="w-3 h-3 rounded border-slate-300 cursor-pointer"
                             />
@@ -493,52 +937,80 @@ console.table(payload);
                       </div>
 
                       {/* Other User IDs Section */}
-                      {rolePermissions[role]?.includes("other") && (
+                      {rolePermissions[roleKey]?.includes("other") && (
                         <div className="bg-white/30 rounded-[5px] p-2 flex-1">
                           <label className="text-[8px] font-medium text-slate-700 block mb-1">
                             Add User IDs
                           </label>
 
                           <div className="flex gap-1 mb-2">
-                            <input
-                              type="text"
-                              placeholder="Enter user ID"
-                              value={currentOtherId[role]}
-                              onChange={(e) =>
-                                setCurrentOtherId((prev) => ({
-                                  ...prev,
-                                  [role]: e.target.value,
-                                }))
-                              }
-                              className={`${inputClass} text-[8px] py-1`}
-                            />
+                              <div className="relative w-full">
+                                <input
+                                  type="text"
+                                  placeholder="Search user..."
+                                  value={userSearch[roleKey]}
+                                  onChange={(e) =>
+                                    setUserSearch((prev) => ({
+                                      ...prev,
+                                      [roleKey]: e.target.value,
+                                    }))
+                                  }
+                                  className={`${inputClass} text-[8px] py-1`}
+                                />
 
-                            <button
-                              onClick={() =>
-                                handleAddOtherId(
-                                  role,
-                                  currentOtherId[role]
-                                )
-                              }
-                              className="rounded-[5px] bg-blue-500 px-2 py-1 text-[8px] font-medium text-white hover:bg-blue-600 transition"
-                            >
-                              Add
-                            </button>
+                                {/* Dropdown */}
+                                {userSearch[roleKey] && (
+                                  <div className="absolute z-50 mt-1 max-h-40 w-full overflow-y-auto rounded-[5px] border border-slate-200 bg-white shadow-lg">
+                                    {allUsers
+                                      .filter((user) =>
+                                        `${user.name} ${user.userid}`
+                                          .toLowerCase()
+                                          .includes(
+                                            userSearch[roleKey].toLowerCase()
+                                          )
+                                      )
+                                      .slice(0, 8)
+                                      .map((user) => (
+                                        <div
+                                          key={user.id}
+                                          onClick={() =>
+                                            handleAddOtherId(
+                                              roleKey,
+                                              user
+                                            )
+                                          }
+                                          className="cursor-pointer border-b border-slate-100 px-2 py-2 text-[8px] hover:bg-slate-100"
+                                        >
+                                          <div className="font-medium">
+                                            {user.name}
+                                          </div>
+
+                                          <div className="text-slate-500">
+                                            {user.userid} • {user.role}
+                                          </div>
+                                        </div>
+                                      ))}
+                                  </div>
+                                )}
+                              </div>
                           </div>
 
                           {/* Display Added User IDs */}
-                          {otherUserIds[role]?.length > 0 && (
+                          {otherUserIds[roleKey]?.length > 0 && (
                             <div className="flex flex-wrap gap-1">
-                              {otherUserIds[role].map((userId, idx) => (
+                              {otherUserIds[roleKey].map((user: any) => (
                                 <div
-                                  key={idx}
+                                  key={user.id}
                                   className="bg-blue-100 border border-blue-300 rounded-full px-2 py-0.5 flex items-center gap-1 text-[8px] text-blue-700"
                                 >
-                                  {userId}
+                                  {user.name || user.userid}
                                   <button
-                                    onClick={() =>
-                                      handleRemoveOtherId(role, idx)
-                                    }
+                                    onClick={() => {
+                                      const idx = otherUserIds[roleKey].findIndex(
+                                        (u: any) => u.id === user.id
+                                      );
+                                      handleRemoveOtherId(roleKey, idx);
+                                    }}
                                     className="text-blue-700 hover:text-blue-900 font-bold"
                                   >
                                     ×
@@ -551,7 +1023,8 @@ console.table(payload);
                       )}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
 
@@ -568,7 +1041,7 @@ console.table(payload);
                   </label>
 
                   <div className="flex flex-wrap gap-2">
-                    {["public", "private", "invite-only"].map((option) => (
+                    {["public", "private"].map((option) => (
                       <label
                         key={option}
                         className="flex items-center gap-2 text-[9px]"
@@ -591,22 +1064,56 @@ console.table(payload);
                     Notifications
                   </label>
 
-                  <div className="space-y-3">
-                    <label className="flex items-center gap-2 text-[9px]">
-                      <input type="checkbox" />
-                      Notify when room goes live
-                    </label>
+                                          <div className="space-y-3">
+                                            <label className="flex items-center gap-2 text-[9px]">
+                                              <input
+                                                type="checkbox"
+                                                checked={notifications.notifyLive}
+                                                onChange={(e) =>
+                                                  setNotifications((prev) => ({
+                                                    ...prev,
+                                                    notifyLive:
+                                                      e.target.checked,
+                                                  }))
+                                                }
+                                              />
+                                              Notify when room goes live
+                                            </label>
 
-                    <label className="flex items-center gap-2 text-[9px]">
-                      <input type="checkbox" />
-                      Notify 1 day before
-                    </label>
+                                            <label className="flex items-center gap-2 text-[9px]">
+                                              <input
+                                                type="checkbox"
+                                                checked={
+                                                  notifications.notify1DayBefore
+                                                }
+                                                onChange={(e) =>
+                                                  setNotifications((prev) => ({
+                                                    ...prev,
+                                                    notify1DayBefore:
+                                                      e.target.checked,
+                                                  }))
+                                                }
+                                              />
+                                              Notify 1 day before
+                                            </label>
 
-                    <label className="flex items-center gap-2 text-[9px]">
-                      <input type="checkbox" />
-                      Notify 1 hour before
-                    </label>
-                  </div>
+                                            <label className="flex items-center gap-2 text-[9px]">
+                                              <input
+                                                type="checkbox"
+                                                checked={
+                                                  notifications.notify1HourBefore
+                                                }
+                                                onChange={(e) =>
+                                                  setNotifications((prev) => ({
+                                                    ...prev,
+                                                    notify1HourBefore:
+                                                      e.target.checked,
+                                                  }))
+                                                }
+                                              />
+                                              Notify 1 hour before
+                                            </label>
+                                          </div>
                 </div>
               </div>
 
@@ -624,7 +1131,12 @@ console.table(payload);
                   type="number"
                   placeholder="Enter participant limit"
                   value={formData.participantLimit}
-                  onChange={(e) => handleFormChange("participantLimit", e.target.value)}
+                  onChange={(e) =>
+                      handleFormChange(
+                        "participantLimit",
+                        Number(e.target.value)
+                      )
+                    }
                   className={inputClass}
                 />
               </div>

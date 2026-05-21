@@ -5,6 +5,8 @@ import RoomConfigurationLayout from "../layouts/RoomConfiguratoinLayout";
 
 // Components
 import CreateRoom from "../components/CreateRoom";
+import RoomsHistory from "../components/RoomsHistory";
+import RoomsScheduled from "../components/RoomsScheduled";
 // import Templates from "../components/Templates";
 // import ActiveRooms from "../components/ActiveRooms";
 // import RoomRecordings from "../components/RoomRecordings";
@@ -13,30 +15,33 @@ import CreateRoom from "../components/CreateRoom";
 type ActiveSection =
   | "create-room"
   | "templates"
-  | "active-rooms"
+  | "rooms-scheduled"
+  | "rooms-history"
   | "recordings"
   | "settings";
 
 const RoomConfigurationDashboard = () => {
-  const [activeSection, setActiveSection] =
-    useState<ActiveSection>("create-room");
+  const [activeSection, setActiveSection] = useState<ActiveSection>("create-room");
 
-  const renderComponent = () => {
+  const renderComponent = () => { 
     switch (activeSection) {
       case "create-room":
         return <CreateRoom />;
 
       case "templates":
-        // return <Templates />;
+        return <div className="p-6">Templates coming soon...</div>;
 
-      case "active-rooms":
-        // return <ActiveRooms />;
+      case "rooms-history":
+        return <RoomsHistory />;
+
+      case "rooms-scheduled":
+        return <RoomsScheduled />;
 
       case "recordings":
-        // return <RoomRecordings />;
+        return <div className="p-6">Recordings coming soon...</div>;
 
       case "settings":
-        // return <Settings />;
+        return <div className="p-6">Settings coming soon...</div>;
 
       default:
         return <CreateRoom />;
