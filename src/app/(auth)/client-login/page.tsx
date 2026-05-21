@@ -75,16 +75,17 @@ const handleLogin = async () => {
 
 
   return (
-    <div className="grid grid-cols-[2.5fr_2fr] w-full h-screen">
-      <div className="bg-primary flex items-center justify-center">
-        <div className="text-white text-center flex items-center gap-6 flex-col justify-center">
+    <div className="grid grid-cols-1 lg:grid-cols-[2.5fr_2fr] w-full min-h-screen">
+      {/* LEFT SIDE - HIDDEN ON MOBILE */}
+      <div className="bg-primary hidden lg:flex items-center justify-center">
+        <div className="text-white text-center flex items-center gap-6 flex-col justify-center px-10">
           <div className="mb-10">
             <WhiteLogo />
           </div>
-          <h1 className={`${FONTS.microgrammaBold.className} text-4xl`}>
+          <h1 className={`${FONTS.microgrammaBold.className} text-2xl lg:text-4xl`}>
             Welcome to the Obrive Client Portal
           </h1>
-          <p className="text-xl w-3xl">
+          <p className="text-base lg:text-xl max-w-3xl">
             Access your projects, reports, and collaboration tools in one secure
             place. Please log in with your authorised client credentials to
             continue.
@@ -92,21 +93,28 @@ const handleLogin = async () => {
         </div>
       </div>
 
-      <div className="bg-accent flex flex-col items-center justify-center gap-30">
+      <div className="bg-accent flex flex-col items-center justify-center gap-12 lg:gap-30 px-6 py-12">
+        {/* Mobile Logo */}
+        <div className="lg:hidden mb-4">
+          <div className="bg-primary p-4 rounded-xl">
+            <WhiteLogo />
+          </div>
+        </div>
+
         <div>
           <h1
-            className={`${FONTS.microgrammaBold.className} text-4xl uppercase`}
+            className={`${FONTS.microgrammaBold.className} text-3xl lg:text-4xl uppercase`}
           >
             WELCOME !
           </h1>
         </div>
 
-        <div className="w-sm">
+        <div className="w-full max-w-sm">
           <form className="flex flex-col gap-4">
             <div>
-              <Label htmlFor="email">Unique Client Id</Label>
+              <Label htmlFor="clientId">Unique Client Id</Label>
               <Input
-                type="clientId"
+                type="text"
                 id="clientId"
                 placeholder="Type your client Id "
                 className="border mt-2 py-6 border-primary outline-none"
