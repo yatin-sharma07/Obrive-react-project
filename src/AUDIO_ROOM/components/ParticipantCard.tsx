@@ -7,77 +7,102 @@ import {
   Crown,
   Shield,
 } from "lucide-react";
+import {
+  useSocket,
+} from "@/context/SocketContext";
 
 interface Participant {
   id: number;
   name: string;
   role: string;
+  isMuted?: boolean;
+  isSpeaking?: boolean;
 }
 
 interface ParticipantCardProps {
   participant: Participant;
+  roomId: number;
+  currentUserId?: number;
+  canModerate?: boolean;
 }
 
 const ParticipantCard = ({
   participant,
+  roomId,
+  currentUserId,
+  canModerate = false,
 }: ParticipantCardProps) => {
+  const {
+    socket,
+  } = useSocket();
+
+  const normalizedRole =
+    participant.role?.toLowerCase() ||
+    "";
+
   const isMuted =
-    participant.role === "LISTENER";
+    participant.isMuted ?? true;
+
+  const isSpeaking =
+    Boolean(
+      participant.isSpeaking &&
+      !isMuted
+    );
+
+  const canBeMuted =
+    canModerate &&
+    participant.id !== currentUserId &&
+    !isMuted &&
+    [
+      "host",
+      "moderator",
+      "speaker",
+    ].includes(
+      normalizedRole
+    );
+
+  const handleModeratorMute =
+    () => {
+      if (
+        !socket ||
+        !canBeMuted
+      ) {
+        return;
+      }
+
+      socket.emit(
+        "audio_moderator_mute",
+        {
+          roomId,
+          targetUserId:
+            participant.id,
+        }
+      );
+    };
 
   const getRoleBadge = () => {
-    switch (participant.role) {
-      case "HOSTr":
+    switch (normalizedRole) {
+      case "host":
         return (
-          <div
-            className="
-              flex
-              items-center
-              gap-0.5
-              lg:gap-1
-              rounded-full
-              bg-amber-50
-              border
-              border-amber-200
-              px-1
-              lg:px-2
-              lg:text-[8px]
-              py-0.5
-            "
-          >
+          <div className="flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5">
             <Crown
               size={9}
-              className="lg:size-2.5 text-amber-600"
+              className="text-amber-600"
             />
-
-            <span className="text-[8px] lg:text-[10px] font-medium text-amber-700">
+            <span className="text-[8px] font-medium text-amber-700">
               Host
             </span>
           </div>
         );
 
-      case "MODERATORr":
+      case "moderator":
         return (
-          <div
-            className="
-              flex
-              items-center
-              gap-0.5
-              lg:gap-1
-              rounded-full
-              bg-sky-50
-              border
-              border-sky-200
-              px-1
-              lg:px-2
-              py-0.5
-            "
-          >
+          <div className="flex items-center gap-1 rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5">
             <Shield
               size={9}
-              className="lg:size-2.5 text-sky-600"
+              className="text-sky-600"
             />
-
-            <span className="text-[8px] lg:text-[10px] font-medium text-sky-700">
+            <span className="text-[8px] font-medium text-sky-700">
               Moderator
             </span>
           </div>
@@ -90,47 +115,43 @@ const ParticipantCard = ({
 
   return (
     <div
-      className="
+      className={`
         rounded-[8px]
         border
-        border-slate-200/70
-        bg-white/50
-        backdrop-blur-sm
         p-2
-        lg:p-2
         shadow-sm
         transition-all
         hover:shadow-md
-        lg:h-25 lg:w-25
-      "
+        lg:h-25
+        lg:w-25
+        ${isSpeaking
+          ? "border-green-300 bg-green-50/70 ring-2 ring-green-200 animate-pulse"
+          : "border-slate-200/70 bg-white/50"}
+      `}
     >
-      <div className="flex flex-col items-center text-center ">
-        {/* Avatar */}
+      <div className="flex flex-col items-center text-center">
         <div
-          className="
+          className={`
             relative
             flex
             h-12
             w-12
-            lg:h-12
-            lg:w-12
             items-center
             justify-center
             rounded-full
             bg-slate-200
             text-xs
-            lg:text-[9px]
             font-semibold
             text-slate-700
-          "
+            ${isSpeaking ? "ring-2 ring-green-400" : ""}
+          `}
         >
           {participant.name
             .split(" ")
-            .map((n) => n[0])
+            .map((namePart) => namePart[0])
             .join("")
             .slice(0, 2)}
 
-          {/* Mic Status */}
           <div
             className={`
               absolute
@@ -139,48 +160,69 @@ const ParticipantCard = ({
               flex
               h-5
               w-5
-              lg:h-6
-              lg:w-6
               items-center
               justify-center
               rounded-full
               border-2
               border-white
-
-              ${
-                isMuted
-                  ? "bg-red-100"
-                  : "bg-green-100"
-              }
+              ${isMuted ? "bg-red-100" : "bg-green-100"}
             `}
           >
             {isMuted ? (
               <MicOff
                 size={9}
-                className="lg:size-3 text-red-600"
+                className="text-red-600"
               />
             ) : (
               <Mic
                 size={9}
-                className="lg:size-3 text-green-600"
+                className="text-green-600"
               />
             )}
           </div>
         </div>
 
-        {/* Name */}
-        <h3 className="mt-2 lg:mt-1.5 text-xs lg:text-[8px] font-semibold text-slate-800">
+        <h3 className="mt-2 text-xs font-semibold text-slate-800 lg:text-[8px]">
           {participant.name}
         </h3>
 
-        {/* Role */}
-        <p className="mt-0.5 lg:mt-0.5 text-[8px] lg:text-[8px] text-slate-500">
+        <p className="mt-0.5 text-[8px] text-slate-500">
           {participant.role}
         </p>
 
-        {/* Badge */}
-        <div className="mt-2 lg:mt-2">
+        {isSpeaking && (
+          <p className="mt-0.5 text-[8px] font-medium text-green-600">
+            speaking
+          </p>
+        )}
+
+        <div className="mt-2 flex items-center justify-center gap-1">
           {getRoleBadge()}
+
+          {canBeMuted && (
+            <button
+              onClick={handleModeratorMute}
+              className="
+                flex
+                h-5
+                w-5
+                items-center
+                justify-center
+                rounded-full
+                border
+                border-red-200
+                bg-red-50
+                text-red-600
+                transition
+                hover:bg-red-100
+              "
+              title="Mute speaker"
+            >
+              <MicOff
+                size={10}
+              />
+            </button>
+          )}
         </div>
       </div>
     </div>

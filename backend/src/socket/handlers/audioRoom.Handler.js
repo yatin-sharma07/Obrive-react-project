@@ -9,6 +9,32 @@ exports.registerAudioRoomHandler =
     io,
     socket
   ) => {
+    const emitParticipantUpdate =
+      async (
+        roomId,
+        userId
+      ) => {
+        const roomDetails =
+          await getRoomDetailsService(
+            roomId,
+            userId
+          );
+
+        io.to(
+          `audio-room:${roomId}`
+        ).emit(
+          "participant_updated",
+          {
+            roomId:
+              Number(
+                roomId
+              ),
+
+            participants:
+              roomDetails.participants,
+          }
+        );
+      };
 
     // ==========================
     // JOIN AUDIO ROOM
@@ -57,25 +83,9 @@ exports.registerAudioRoomHandler =
           `User ${userId} joined room ${roomId}`
         );
 
-        const roomDetails =
-          await getRoomDetailsService(
-            roomId,
-            userId
-          );
-
-        io.to(
-          `audio-room:${roomId}`
-        ).emit(
-          "participant_updated",
-          {
-            roomId:
-              Number(
-                roomId
-              ),
-
-            participants:
-              roomDetails.participants,
-          }
+        await emitParticipantUpdate(
+          roomId,
+          userId
         );
       }
     );
@@ -140,25 +150,177 @@ exports.registerAudioRoomHandler =
           `audio-room:${roomId}`
         );
 
-        const roomDetails =
-          await getRoomDetailsService(
-            roomId,
-            userId
+        await emitParticipantUpdate(
+          roomId,
+          userId
+        );
+      }
+    );
+
+    socket.on(
+      "audio_mic_toggle",
+      async (
+        payload
+      ) => {
+        const roomId =
+          Number(payload?.roomId);
+
+        const userId =
+          Number(socket.user?.id);
+
+        const isMuted =
+          Boolean(payload?.isMuted);
+
+        if (
+          !roomId ||
+          !userId
+        ) {
+          return;
+        }
+
+        await prisma.room_participants.updateMany(
+          {
+            where: {
+              roomId,
+              userId,
+              leftAt:
+                null,
+
+              roomRole: {
+                in: [
+                  "host",
+                  "moderator",
+                  "speaker",
+                ],
+              },
+            },
+
+            data: {
+              isMuted,
+              isSpeaking:
+                !isMuted,
+            },
+          }
+        );
+
+        await emitParticipantUpdate(
+          roomId,
+          userId
+        );
+      }
+    );
+
+    socket.on(
+      "audio_speaking_update",
+      async (
+        payload
+      ) => {
+        const roomId =
+          Number(payload?.roomId);
+
+        const userId =
+          Number(socket.user?.id);
+
+        const isSpeaking =
+          Boolean(payload?.isSpeaking);
+
+        if (
+          !roomId ||
+          !userId
+        ) {
+          return;
+        }
+
+        await prisma.room_participants.updateMany(
+          {
+            where: {
+              roomId,
+              userId,
+              leftAt:
+                null,
+            },
+
+            data: {
+              isSpeaking,
+            },
+          }
+        );
+
+        await emitParticipantUpdate(
+          roomId,
+          userId
+        );
+      }
+    );
+
+    socket.on(
+      "audio_moderator_mute",
+      async (
+        payload
+      ) => {
+        const roomId =
+          Number(payload?.roomId);
+
+        const targetUserId =
+          Number(payload?.targetUserId);
+
+        if (
+          !roomId ||
+          !targetUserId
+        ) {
+          return;
+        }
+
+        const moderator =
+          await prisma.room_participants.findFirst(
+            {
+              where: {
+                roomId,
+                userId:
+                  Number(
+                    socket.user?.id
+                  ),
+                leftAt:
+                  null,
+                roomRole: {
+                  in: [
+                    "host",
+                    "moderator",
+                    "admin",
+                  ],
+                },
+              },
+            }
           );
 
-        io.to(
-          `audio-room:${roomId}`
-        ).emit(
-          "participant_updated",
-          {
-            roomId:
-              Number(
-                roomId
-              ),
+        if (
+          !moderator
+        ) {
+          return;
+        }
 
-            participants:
-              roomDetails.participants,
+        await prisma.room_participants.updateMany(
+          {
+            where: {
+              roomId,
+              userId:
+                targetUserId,
+              leftAt:
+                null,
+            },
+
+            data: {
+              isMuted:
+                true,
+              isSpeaking:
+                false,
+            },
           }
+        );
+
+        await emitParticipantUpdate(
+          roomId,
+          targetUserId
         );
       }
     );
@@ -198,25 +360,9 @@ exports.registerAudioRoomHandler =
           }
         );
 
-        const roomDetails =
-          await getRoomDetailsService(
-            roomId,
-            socket.user.id
-          );
-
-        io.to(
-          `audio-room:${roomId}`
-        ).emit(
-          "participant_updated",
-          {
-            roomId:
-              Number(
-                roomId
-              ),
-
-            participants:
-              roomDetails.participants,
-          }
+        await emitParticipantUpdate(
+          roomId,
+          socket.user.id
         );
 
         console.log(

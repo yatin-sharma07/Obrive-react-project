@@ -7,16 +7,24 @@ interface Participant {
   id: number;
   name: string;
   role: string;
+  isMuted?: boolean;
+  isSpeaking?: boolean;
 }
 
 interface ParticipantSectionProps {
   title: string;
   participants: Participant[];
+  roomId: number;
+  currentUserId?: number;
+  canModerate?: boolean;
 }
 
 const ParticipantSection = ({
   title,
   participants,
+  roomId,
+  currentUserId,
+  canModerate = false,
 }: ParticipantSectionProps) => {
   const uniqueParticipants =
     Array.from(
@@ -95,6 +103,15 @@ const ParticipantSection = ({
                 key={participant.id}
                 participant={
                   participant
+                }
+                roomId={
+                  roomId
+                }
+                currentUserId={
+                  currentUserId
+                }
+                canModerate={
+                  canModerate
                 }
               />
             )

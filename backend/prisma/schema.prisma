@@ -442,6 +442,8 @@ model room_participants {
   roomRole    String
   joinedAt    DateTime @default(now())
   leftAt      DateTime?
+  isMuted     Boolean @default(true)
+  isSpeaking  Boolean @default(false)
 
   room        room_configs @relation(fields: [roomId], references: [id])
   user users @relation(fields: [userId], references: [id])

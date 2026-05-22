@@ -129,19 +129,6 @@ const addParticipant =
         if (
           primaryParticipant
         ) {
-          await tx.room_participants.update(
-            {
-              where: {
-                id:
-                  primaryParticipant.id,
-              },
-
-              data: {
-                roomRole,
-              },
-            }
-          );
-
           return;
         }
 

@@ -169,6 +169,12 @@ if (
 
             role:
               participant.roomRole,
+
+            isMuted:
+              participant.isMuted,
+
+            isSpeaking:
+              participant.isSpeaking,
           };
 
         if (

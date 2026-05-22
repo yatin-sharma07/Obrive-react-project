@@ -60,6 +60,29 @@ const AudioRoomPage =
       roomData?.myRole ||
       "listener";
 
+    const participantGroups =
+      [
+        ...(roomData?.participants?.hostAndSpeakers || []),
+        ...(roomData?.participants?.moderators || []),
+        ...(roomData?.participants?.listeners || []),
+      ];
+
+    const currentParticipant =
+      participantGroups.find(
+        (participant: any) =>
+          Number(participant.id) ===
+          Number(me?.id)
+      );
+
+    const canModerate =
+      [
+        "host",
+        "moderator",
+        "admin",
+      ].includes(
+        currentUserRole?.toLowerCase()
+      );
+
     const joinSocketRoom =
       () => {
         if (
@@ -389,6 +412,17 @@ const AudioRoomPage =
                       ?.hostAndSpeakers ||
                     []
                   }
+                  roomId={
+                    Number(
+                      roomId
+                    )
+                  }
+                  currentUserId={
+                    me?.id
+                  }
+                  canModerate={
+                    canModerate
+                  }
                 />
 
                 <ParticipantSection
@@ -399,6 +433,17 @@ const AudioRoomPage =
                       ?.moderators ||
                     []
                   }
+                  roomId={
+                    Number(
+                      roomId
+                    )
+                  }
+                  currentUserId={
+                    me?.id
+                  }
+                  canModerate={
+                    canModerate
+                  }
                 />
 
                 <ParticipantSection
@@ -408,6 +453,17 @@ const AudioRoomPage =
                       ?.participants
                       ?.listeners ||
                     []
+                  }
+                  roomId={
+                    Number(
+                      roomId
+                    )
+                  }
+                  currentUserId={
+                    me?.id
+                  }
+                  canModerate={
+                    canModerate
                   }
                 />
 
@@ -440,6 +496,10 @@ const AudioRoomPage =
             }
             role={
               currentUserRole
+            }
+            isMuted={
+              currentParticipant?.isMuted ??
+              true
             }
             isChatOpen={
               isChatOpen

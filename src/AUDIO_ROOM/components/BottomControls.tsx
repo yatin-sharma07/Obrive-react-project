@@ -15,10 +15,13 @@ import {
 import {
   API_BASE_URL,
 } from "@/lib/api";
+import {
+  useSocket,
+} from "@/context/SocketContext";
 
 interface BottomControlsProps {
-  roomId: string;
-  userId: number;
+  roomId: number;
+  userId?: number;
   
 
   role:
@@ -29,6 +32,8 @@ interface BottomControlsProps {
     | "listener";
 
   isChatOpen?: boolean;
+
+  isMuted?: boolean;
 
   setIsChatOpen?: (
     value: boolean
@@ -42,16 +47,42 @@ const BottomControls = ({
   role,
   userId,
   isChatOpen = false,
+  isMuted = true,
   setIsChatOpen,
 }: BottomControlsProps) => {
+  const {
+    socket,
+  } = useSocket();
+
   const canSpeak =
     role !== "listener";
 
-  const isMuted = true;
   console.log(
   "Current Role:",
   role
 );
+
+const handleMicToggle =
+  () => {
+    if (
+      !socket ||
+      !userId ||
+      !canSpeak
+    ) {
+      return;
+    }
+
+    socket.emit(
+      "audio_mic_toggle",
+      {
+        roomId:
+          Number(roomId),
+        userId,
+        isMuted:
+          !isMuted,
+      }
+    );
+  };
 
 
 const handleEndRoom =
@@ -73,6 +104,7 @@ const handleEndRoom =
               JSON.stringify(
                 {
                   roomId,
+                  userId,
                 }
               ),
           }
@@ -234,6 +266,7 @@ const handleLeaveRoom =
         {/* Mic Button */}
         {canSpeak && (
           <button
+            onClick={handleMicToggle}
             className={`
               flex
               h-12

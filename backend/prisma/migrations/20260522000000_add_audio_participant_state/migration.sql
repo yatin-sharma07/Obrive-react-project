@@ -1,0 +1,5 @@
+ALTER TABLE "room_participants"
+ADD COLUMN IF NOT EXISTS "isMuted" BOOLEAN NOT NULL DEFAULT true;
+
+ALTER TABLE "room_participants"
+ADD COLUMN IF NOT EXISTS "isSpeaking" BOOLEAN NOT NULL DEFAULT false;

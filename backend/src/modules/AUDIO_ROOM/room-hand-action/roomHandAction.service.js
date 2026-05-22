@@ -119,6 +119,10 @@ const handleHandRequestActionService =
                 data: {
                   roomRole:
                     "speaker",
+                  isMuted:
+                    true,
+                  isSpeaking:
+                    false,
                 },
               }
             );
