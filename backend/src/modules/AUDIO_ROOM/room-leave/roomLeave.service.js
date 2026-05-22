@@ -1,6 +1,13 @@
 const { prisma } =
   require("../../../../prisma");
 
+const { getIO } =
+  require("../../../socket");
+
+const {
+  getRoomDetailsService,
+} = require("../room-details/roomDetails.service");
+
 const leaveRoomService =
   async (payload) => {
     const {
@@ -54,7 +61,21 @@ const leaveRoomService =
 
       const io = getIO();
 
-        io.to( `audio-room:${roomId}`).emit("participant_updated");
+      const roomDetails =
+        await getRoomDetailsService(
+          roomId,
+          userId
+        );
+
+        io.to( `audio-room:${roomId}`).emit("participant_updated", {
+          roomId:
+            Number(
+              roomId
+            ),
+
+          participants:
+            roomDetails.participants,
+        });
 
     return updatedParticipant;
   };

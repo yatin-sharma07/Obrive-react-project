@@ -6,9 +6,17 @@ const { registerConnectionHandler } = require("./handlers/connection.handler");
 let io;
 
 exports.initializeSocket = (httpServer) => {
+  const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    process.env.CLIENT_URL,
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://localhost:3002",
+  ].filter(Boolean);
+
   io = new Server(httpServer, {
     cors: {
-      origin: process.env.FRONTEND_URL || "http://localhost:3000",
+      origin: allowedOrigins,
       credentials: true,
     },
   });

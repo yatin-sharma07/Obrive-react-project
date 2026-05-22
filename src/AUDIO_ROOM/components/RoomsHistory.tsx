@@ -6,6 +6,7 @@ import React, {
 } from "react";
 
 import { API_BASE_URL } from "@/lib/api";
+import { useDashboardData } from "@/app/(dashboard)/dashboard/useDashboardData";
 
 // ======================================================
 // UI CLASSES
@@ -51,6 +52,11 @@ interface Room {
 // ======================================================
 
 const RoomsHistory = () => {
+  const { me } =
+    useDashboardData(
+      "employee"
+    );
+
   // ======================================================
   // STATE
   // ======================================================
@@ -131,9 +137,16 @@ const RoomsHistory = () => {
           roomId: number
         ) => {
           try {
-            // TEMP USER ID
-            // Later this will come from auth/login
-            const userId = 1;
+            const userId =
+              me?.id;
+
+            if (!userId) {
+              alert(
+                "Please login before joining a room"
+              );
+
+              return;
+            }
 
             const response =
               await fetch(
@@ -213,6 +226,10 @@ const handleEndRoom =
     roomId: number
   ) => {
     try {
+      if (!me?.id) {
+        return;
+      }
+
       const response =
         await fetch(
           `${API_BASE_URL}/audio-room/end-room`,
@@ -229,6 +246,8 @@ const handleEndRoom =
               JSON.stringify(
                 {
                   roomId,
+                  userId:
+                    me.id,
                 }
               ),
           }

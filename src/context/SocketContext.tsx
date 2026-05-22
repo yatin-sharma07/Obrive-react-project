@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { io, Socket } from 'socket.io-client'
 import { useDashboardData } from '@/app/(dashboard)/dashboard/useDashboardData'
+import { API_BASE_URL } from '@/lib/api'
 
 interface SocketContextType {
   socket: Socket | null
@@ -26,10 +27,16 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (!me?.id) return
 
-    const socketInstance = io(process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000', {
+    const socketUrl =
+      process.env.NEXT_PUBLIC_BACKEND_URL ||
+      API_BASE_URL?.replace(/\/api\/?$/, '') ||
+      'http://localhost:5000'
+
+    const socketInstance = io(socketUrl, {
       withCredentials: true,
       auth: {
         token: localStorage.getItem('token') || localStorage.getItem('accessToken'),
+        userId: me.id,
       },
     })
 
@@ -41,6 +48,11 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     socketInstance.on('disconnect', () => {
       setIsConnected(false)
       console.log('Socket disconnected')
+    })
+
+    socketInstance.on('connect_error', (error) => {
+      setIsConnected(false)
+      console.error('Socket connection error', error.message)
     })
 
     socketInstance.on('user_online', ({ userId }) => {

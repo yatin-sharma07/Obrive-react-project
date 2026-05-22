@@ -11,10 +11,15 @@ const endRoomController =
     next
   ) => {
     try {
+      const userId =
+        req.body.userId ||
+        req.user?.id;
 
-      // TEMP USER ID
-      // Later from auth
-      const userId = 1;
+      if (!userId) {
+        throw new Error(
+          "User id is required"
+        );
+      }
 
       const result =
         await endRoomService(

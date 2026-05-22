@@ -1,4 +1,8 @@
 const { prisma } = require("../../../../prisma");
+const {
+  getRoomDetailsService,
+} = require("../room-details/roomDetails.service");
+const { getIO,} = require( "../../../socket");
 
 const joinRoomService = async (payload) => {
   const {
@@ -6,9 +10,6 @@ const joinRoomService = async (payload) => {
     userId,
     passkey,
   } = payload;
-
-const { getIO,} = require( "../../../socket");
-
 
   // ==================================
   // FIND ROOM
@@ -106,20 +107,31 @@ const addParticipant =
           },
         }
       );
-
-      // ==========================
-      // SOCKET UPDATE
-      // ==========================
-
-      const io =
-        getIO();
-
-      io.to(
-        `audio-room:${roomId}`
-      ).emit(
-        "participant_updated"
-      );
     }
+
+    const io =
+      getIO();
+
+    const roomDetails =
+      await getRoomDetailsService(
+        roomId,
+        userId
+      );
+
+    io.to(
+      `audio-room:${roomId}`
+    ).emit(
+      "participant_updated",
+      {
+        roomId:
+          Number(
+            roomId
+          ),
+
+        participants:
+          roomDetails.participants,
+      }
+    );
   };
 
 

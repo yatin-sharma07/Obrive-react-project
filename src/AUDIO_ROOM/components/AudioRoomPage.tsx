@@ -59,6 +59,30 @@ const AudioRoomPage =
       roomData?.myRole ||
       "listener";
 
+    const joinSocketRoom =
+      () => {
+        if (
+          !socket ||
+          !roomId ||
+          !me?.id
+        ) {
+          return;
+        }
+
+        socket.emit(
+          "join_audio_room",
+          {
+            roomId:
+              Number(
+                roomId
+              ),
+
+            userId:
+              me.id,
+          }
+        );
+      };
+
     // ==========================
     // FETCH ROOM DETAILS
     // ==========================
@@ -171,17 +195,6 @@ const AudioRoomPage =
 
 
 
-      useEffect(() => {
-  if (!socket || !roomId || !me?.id) return;
-
-  socket.emit("join_audio_room", Number(roomId), me.id);
-
-  console.log(`Joined audio room: ${roomId} as user ${me.id}`);
-
-  return () => {
-    socket.emit("leave_audio_room", Number(roomId), me.id);
-  };
-}, [socket, roomId, me?.id]);
 
 
 
@@ -203,24 +216,35 @@ const AudioRoomPage =
 
           await joinRoom();
 
-          socket?.emit(
-            "join_audio_room",
-            Number(
-              roomId
-            )
-          );
+          joinSocketRoom();
 
           await fetchRoomDetails();
         };
 
       initializeRoom();
 
+      socket?.on(
+        "connect",
+        joinSocketRoom
+      );
+
       return () => {
+        socket?.off(
+          "connect",
+          joinSocketRoom
+        );
+
         socket?.emit(
           "leave_audio_room",
-          Number(
-            roomId
-          )
+          {
+            roomId:
+              Number(
+                roomId
+              ),
+
+            userId:
+              me?.id,
+          }
         );
       };
     }, [
@@ -239,10 +263,38 @@ const AudioRoomPage =
       ) return;
 
       const handleParticipantUpdate =
-        () => {
+        (
+          payload?: any
+        ) => {
+          if (
+            payload?.roomId &&
+            Number(
+              payload.roomId
+            ) !==
+              Number(
+                roomId
+              )
+          ) {
+            return;
+          }
+
           console.log(
             "Realtime participant update"
           );
+
+          if (
+            payload?.participants
+          ) {
+            setRoomData(
+              (previousRoomData: any) => ({
+                ...previousRoomData,
+                participants:
+                  payload.participants,
+              })
+            );
+
+            return;
+          }
 
           fetchRoomDetails();
         };
@@ -258,7 +310,7 @@ const AudioRoomPage =
           handleParticipantUpdate
         );
       };
-    }, [socket]);
+    }, [socket, roomId, me?.id]);
 
     // ==========================
     // LOADING

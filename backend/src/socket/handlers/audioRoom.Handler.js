@@ -1,5 +1,8 @@
 const { prisma } =
   require("../../../prisma");
+const {
+  getRoomDetailsService,
+} = require("../../modules/AUDIO_ROOM/room-details/roomDetails.service");
 
 exports.registerAudioRoomHandler =
   (
@@ -13,9 +16,33 @@ exports.registerAudioRoomHandler =
 
     socket.on(
       "join_audio_room",
-      (
-        roomId
+      async (
+        payload,
+        legacyUserId
       ) => {
+        const roomId =
+          typeof payload ===
+          "object"
+            ? payload.roomId
+            : payload;
+
+        const userId =
+          Number(
+            typeof payload ===
+            "object"
+              ? payload.userId
+              : legacyUserId
+          ) ||
+          Number(
+            socket.user?.id
+          );
+
+        if (
+          !roomId ||
+          !userId
+        ) {
+          return;
+        }
 
         socket.join(
           `audio-room:${roomId}`
@@ -27,13 +54,28 @@ exports.registerAudioRoomHandler =
           );
 
         console.log(
-          `User ${socket.user?.id} joined room ${roomId}`
+          `User ${userId} joined room ${roomId}`
         );
+
+        const roomDetails =
+          await getRoomDetailsService(
+            roomId,
+            userId
+          );
 
         io.to(
           `audio-room:${roomId}`
         ).emit(
-          "participant_updated"
+          "participant_updated",
+          {
+            roomId:
+              Number(
+                roomId
+              ),
+
+            participants:
+              roomDetails.participants,
+          }
         );
       }
     );
@@ -45,8 +87,32 @@ exports.registerAudioRoomHandler =
     socket.on(
       "leave_audio_room",
       async (
-        roomId
+        payload,
+        legacyUserId
       ) => {
+        const roomId =
+          typeof payload ===
+          "object"
+            ? payload.roomId
+            : payload;
+
+        const userId =
+          Number(
+            typeof payload ===
+            "object"
+              ? payload.userId
+              : legacyUserId
+          ) ||
+          Number(
+            socket.user?.id
+          );
+
+        if (
+          !roomId ||
+          !userId
+        ) {
+          return;
+        }
 
         await prisma.room_participants.updateMany(
           {
@@ -57,7 +123,7 @@ exports.registerAudioRoomHandler =
                 ),
 
               userId:
-                socket.user.id,
+                userId,
 
               leftAt:
                 null,
@@ -74,10 +140,25 @@ exports.registerAudioRoomHandler =
           `audio-room:${roomId}`
         );
 
+        const roomDetails =
+          await getRoomDetailsService(
+            roomId,
+            userId
+          );
+
         io.to(
           `audio-room:${roomId}`
         ).emit(
-          "participant_updated"
+          "participant_updated",
+          {
+            roomId:
+              Number(
+                roomId
+              ),
+
+            participants:
+              roomDetails.participants,
+          }
         );
       }
     );
@@ -102,7 +183,9 @@ exports.registerAudioRoomHandler =
             where: {
               roomId,
               userId:
-                socket.user.id,
+                Number(
+                  socket.user.id
+                ),
 
               leftAt:
                 null,
@@ -115,10 +198,25 @@ exports.registerAudioRoomHandler =
           }
         );
 
+        const roomDetails =
+          await getRoomDetailsService(
+            roomId,
+            socket.user.id
+          );
+
         io.to(
           `audio-room:${roomId}`
         ).emit(
-          "participant_updated"
+          "participant_updated",
+          {
+            roomId:
+              Number(
+                roomId
+              ),
+
+            participants:
+              roomDetails.participants,
+          }
         );
 
         console.log(
