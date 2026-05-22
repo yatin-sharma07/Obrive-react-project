@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Mic,
   MicOff,
@@ -10,6 +10,10 @@ import {
   Shield,
   MessageCircle,
   Square,
+  Volume2,
+  VolumeX,
+  LogOut,
+  Trash2,
 } from "lucide-react";
 
 import {
@@ -54,8 +58,16 @@ const BottomControls = ({
     socket,
   } = useSocket();
 
+  const [showModerationMenu, setShowModerationMenu] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+
   const canSpeak =
     role !== "listener";
+
+  const isModerator =
+    role === "moderator" ||
+    role === "host" ||
+    role === "admin";
 
   console.log(
   "Current Role:",
@@ -83,6 +95,8 @@ const handleMicToggle =
       }
     );
   };
+
+  
 
 
 const handleEndRoom =
@@ -247,6 +261,73 @@ const handleLeaveRoom =
     }
   };
 
+// ==========================
+// MODERATION HANDLERS
+// ==========================
+
+const handleMuteSpeaker =
+  (speakerId: number) => {
+    if (!socket) return;
+
+    socket.emit("mute_speaker", {
+      roomId: Number(roomId),
+      userId: speakerId,
+    });
+
+    console.log(
+      `🔇 Muting user ${speakerId}`
+    );
+    setShowModerationMenu(false);
+  };
+
+const handleUnmuteSpeaker =
+  (speakerId: number) => {
+    if (!socket) return;
+
+    socket.emit("unmute_speaker", {
+      roomId: Number(roomId),
+      userId: speakerId,
+    });
+
+    console.log(
+      `🔊 Unmuting user ${speakerId}`
+    );
+    setShowModerationMenu(false);
+  };
+
+const handleDowngradeSpeaker =
+  (speakerId: number) => {
+    if (!socket) return;
+
+    socket.emit(
+      "downgrade_to_listener",
+      {
+        roomId: Number(roomId),
+        userId: speakerId,
+      }
+    );
+
+    console.log(
+      `👤 Downgrading user ${speakerId} to listener`
+    );
+    setShowModerationMenu(false);
+  };
+
+const handleRemoveParticipant =
+  (participantId: number) => {
+    if (!socket) return;
+
+    socket.emit("remove_participant", {
+      roomId: Number(roomId),
+      userId: participantId,
+    });
+
+    console.log(
+      `❌ Removing user ${participantId} from room`
+    );
+    setShowModerationMenu(false);
+  };
+
 
   return (
     <div
@@ -348,32 +429,223 @@ const handleLeaveRoom =
         )}
 
         {/* Moderator Controls */}
-        {(role ===
-          "moderator" ||
-          role === "host" ||
-          role ===
-            "admin") && (
-          <button
-            className="
-              flex
-              h-12
-              w-12
-              items-center
-              justify-center
-              rounded-full
-              border
-              border-sky-200
-              bg-sky-100
-              shadow-sm
-              transition
-              hover:bg-sky-200
-            "
-          >
-            <Shield
-              size={22}
-              className="text-sky-700"
-            />
-          </button>
+        {isModerator && (
+          <div className="relative">
+            <button
+              onClick={() =>
+                setShowModerationMenu(
+                  !showModerationMenu
+                )
+              }
+              className="
+                flex
+                h-12
+                w-12
+                items-center
+                justify-center
+                rounded-full
+                border
+                border-sky-200
+                bg-sky-100
+                shadow-sm
+                transition
+                hover:bg-sky-200
+              "
+            >
+              <Shield
+                size={22}
+                className="text-sky-700"
+              />
+            </button>
+
+            {/* Moderation Dropdown Menu */}
+            {showModerationMenu && (
+              <div
+                className="
+                  absolute
+                  bottom-16
+                  left-0
+                  bg-white
+                  border
+                  border-slate-200
+                  rounded-lg
+                  shadow-lg
+                  p-2
+                  z-50
+                  w-56
+                "
+              >
+                <div
+                  className="
+                    text-sm
+                    font-semibold
+                    text-slate-700
+                    mb-3
+                    px-2
+                  "
+                >
+                  Moderation Controls
+                </div>
+
+                <div
+                  className="
+                    space-y-2
+                  "
+                >
+                  <button
+                    onClick={() =>
+                      handleMuteSpeaker(
+                        selectedUserId || 0
+                      )
+                    }
+                    disabled={
+                      !selectedUserId
+                    }
+                    className="
+                      w-full
+                      flex
+                      items-center
+                      gap-2
+                      px-3
+                      py-2
+                      rounded
+                      text-sm
+                      border
+                      border-gray-300
+                      hover:bg-gray-100
+                      disabled:opacity-50
+                      disabled:cursor-not-allowed
+                    "
+                  >
+                    <VolumeX
+                      size={16}
+                    />
+                    Mute Speaker
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      handleUnmuteSpeaker(
+                        selectedUserId || 0
+                      )
+                    }
+                    disabled={
+                      !selectedUserId
+                    }
+                    className="
+                      w-full
+                      flex
+                      items-center
+                      gap-2
+                      px-3
+                      py-2
+                      rounded
+                      text-sm
+                      border
+                      border-gray-300
+                      hover:bg-gray-100
+                      disabled:opacity-50
+                      disabled:cursor-not-allowed
+                    "
+                  >
+                    <Volume2
+                      size={16}
+                    />
+                    Unmute Speaker
+                  </button>
+
+                  <hr
+                    className="
+                      my-2
+                    "
+                  />
+
+                  <button
+                    onClick={() =>
+                      handleDowngradeSpeaker(
+                        selectedUserId || 0
+                      )
+                    }
+                    disabled={
+                      !selectedUserId
+                    }
+                    className="
+                      w-full
+                      flex
+                      items-center
+                      gap-2
+                      px-3
+                      py-2
+                      rounded
+                      text-sm
+                      border
+                      border-amber-300
+                      hover:bg-amber-100
+                      disabled:opacity-50
+                      disabled:cursor-not-allowed
+                      text-amber-700
+                    "
+                  >
+                    <LogOut
+                      size={16}
+                    />
+                    Downgrade to Listener
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      handleRemoveParticipant(
+                        selectedUserId || 0
+                      )
+                    }
+                    disabled={
+                      !selectedUserId
+                    }
+                    className="
+                      w-full
+                      flex
+                      items-center
+                      gap-2
+                      px-3
+                      py-2
+                      rounded
+                      text-sm
+                      border
+                      border-red-300
+                      hover:bg-red-100
+                      disabled:opacity-50
+                      disabled:cursor-not-allowed
+                      text-red-700
+                    "
+                  >
+                    <Trash2
+                      size={16}
+                    />
+                    Remove from Room
+                  </button>
+
+                  <hr
+                    className="
+                      my-2
+                    "
+                  />
+
+                  <div
+                    className="
+                      px-2
+                      py-1
+                      text-xs
+                      text-slate-500
+                    "
+                  >
+                    Selected User ID:{" "}
+                    {selectedUserId ||
+                      "None"}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         )}
 
         {/* Chat Toggle */}

@@ -6,6 +6,10 @@ import {
   MicOff,
   Crown,
   Shield,
+  Volume2,
+  VolumeX,
+  LogOut,
+  Trash2,
 } from "lucide-react";
 import {
   useSocket,
@@ -71,13 +75,88 @@ const ParticipantCard = ({
       }
 
       socket.emit(
-        "audio_moderator_mute",
+        "mute_speaker",
         {
           roomId,
-          targetUserId:
+          userId:
             participant.id,
         }
       );
+    };
+
+  const handleModeratorUnmute =
+    () => {
+      if (
+        !socket ||
+        !canModerate ||
+        participant.id ===
+          currentUserId ||
+        isMuted
+      ) {
+        return;
+      }
+
+      socket.emit(
+        "unmute_speaker",
+        {
+          roomId,
+          userId:
+            participant.id,
+        }
+      );
+    };
+
+  const handleDowngradeToListener =
+    () => {
+      if (
+        !socket ||
+        !canModerate ||
+        participant.id ===
+          currentUserId ||
+        [
+          "listener",
+        ].includes(
+          normalizedRole
+        )
+      ) {
+        return;
+      }
+
+      socket.emit(
+        "downgrade_to_listener",
+        {
+          roomId,
+          userId:
+            participant.id,
+        }
+      );
+    };
+
+  const handleRemoveParticipant =
+    () => {
+      if (
+        !socket ||
+        !canModerate ||
+        participant.id ===
+          currentUserId
+      ) {
+        return;
+      }
+
+      if (
+        confirm(
+          `Remove ${participant.name} from room?`
+        )
+      ) {
+        socket.emit(
+          "remove_participant",
+          {
+            roomId,
+            userId:
+              participant.id,
+          }
+        );
+      }
     };
 
   const getRoleBadge = () => {
@@ -196,9 +275,10 @@ const ParticipantCard = ({
           </p>
         )}
 
-        <div className="mt-2 flex items-center justify-center gap-1">
+        <div className="mt-2 flex items-center justify-center gap-1 flex-wrap">
           {getRoleBadge()}
 
+          {/* MUTE BUTTON - Show when speaker is not muted */}
           {canBeMuted && (
             <button
               onClick={handleModeratorMute}
@@ -219,6 +299,109 @@ const ParticipantCard = ({
               title="Mute speaker"
             >
               <MicOff
+                size={10}
+              />
+            </button>
+          )}
+
+          {/* UNMUTE BUTTON - Show when speaker is muted and moderator */}
+          {canModerate &&
+            participant.id !==
+              currentUserId &&
+            isMuted &&
+            ![
+              "listener",
+            ].includes(
+              normalizedRole
+            ) && (
+            <button
+              onClick={
+                handleModeratorUnmute
+              }
+              className="
+                flex
+                h-5
+                w-5
+                items-center
+                justify-center
+                rounded-full
+                border
+                border-green-200
+                bg-green-50
+                text-green-600
+                transition
+                hover:bg-green-100
+              "
+              title="Unmute speaker"
+            >
+              <Volume2
+                size={10}
+              />
+            </button>
+          )}
+
+          {/* DOWNGRADE BUTTON - Show for speakers/moderators when moderator */}
+          {canModerate &&
+            participant.id !==
+              currentUserId &&
+            ![
+              "listener",
+              "host",
+              "admin",
+            ].includes(
+              normalizedRole
+            ) && (
+            <button
+              onClick={
+                handleDowngradeToListener
+              }
+              className="
+                flex
+                h-5
+                w-5
+                items-center
+                justify-center
+                rounded-full
+                border
+                border-amber-200
+                bg-amber-50
+                text-amber-600
+                transition
+                hover:bg-amber-100
+              "
+              title="Downgrade to listener"
+            >
+              <LogOut
+                size={10}
+              />
+            </button>
+          )}
+
+          {/* REMOVE BUTTON - Show when moderator */}
+          {canModerate &&
+            participant.id !==
+              currentUserId && (
+            <button
+              onClick={
+                handleRemoveParticipant
+              }
+              className="
+                flex
+                h-5
+                w-5
+                items-center
+                justify-center
+                rounded-full
+                border
+                border-red-300
+                bg-red-100
+                text-red-700
+                transition
+                hover:bg-red-200
+              "
+              title="Remove from room"
+            >
+              <Trash2
                 size={10}
               />
             </button>

@@ -218,7 +218,37 @@ const AudioRoomPage =
 
 
 
+          useEffect(() => {
+          if (!socket) return;
 
+          // Listen for real-time moderation updates
+          socket.on("speaker_muted", (data) => {
+            console.log("Speaker muted:", data.userId);
+            fetchRoomDetails();
+          });
+
+          socket.on("speaker_unmuted", (data) => {
+            console.log("Speaker unmuted:", data.userId);
+            fetchRoomDetails();
+          });
+
+          socket.on("role_changed", (data) => {
+            console.log("Role changed for user:", data.userId);
+            fetchRoomDetails();
+          });
+
+          socket.on("participant_removed", (data) => {
+            console.log("Participant removed:", data.userId);
+            fetchRoomDetails();
+          });
+
+          return () => {
+            socket.off("speaker_muted");
+            socket.off("speaker_unmuted");
+            socket.off("role_changed");
+            socket.off("participant_removed");
+          };
+        }, [socket]);
 
 
 

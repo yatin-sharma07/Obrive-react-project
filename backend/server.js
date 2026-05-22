@@ -161,6 +161,25 @@ app.use(
     "./src/modules/AUDIO_ROOM/room-hand-action/roomHandAction.routes"
   )
 );
+// ✅ MODERATION ROUTES
+app.use(
+  "/api/audio-room",
+  require(
+    "./src/modules/AUDIO_ROOM/speaker-mute/speakerMute.routes"
+  )
+);
+app.use(
+  "/api/audio-room",
+  require(
+    "./src/modules/AUDIO_ROOM/speaker-downgrade/speakerDowngrade.routes"
+  )
+);
+app.use(
+  "/api/audio-room",
+  require(
+    "./src/modules/AUDIO_ROOM/participant-remove/participantRemove.routes"
+  )
+);
 
 
 // ── Error handler ─────────────────────────────────────────────
