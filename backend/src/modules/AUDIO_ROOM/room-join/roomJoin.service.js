@@ -76,38 +76,90 @@ const addParticipant =
   async (
     roomRole
   ) => {
-    const existingParticipant =
-      await prisma.room_participants.findFirst(
-        {
-          where: {
-            roomId:
-              Number(roomId),
+    await prisma.$transaction(
+      async (tx) => {
+        const activeParticipants =
+          await tx.room_participants.findMany(
+            {
+              where: {
+                roomId:
+                  Number(roomId),
 
-            userId:
-              Number(userId),
+                userId:
+                  Number(userId),
 
-            leftAt: null,
-          },
+                leftAt: null,
+              },
+
+              orderBy: {
+                joinedAt:
+                  "asc",
+              },
+            }
+          );
+
+        const [primaryParticipant,
+          ...duplicateParticipants] =
+          activeParticipants;
+
+        if (
+          duplicateParticipants.length
+        ) {
+          await tx.room_participants.updateMany(
+            {
+              where: {
+                id: {
+                  in:
+                    duplicateParticipants.map(
+                      (
+                        participant
+                      ) => participant.id
+                    ),
+                },
+              },
+
+              data: {
+                leftAt:
+                  new Date(),
+              },
+            }
+          );
         }
-      );
 
-    if (
-      !existingParticipant
-    ) {
-      await prisma.room_participants.create(
-        {
-          data: {
-            roomId:
-              Number(roomId),
+        if (
+          primaryParticipant
+        ) {
+          await tx.room_participants.update(
+            {
+              where: {
+                id:
+                  primaryParticipant.id,
+              },
 
-            userId:
-              Number(userId),
+              data: {
+                roomRole,
+              },
+            }
+          );
 
-            roomRole,
-          },
+          return;
         }
-      );
-    }
+
+        await tx.room_participants.create(
+          {
+            data: {
+              roomId:
+                Number(roomId),
+
+              userId:
+                Number(userId),
+
+              roomRole,
+            },
+          }
+        );
+      }
+    );
 
     const io =
       getIO();

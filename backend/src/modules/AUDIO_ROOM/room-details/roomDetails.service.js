@@ -87,6 +87,53 @@ const roomParticipants =
     }
   );
 
+const uniqueRoomParticipants =
+  Array.from(
+    roomParticipants
+      .reduce(
+        (
+          map,
+          participant
+        ) => {
+          const existingParticipant =
+            map.get(
+              participant.userId
+            );
+
+          if (
+            !existingParticipant ||
+            participant.joinedAt >
+              existingParticipant.joinedAt
+          ) {
+            map.set(
+              participant.userId,
+              participant
+            );
+          }
+
+          return map;
+        },
+        new Map()
+      )
+      .values()
+  );
+
+const currentParticipant =
+  uniqueRoomParticipants.find(
+    (
+      participant
+    ) =>
+      participant.userId ===
+      Number(userId)
+  );
+
+if (
+  currentParticipant
+) {
+  myRole =
+    currentParticipant.roomRole;
+}
+
 // ==========================
 // GROUP PARTICIPANTS
 // ==========================
@@ -103,7 +150,7 @@ const roomParticipants =
           [],
       };
 
-    roomParticipants.forEach(
+    uniqueRoomParticipants.forEach(
       (
         participant
       ) => {

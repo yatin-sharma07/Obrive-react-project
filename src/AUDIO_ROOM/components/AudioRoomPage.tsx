@@ -13,6 +13,7 @@ import RoomHeader from "./RoomHeader";
 import ParticipantSection from "./ParticipantSection";
 import ChatPanel from "./ChatPanel";
 import BottomControls from "./BottomControls";
+import RaisedHandsPanel from "./RaisedHandsPanel";
 
 import {
   API_BASE_URL,
@@ -285,11 +286,28 @@ const AudioRoomPage =
           if (
             payload?.participants
           ) {
+            const participantGroups =
+              [
+                ...(payload.participants.hostAndSpeakers || []),
+                ...(payload.participants.moderators || []),
+                ...(payload.participants.listeners || []),
+              ];
+
+            const currentParticipant =
+              participantGroups.find(
+                (participant: any) =>
+                  Number(participant.id) ===
+                  Number(me?.id)
+              );
+
             setRoomData(
               (previousRoomData: any) => ({
                 ...previousRoomData,
                 participants:
                   payload.participants,
+                myRole:
+                  currentParticipant?.role ||
+                  previousRoomData?.myRole,
               })
             );
 
@@ -341,10 +359,21 @@ const AudioRoomPage =
     }
 
     return (
-      <div className="h-screen w-full overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100">
+      <div className="relative h-screen w-full overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100">
         <div className="h-full flex flex-col min-h-0">
 
           <RoomHeader />
+
+          <RaisedHandsPanel
+            roomId={
+              Number(
+                roomId
+              )
+            }
+            role={
+              currentUserRole
+            }
+          />
 
           <div className="flex-1 min-h-0 flex overflow-hidden">
 

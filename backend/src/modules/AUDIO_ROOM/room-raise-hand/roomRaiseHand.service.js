@@ -2,9 +2,9 @@ const { prisma } =
   require("../../../../prisma");
 
 const {
-  getIO,
+  emitHandRaiseUpdated,
 } = require(
-  "../../../socket"
+  "../room-hand-action/roomHandAction.service"
 );
 
 const raiseHandService =
@@ -97,18 +97,8 @@ const raiseHandService =
         }
       );
 
-    // ==========================
-    // SOCKET UPDATE
-    // ==========================
-
-    const io =
-      getIO();
-
-    io.to(
-      `audio-room:${roomId}`
-    ).emit(
-      "hand_raised",
-      request
+    await emitHandRaiseUpdated(
+      roomId
     );
 
     return request;

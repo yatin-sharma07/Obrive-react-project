@@ -18,6 +18,20 @@ const ParticipantSection = ({
   title,
   participants,
 }: ParticipantSectionProps) => {
+  const uniqueParticipants =
+    Array.from(
+      new Map(
+        participants.map(
+          (
+            participant
+          ) => [
+            participant.id,
+            participant,
+          ]
+        )
+      ).values()
+    );
+
   return (
     <section
       className="
@@ -38,13 +52,13 @@ const ParticipantSection = ({
           </h2>
 
           <p className="text-[8px] text-slate-500 mt-1">
-            {participants.length} participants
+            {uniqueParticipants.length} participants
           </p>
         </div>
       </div>
 
       {/* Empty State */}
-      {participants.length === 0 ? (
+      {uniqueParticipants.length === 0 ? (
         <div
           className="
             flex
@@ -75,7 +89,7 @@ const ParticipantSection = ({
             gap-4
           "
         >
-          {participants.map(
+          {uniqueParticipants.map(
             (participant) => (
               <ParticipantCard
                 key={participant.id}

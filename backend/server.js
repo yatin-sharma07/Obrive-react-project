@@ -149,6 +149,18 @@ app.use(
     "./src/modules/AUDIO_ROOM/room-raise-hand/roomRaiseHand.routes"
   )
 );
+app.use(
+  "/api/audio-room",
+  require(
+    "./src/modules/AUDIO_ROOM/room-hand-requests/roomHandRequests.routes"
+  )
+);
+app.use(
+  "/api/audio-room",
+  require(
+    "./src/modules/AUDIO_ROOM/room-hand-action/roomHandAction.routes"
+  )
+);
 
 
 // ── Error handler ─────────────────────────────────────────────
