@@ -1,0 +1,34 @@
+const {
+  raiseHandService,
+} = require(
+  "./roomRaiseHand.service"
+);
+
+const raiseHandController =
+  async (
+    req,
+    res,
+    next
+  ) => {
+    try {
+      const result =
+        await raiseHandService(
+          req.body
+        );
+
+      return res
+        .status(200)
+        .json({
+          success: true,
+          data: result,
+        });
+    } catch (
+      error
+    ) {
+      next(error);
+    }
+  };
+
+module.exports = {
+  raiseHandController,
+};

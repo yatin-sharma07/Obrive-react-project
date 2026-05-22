@@ -60,20 +60,97 @@ const getRoomDetailsService =
         specificUserRole.assignedRoomRole;
     }
 
-    // ==========================
-    // GROUP PARTICIPANTS
-    // TEMP MOCK DATA
-    // Later realtime
-    // ==========================
+// ==========================
+// GET PARTICIPANTS
+// ==========================
+
+const roomParticipants =
+  await prisma.room_participants.findMany(
+    {
+      where: {
+        roomId:
+          Number(roomId),
+
+        leftAt: null,
+      },
+
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            userid: true,
+            role: true,
+          },
+        },
+      },
+    }
+  );
+
+// ==========================
+// GROUP PARTICIPANTS
+// ==========================
 
     const participants =
       {
         hostAndSpeakers:
           [],
+
         moderators:
           [],
-        listeners: [],
+
+        listeners:
+          [],
       };
+
+    roomParticipants.forEach(
+      (
+        participant
+      ) => {
+        const user =
+          participant.user;
+
+        const formattedUser =
+          {
+            id: user.id,
+
+            name:
+              user.name,
+
+            userid:
+              user.userid,
+
+            role:
+              participant.roomRole,
+          };
+
+        if (
+          participant.roomRole ===
+            "host" ||
+          participant.roomRole ===
+            "speaker"
+        ) {
+          participants.hostAndSpeakers.push(
+            formattedUser
+          );
+        }
+
+        else if (
+          participant.roomRole ===
+          "moderator"
+        ) {
+          participants.moderators.push(
+            formattedUser
+          );
+        }
+
+        else {
+          participants.listeners.push(
+            formattedUser
+          );
+        }
+      }
+    );
 
     return {
       room,

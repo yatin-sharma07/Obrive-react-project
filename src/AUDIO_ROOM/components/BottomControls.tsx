@@ -18,6 +18,8 @@ import {
 
 interface BottomControlsProps {
   roomId: string;
+  userId: number;
+  
 
   role:
     | "admin"
@@ -34,9 +36,11 @@ interface BottomControlsProps {
 }
 
 
+
 const BottomControls = ({
   roomId,
   role,
+  userId,
   isChatOpen = false,
   setIsChatOpen,
 }: BottomControlsProps) => {
@@ -49,12 +53,10 @@ const BottomControls = ({
   role
 );
 
-  const handleEndRoom = async () => {
-    try {
-      console.log(
-        "END BUTTON CLICKED"
-      );
 
+const handleEndRoom =
+  async () => {
+    try {
       const response =
         await fetch(
           `${API_BASE_URL}/audio-room/end-room`,
@@ -93,7 +95,6 @@ const BottomControls = ({
         data
       );
 
-      // Redirect
       window.location.href =
         "/audio-room";
     } catch (
@@ -105,6 +106,115 @@ const BottomControls = ({
       );
     }
   };
+
+const handleLeaveRoom =
+  async () => {
+    try {
+      // const userId = 1;
+
+      const response =
+        await fetch(
+          `${API_BASE_URL}/audio-room/leave-room`,
+          {
+            method:
+              "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body:
+              JSON.stringify(
+                {
+                  roomId,
+                  userId,
+                }
+              ),
+          }
+        );
+
+      const data =
+        await response.json();
+
+      if (
+        !response.ok
+      ) {
+        throw new Error(
+          data.message ||
+            "Failed to leave room"
+        );
+      }
+
+      console.log(
+        "✅ Left Room:",
+        data
+      );
+
+      window.location.href =
+        "/audio-room";
+    } catch (
+      error
+    ) {
+      console.error(
+        "❌ Leave Room Error:",
+        error
+      );
+    }
+  };
+
+
+
+  const handleRaiseHand =
+  async () => {
+    try {
+      const response =
+        await fetch(
+          `${API_BASE_URL}/audio-room/raise-hand`,
+          {
+            method:
+              "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body:
+              JSON.stringify({
+                roomId:
+                  Number(roomId),
+
+                userId,
+              }),
+          }
+        );
+
+      const data =
+        await response.json();
+
+      if (
+        !response.ok
+      ) {
+        throw new Error(
+          data.message
+        );
+      }
+
+      console.log(
+        "✋ Hand Raised:",
+        data
+      );
+    } catch (
+      error
+    ) {
+      console.error(
+        "Raise Hand Error:",
+        error
+      );
+    }
+  };
+
 
   return (
     <div
@@ -179,9 +289,9 @@ const BottomControls = ({
         </button>
 
         {/* Raise Hand */}
-        {role ===
-          "listener" && (
+        {role === "listener" && (
           <button
+            onClick={handleRaiseHand}
             className="
               flex
               h-12
@@ -295,6 +405,7 @@ const BottomControls = ({
 
         {/* Leave Room */}
         <button
+        onClick={ handleLeaveRoom }
           className="
             flex
             h-12

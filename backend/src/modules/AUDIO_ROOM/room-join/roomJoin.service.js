@@ -7,6 +7,9 @@ const joinRoomService = async (payload) => {
     passkey,
   } = payload;
 
+const { getIO,} = require( "../../../socket");
+
+
   // ==================================
   // FIND ROOM
   // ==================================
@@ -52,11 +55,73 @@ const joinRoomService = async (payload) => {
       },
     });
 
+    console.log(
+  "JOIN USER:",
+  user.id,
+  user.role
+);
+
   if (!user) {
     throw new Error(
       "User not found"
     );
   }
+
+// ==================================
+// ADD PARTICIPANT
+// ==================================
+
+const addParticipant =
+  async (
+    roomRole
+  ) => {
+    const existingParticipant =
+      await prisma.room_participants.findFirst(
+        {
+          where: {
+            roomId:
+              Number(roomId),
+
+            userId:
+              Number(userId),
+
+            leftAt: null,
+          },
+        }
+      );
+
+    if (
+      !existingParticipant
+    ) {
+      await prisma.room_participants.create(
+        {
+          data: {
+            roomId:
+              Number(roomId),
+
+            userId:
+              Number(userId),
+
+            roomRole,
+          },
+        }
+      );
+
+      // ==========================
+      // SOCKET UPDATE
+      // ==========================
+
+      const io =
+        getIO();
+
+      io.to(
+        `audio-room:${roomId}`
+      ).emit(
+        "participant_updated"
+      );
+    }
+  };
+
 
   // ==================================
   // CHECK SPECIFIC ROLE ASSIGNMENT
@@ -71,14 +136,18 @@ const joinRoomService = async (payload) => {
           Number(userId)
     );
 
-  if (assignedRole) {
-    return {
-      allowed: true,
-      roomRole:
-        assignedRole.assignedRoomRole,
-      room,
-    };
-  }
+if (assignedRole) {
+  await addParticipant(
+    assignedRole.assignedRoomRole
+  );
+
+  return {
+    allowed: true,
+    roomRole:
+      assignedRole.assignedRoomRole,
+    room,
+  };
+}
 
   // ==================================
   // CHECK CRM ROLE ACCESS
@@ -93,14 +162,28 @@ const joinRoomService = async (payload) => {
           user.role?.toLowerCase()
     );
 
-  if (hasRoleAccess) {
-    return {
-      allowed: true,
-      roomRole: "listener",
-      room,
-    };
-  }
+    console.log(
+      "ROOM PERMISSIONS:",
+      room.joinPermissions
+    );
 
+    console.log(
+      "USER ROLE:",
+      user.role
+    );
+
+    if (hasRoleAccess) {
+      await addParticipant(
+        "listener"
+      );
+
+  return {
+    allowed: true,
+    roomRole:
+      "listener",
+    room,
+  };
+}
   // ==================================
   // CHECK GUEST ACCESS
   // ==================================
@@ -112,16 +195,21 @@ const joinRoomService = async (payload) => {
         "guest"
     );
 
-  if (
-    guestAllowed &&
-    room.allowGuestUsers
-  ) {
-    return {
-      allowed: true,
-      roomRole: "listener",
-      room,
-    };
-  }
+if (
+  guestAllowed &&
+  room.allowGuestUsers
+) {
+  await addParticipant(
+    "listener"
+  );
+
+  return {
+    allowed: true,
+    roomRole:
+      "listener",
+    room,
+  };
+}
 
   // ==================================
   // ACCESS DENIED

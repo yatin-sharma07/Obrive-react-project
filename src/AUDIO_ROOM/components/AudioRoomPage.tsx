@@ -1,217 +1,355 @@
 "use client";
 
-import React, {useEffect,useState,} from "react";
+import React, {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  useParams,
+} from "next/navigation";
+
 import RoomHeader from "./RoomHeader";
 import ParticipantSection from "./ParticipantSection";
 import ChatPanel from "./ChatPanel";
 import BottomControls from "./BottomControls";
-import { useParams,} from "next/navigation";
-import { API_BASE_URL } from "@/lib/api";
 
+import {
+  API_BASE_URL,
+} from "@/lib/api";
 
+import {
+  useSocket,
+} from "@/context/SocketContext";
 
-// const mockParticipants = {
-//   hostAndSpeakers: [
-//     {
-//       id: 1,
-//       name: "Rohan Sharma",
-//       role: "HOST",
-//     },
-//     {
-//       id: 2,
-//       name: "Amit Kumar",
-//       role: "SPEAKER",
-//     },
-//     {
-//       id: 3,
-//       name: "Neha Verma",
-//       role: "SPEAKER",
-//     },
-//   ],
+import {
+  useDashboardData,
+} from "@/app/(dashboard)/dashboard/useDashboardData";
 
-//   moderators: [
-//     {
-//       id: 4,
-//       name: "Priya Singh",
-//       role: "MODERATOR",
-//     },
-//     {
-//       id: 5,
-//       name: "Arjun Mehta",
-//       role: "MODERATOR",
-//     },
-//   ],
+const AudioRoomPage =
+  () => {
+    const [isChatOpen,
+      setIsChatOpen] =
+      useState(true);
 
-//   listeners: [
-//     {
-//       id: 6,
-//       name: "Karan",
-//       role: "LISTENER",
-//     },
-//     {
-//       id: 7,
-//       name: "Riya",
-//       role: "LISTENER",
-//     },
-//     {
-//       id: 8,
-//       name: "Anjali",
-//       role: "LISTENER",
-//     },
-//     {
-//       id: 9,
-//       name: "Rahul",
-//       role: "LISTENER",
-//     },
-//   ],
-// };
+    const [roomData,
+      setRoomData] =
+      useState<any>(null);
 
-const AudioRoomPage = () => {
-  const [isChatOpen, setIsChatOpen] =
-    useState(true);
+    const [loading,
+      setLoading] =
+      useState(true);
 
-const params = useParams();
-const roomId = params.roomId;
-const [roomData, setRoomData] = useState<any>(null);
-const [loading, setLoading] = useState(true);
-const currentUserRole = roomData?.myRole || "listener";
+    const params =
+      useParams();
 
+    const roomId =
+      params.roomId;
 
+    const {
+      socket,
+    } = useSocket();
 
+    const { me } =
+      useDashboardData(
+        "employee"
+      );
 
+    const currentUserRole =
+      roomData?.myRole ||
+      "listener";
 
-useEffect(() => {
-  fetchRoomDetails();
-}, []);
+    // ==========================
+    // FETCH ROOM DETAILS
+    // ==========================
 
-const fetchRoomDetails =
-  async () => {
-    try {
-      const userId = 1;
+    const fetchRoomDetails =
+      async () => {
+        try {
+          if (
+            !roomId ||
+            !me?.id
+          ) {
+            return;
+          }
 
-      const response =
-        await fetch(
-          `${API_BASE_URL}/audio-room/room-details/${roomId}?userId=${userId}`
+          const response =
+            await fetch(
+              `${API_BASE_URL}/audio-room/room-details/${roomId}?userId=${me.id}`
+            );
+
+          const data =
+            await response.json();
+
+          if (
+            !response.ok
+          ) {
+            throw new Error(
+              data.message
+            );
+          }
+
+          setRoomData(
+            data.data
+          );
+
+        } catch (
+          error
+        ) {
+          console.error(
+            "Room details error:",
+            error
+          );
+        } finally {
+          setLoading(
+            false
+          );
+        }
+      };
+
+    // ==========================
+    // JOIN ROOM
+    // ==========================
+
+    const joinRoom =
+      async () => {
+        try {
+          if (
+            !roomId ||
+            !me?.id
+          ) {
+            return;
+          }
+
+          const response =
+            await fetch(
+              `${API_BASE_URL}/audio-room/join`,
+              {
+                method:
+                  "POST",
+
+                headers: {
+                  "Content-Type":
+                    "application/json",
+                },
+
+                body:
+                  JSON.stringify(
+                    {
+                      roomId:
+                        Number(
+                          roomId
+                        ),
+
+                      userId:
+                        me.id,
+                    }
+                  ),
+              }
+            );
+
+          const data =
+            await response.json();
+
+          console.log(
+            "Joined room:",
+            data
+          );
+
+        } catch (
+          error
+        ) {
+          console.error(
+            "Join room error:",
+            error
+          );
+        }
+      };
+
+    // ==========================
+    // INITIALIZE ROOM
+    // ==========================
+
+    useEffect(() => {
+      const initializeRoom =
+        async () => {
+
+          if (
+            !roomId ||
+            !me?.id
+          ) {
+            return;
+          }
+
+          await joinRoom();
+
+          socket?.emit(
+            "join_audio_room",
+            Number(
+              roomId
+            )
+          );
+
+          await fetchRoomDetails();
+        };
+
+      initializeRoom();
+
+      return () => {
+        socket?.emit(
+          "leave_audio_room",
+          Number(
+            roomId
+          )
         );
+      };
+    }, [
+      me?.id,
+      roomId,
+      socket,
+    ]);
 
-      const data =
-        await response.json();
+    // ==========================
+    // REALTIME PARTICIPANTS
+    // ==========================
 
+    useEffect(() => {
       if (
-        !response.ok
-      ) {
-        throw new Error(
-          data.message
+        !socket
+      ) return;
+
+      const handleParticipantUpdate =
+        () => {
+          console.log(
+            "Realtime participant update"
+          );
+
+          fetchRoomDetails();
+        };
+
+      socket.on(
+        "participant_updated",
+        handleParticipantUpdate
+      );
+
+      return () => {
+        socket.off(
+          "participant_updated",
+          handleParticipantUpdate
         );
-      }
+      };
+    }, [socket]);
 
-      console.log(
-        "✅ Room Details:",
-        data
-      );
+    // ==========================
+    // LOADING
+    // ==========================
 
-      setRoomData(
-        data.data
-      );
-    } catch (
-      error
+    if (
+      loading
     ) {
-      console.error(
-        error
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+      return (
+        <div className="flex h-screen items-center justify-center">
+          <div className="text-center">
+            <div className="text-lg font-semibold">
+              Loading room...
+            </div>
 
-
-if (loading) {
-  return (
-    <div className="flex h-screen items-center justify-center">
-      Loading room...
-    </div>
-  );
-}
-
-  return (
-
-    
-    <div className="h-screen w-full overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100">
-      <div className="h-full flex flex-col min-h-0">
-        {/* Header */}
-
-          {/* <div className="bg-red-100 p-2 text-sm">
-              Room ID: {String(roomId)}
-          </div> */}
-
-
-
-        <RoomHeader />
-
-        {/* Content Area - Participants and Chat */}
-        <div className="flex-1 min-h-0 flex overflow-hidden">
-          {/* Left - Participants */}
-          <div className="flex-1 min-w-0 overflow-y-auto px-5 py-5">
-            <div className="flex flex-col gap-5">
-              {/* Host + Speakers */}
-              <ParticipantSection
-                title="Host & Speakers"
-                participants={
-                        roomData?.participants
-                          ?.hostAndSpeakers ||
-                        []
-                      }
-              />
-
-              {/* Moderators */}
-              <ParticipantSection
-                title="Moderators"
-                participants={
-                  roomData?.participants
-                    ?.moderators ||
-                  []
-                }
-              />
-
-              {/* Listeners */}
-              <ParticipantSection
-                title="Listeners"
-                participants={
-                  roomData?.participants
-                    ?.listeners ||
-                  []
-                }
-              />
+            <div className="text-sm text-slate-500">
+              roomId:
+              {" "}
+              {
+                String(
+                  roomId
+                )
+              }
             </div>
           </div>
-
-          {/* Right Chat Panel */}
-          {isChatOpen && (
-            <div className="w-[360px] shrink-0 border-l border-slate-200/60 bg-white/40 backdrop-blur-md overflow-y-auto">
-              <ChatPanel
-                isChatOpen={isChatOpen}
-                setIsChatOpen={setIsChatOpen}
-              />
-            </div>
-          )}
         </div>
+      );
+    }
 
-        {/* Bottom Controls */}
-            <BottomControls
-              roomId={
-                roomId as string
-              }
-              role={currentUserRole}
-              isChatOpen={
-                isChatOpen
-              }
-              setIsChatOpen={
-                setIsChatOpen
-              }
-            />
+    return (
+      <div className="h-screen w-full overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100">
+        <div className="h-full flex flex-col min-h-0">
+
+          <RoomHeader />
+
+          <div className="flex-1 min-h-0 flex overflow-hidden">
+
+            {/* Participants */}
+            <div className="flex-1 min-w-0 overflow-y-auto px-5 py-5">
+              <div className="flex flex-col gap-5">
+
+                <ParticipantSection
+                  title="Host & Speakers"
+                  participants={
+                    roomData
+                      ?.participants
+                      ?.hostAndSpeakers ||
+                    []
+                  }
+                />
+
+                <ParticipantSection
+                  title="Moderators"
+                  participants={
+                    roomData
+                      ?.participants
+                      ?.moderators ||
+                    []
+                  }
+                />
+
+                <ParticipantSection
+                  title="Listeners"
+                  participants={
+                    roomData
+                      ?.participants
+                      ?.listeners ||
+                    []
+                  }
+                />
+
+              </div>
+            </div>
+
+            {/* Chat */}
+            {isChatOpen && (
+              <div className="w-[360px] shrink-0 border-l border-slate-200/60 bg-white/40 backdrop-blur-md overflow-y-auto">
+                <ChatPanel
+                  isChatOpen={
+                    isChatOpen
+                  }
+                  setIsChatOpen={
+                    setIsChatOpen
+                  }
+                />
+              </div>
+            )}
+          </div>
+
+          <BottomControls
+            userId={
+              me?.id
+            }
+            roomId={
+              Number(
+                roomId
+              )
+            }
+            role={
+              currentUserRole
+            }
+            isChatOpen={
+              isChatOpen
+            }
+            setIsChatOpen={
+              setIsChatOpen
+            }
+          />
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
 export default AudioRoomPage;

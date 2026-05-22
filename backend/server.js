@@ -137,6 +137,18 @@ app.use( "/api/audio-room", require( "./src/modules/AUDIO_ROOM/room-end/roomEnd.
 app.use( "/api/audio-room", require( "./src/modules/AUDIO_ROOM/room-join/roomJoin.routes"));
 app.use( "/api/audio-room",  require("./src/modules/AUDIO_ROOM/room-list/roomList.routes"));
 app.use( "/api/audio-room",  require("./src/modules/AUDIO_ROOM/room-details/roomDetails.routes"));
+app.use(
+  "/api/audio-room",
+  require(
+    "./src/modules/AUDIO_ROOM/room-leave/roomLeave.routes"
+  )
+);
+app.use(
+  "/api/audio-room",
+  require(
+    "./src/modules/AUDIO_ROOM/room-raise-hand/roomRaiseHand.routes"
+  )
+);
 
 
 // ── Error handler ─────────────────────────────────────────────

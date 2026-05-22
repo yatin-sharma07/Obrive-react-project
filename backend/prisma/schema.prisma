@@ -133,12 +133,14 @@ model users {
   leaves              leaves[]
   approved_leaves     leaves[]              @relation("LeaveApprovedBy")
   room_configs        room_configs[]
+  handRaises          room_hand_raises[]
   
   // Chat relations
   created_conversations conversations[]     @relation("CreatedConversations")
   conversations         conversation_participants[]
   messages              messages[]
   unread_conversations  conversation_unread[]
+  roomParticipants      room_participants[]
 
   //Room relations
   room_role_assignments room_role_assignments[] @relation("RoomRoleAssignmentUser")
@@ -327,6 +329,8 @@ model room_configs {
   joinPermissions         room_join_permissions[]
   invites                 room_invites[]
   notifications           room_notifications[]
+  participants            room_participants[]
+  handRaises              room_hand_raises[]
 
   @@index([createdBy])
   @@index([roomStatus])
@@ -428,4 +432,32 @@ model room_notifications {
   createdAt           DateTime @default(now())
 
   @@index([roomConfigId])
+}
+
+//=======================================================================================
+model room_participants {
+  id          Int      @id @default(autoincrement())
+  roomId      Int
+  userId      Int
+  roomRole    String
+  joinedAt    DateTime @default(now())
+  leftAt      DateTime?
+
+  room        room_configs @relation(fields: [roomId], references: [id])
+  user users @relation(fields: [userId], references: [id])
+}
+
+//=======================================================================================
+model room_hand_raises {
+  id            Int       @id @default(autoincrement())
+
+  roomId        Int
+  userId        Int
+
+  status        String    @default("pending")
+  requestedAt   DateTime  @default(now())
+  respondedAt   DateTime?
+
+  room          room_configs @relation(fields: [roomId], references: [id])
+  user          users @relation(fields: [userId], references: [id])
 }

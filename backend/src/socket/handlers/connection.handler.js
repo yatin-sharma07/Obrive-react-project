@@ -3,6 +3,7 @@ const { registerMessageHandler } = require("./message.handler");
 const { registerTypingHandler } = require("./typing.handler");
 const { registerPresenceHandler } = require("./presence.handler");
 const { joinConversationRoom, leaveConversationRoom } = require("../room/room.manager");
+const { registerAudioRoomHandler,} = require( "./audioRoom.handler" );  //AR
 
 exports.registerConnectionHandler = (io, socket) => {
   console.log(`User connected ${socket.user?.id}`);
@@ -13,6 +14,7 @@ exports.registerConnectionHandler = (io, socket) => {
   registerPresenceHandler(io, socket);
   registerMessageHandler(io, socket);
   registerTypingHandler(io, socket);
+  registerAudioRoomHandler(io, socket); //AR
 
   socket.on("join_conversation", (conversationId) => {
     joinConversationRoom(socket, conversationId);
