@@ -166,6 +166,26 @@ const AudioRoomPage =
         }
       };
 
+
+
+
+
+
+      useEffect(() => {
+  if (!socket || !roomId || !me?.id) return;
+
+  socket.emit("join_audio_room", Number(roomId), me.id);
+
+  console.log(`Joined audio room: ${roomId} as user ${me.id}`);
+
+  return () => {
+    socket.emit("leave_audio_room", Number(roomId), me.id);
+  };
+}, [socket, roomId, me?.id]);
+
+
+
+
     // ==========================
     // INITIALIZE ROOM
     // ==========================
