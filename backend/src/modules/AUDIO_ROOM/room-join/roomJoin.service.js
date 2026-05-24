@@ -1,8 +1,7 @@
 const { prisma } = require("../../../../prisma");
-const {
-  getRoomDetailsService,
-} = require("../room-details/roomDetails.service");
+const { getRoomDetailsService,} = require("../room-details/roomDetails.service");
 const { getIO,} = require( "../../../socket");
+const { createLiveKitToken,} = require("../livekit/token/create-token");
 
 const joinRoomService = async (payload) => {
   const {
@@ -192,11 +191,29 @@ if (assignedRole) {
     assignedRole.assignedRoomRole
   );
 
+  const livekitToken =
+    await createLiveKitToken({
+      roomName:
+        room.id.toString(),
+
+      participantId:
+        user.id.toString(),
+
+      participantName:
+        user.name ||
+        user.username ||
+        `user-${user.id}`,
+
+      role:
+        assignedRole.assignedRoomRole,
+    });
+
   return {
     allowed: true,
     roomRole:
       assignedRole.assignedRoomRole,
     room,
+    livekitToken,
   };
 }
 
@@ -223,28 +240,41 @@ if (assignedRole) {
       user.role
     );
 
-    if (hasRoleAccess) {
-      await addParticipant(
-        "listener"
-      );
+const livekitToken =
+  await createLiveKitToken({
+    roomName:
+      room.id.toString(),
 
-  return {
-    allowed: true,
-    roomRole:
+    participantId:
+      user.id.toString(),
+
+    participantName:
+      user.name ||
+      user.username ||
+      `user-${user.id}`,
+
+    role:
       "listener",
-    room,
-  };
-}
+  });
+
+return {
+  allowed: true,
+  roomRole:
+    "listener",
+  room,
+  livekitToken,
+};
+
   // ==================================
   // CHECK GUEST ACCESS
   // ==================================
 
-  const guestAllowed =
-    room.joinPermissions.find(
-      (permission) =>
-        permission.permissionType ===
-        "guest"
-    );
+const guestAllowed =
+  room.joinPermissions.find(
+    (permission) =>
+      permission.permissionType ===
+      "guest"
+  );
 
 if (
   guestAllowed &&
@@ -254,11 +284,29 @@ if (
     "listener"
   );
 
+  const livekitToken =
+    await createLiveKitToken({
+      roomName:
+        room.id.toString(),
+
+      participantId:
+        user.id.toString(),
+
+      participantName:
+        user.name ||
+        user.username ||
+        `user-${user.id}`,
+
+      role:
+        "listener",
+    });
+
   return {
     allowed: true,
     roomRole:
       "listener",
     room,
+    livekitToken,
   };
 }
 

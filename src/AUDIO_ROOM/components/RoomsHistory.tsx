@@ -7,6 +7,7 @@ import React, {
 
 import { API_BASE_URL } from "@/lib/api";
 import { useDashboardData } from "@/app/(dashboard)/dashboard/useDashboardData";
+import livekitService from "@app/../../backend/src/modules/AUDIO_ROOM/livekit/services/livekit.service";
 
 // ======================================================
 // UI CLASSES
@@ -17,6 +18,10 @@ const sectionClass =
 
 const buttonClass =
   "rounded-[5px] border border-slate-200 bg-slate-900 px-2 py-1 text-[8px] font-medium text-white transition hover:opacity-90";
+
+
+
+
 
 // ======================================================
 // TYPES
@@ -198,9 +203,35 @@ const RoomsHistory = () => {
               data
             );
 
-            // REDIRECT TO ROOM
-            window.location.href =
-              `/audio-room/room/${roomId}`;
+            // ==================================
+            // CONNECT LIVEKIT
+            // ==================================
+
+            // await livekitService.connect({
+            //   token:
+            //     data.data.livekitToken,
+
+            //   roomId:
+            //     roomId.toString(),
+            // });
+
+            // STORE ROOM SESSION
+            sessionStorage.setItem(
+              "audio-room-session",
+              JSON.stringify({
+                roomId,
+                roomRole:
+                  data.data.roomRole,
+
+                livekitToken:
+                  data.data
+                    .livekitToken,
+              })
+            );
+
+          // REDIRECT TO ROOM
+          window.location.href =
+            `/audio-room/room/${roomId}`;
           } catch (
             error
           ) {

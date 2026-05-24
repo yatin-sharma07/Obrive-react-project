@@ -36,6 +36,6 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "global.d.ts"
-  ],
+, "backend/src/modules/AUDIO_ROOM/livekit/token/create-token.js"  ],
   "exclude": ["node_modules"]
 }

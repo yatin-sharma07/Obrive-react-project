@@ -19,6 +19,8 @@ import {
   API_BASE_URL,
 } from "@/lib/api";
 
+import livekitService from "../../../backend/src/modules/AUDIO_ROOM/livekit/services/livekit.service";
+
 import {
   useSocket,
 } from "@/context/SocketContext";
@@ -106,6 +108,56 @@ const AudioRoomPage =
           }
         );
       };
+
+
+// ==========================
+// CONNECT LIVEKIT
+// ==========================
+
+const connectLiveKit =
+  async () => {
+    try {
+      const session =
+        sessionStorage.getItem(
+          "audio-room-session"
+        );
+
+      if (!session) {
+        console.warn(
+          "No audio room session found"
+        );
+
+        return;
+      }
+
+      const parsedSession =
+        JSON.parse(
+          session
+        );
+
+      await livekitService.connect({
+        token:
+          parsedSession
+            .livekitToken,
+
+        roomId:
+          String(
+            roomId
+          ),
+      });
+
+      console.log(
+        "✅ LiveKit room connected"
+      );
+    } catch (
+      error
+    ) {
+      console.error(
+        "❌ LiveKit connection failed:",
+        error
+      );
+    }
+  };
 
     // ==========================
     // FETCH ROOM DETAILS
@@ -270,6 +322,8 @@ const AudioRoomPage =
 
           await joinRoom();
 
+          await connectLiveKit();
+
           joinSocketRoom();
 
           await fetchRoomDetails();
@@ -287,6 +341,12 @@ const AudioRoomPage =
           "connect",
           joinSocketRoom
         );
+
+        livekitService.disconnect();
+
+          sessionStorage.removeItem(
+            "audio-room-session"
+          );
 
         socket?.emit(
           "leave_audio_room",
@@ -516,6 +576,16 @@ const AudioRoomPage =
           </div>
 
           <BottomControls
+
+                isMuted={
+                    roomData?.participants
+                      ?.hostAndSpeakers
+                      ?.find(
+                        (p: any) =>
+                          p.id === me?.id
+                      )?.isMuted ?? true
+                  }
+
             userId={
               me?.id
             }

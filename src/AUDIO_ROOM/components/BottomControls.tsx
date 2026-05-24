@@ -1,5 +1,6 @@
 "use client";
 
+import useMicrophone from "@/AUDIO_ROOM/hooks/useMicrophone";
 import React, { useState } from "react";
 import {
   Mic,
@@ -37,7 +38,7 @@ interface BottomControlsProps {
 
   isChatOpen?: boolean;
 
-  isMuted?: boolean;
+  isMicEnabled?: boolean;
 
   setIsChatOpen?: (
     value: boolean
@@ -51,7 +52,7 @@ const BottomControls = ({
   role,
   userId,
   isChatOpen = false,
-  isMuted = true,
+  isMicEnabled = false,
   setIsChatOpen,
 }: BottomControlsProps) => {
   const {
@@ -60,6 +61,7 @@ const BottomControls = ({
 
   const [showModerationMenu, setShowModerationMenu] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const { isMicEnabled: micActive, startMic, stopMic,} =  useMicrophone();
 
   const canSpeak =
     role !== "listener";
@@ -74,8 +76,12 @@ const BottomControls = ({
   role
 );
 
+
+
+
 const handleMicToggle =
-  () => {
+  async () => {
+
     if (
       !socket ||
       !userId ||
@@ -84,17 +90,76 @@ const handleMicToggle =
       return;
     }
 
-    socket.emit(
-      "audio_mic_toggle",
-      {
-        roomId:
-          Number(roomId),
-        userId,
-        isMuted:
-          !isMuted,
+    try {
+
+      // ==========================
+      // TURN MIC ON
+      // ==========================
+
+      if (
+        !micActive
+      ) {
+
+        await startMic();
+
       }
-    );
+
+      // ==========================
+      // TURN MIC OFF
+      // ==========================
+
+      else {
+
+        stopMic();
+
+      }
+
+      // ==========================
+      // SOCKET UPDATE
+      // ==========================
+
+        socket.emit(
+          "audio_mic_toggle",
+          {
+            roomId: Number(roomId),
+            userId,
+            isMuted: micActive,
+          }
+        );
+
+    } catch (
+      error
+    ) {
+
+      console.error(
+        "Mic toggle failed:",
+        error
+      );
+    }
   };
+
+
+// const handleMicToggle =
+//   () => {
+//     if (
+//       !socket ||
+//       !userId ||
+//       !canSpeak
+//     ) {
+//       return;
+//     }
+
+//     socket.emit(
+//       "audio_mic_toggle",
+//       {
+//         roomId:
+//           Number(roomId),
+//         userId,
+//         !isMicEnabled:
+//           !!isMicEnabled,
+//       }
+//     );
+//   };
 
   
 
@@ -359,13 +424,13 @@ const handleRemoveParticipant =
               shadow-sm
 
               ${
-                isMuted
+                !micActive
                   ? "bg-red-100 border border-red-200"
                   : "bg-green-100 border border-green-200"
               }
             `}
           >
-            {isMuted ? (
+            {!micActive ? (
               <MicOff
                 size={22}
                 className="text-red-600"

@@ -204,7 +204,7 @@ const ParticipantCard = ({
         lg:h-25
         lg:w-25
         ${isSpeaking
-          ? "border-green-300 bg-green-50/70 ring-2 ring-green-200 animate-pulse"
+          ? "border-green-300 bg-green-50/70 ring-0.5 ring-green-200 animate-pulse"
           : "border-slate-200/70 bg-white/50"}
       `}
     >
@@ -271,7 +271,7 @@ const ParticipantCard = ({
 
         {isSpeaking && (
           <p className="mt-0.5 text-[8px] font-medium text-green-600">
-            speaking
+            {/* speaking */}
           </p>
         )}
 
