@@ -55,17 +55,17 @@ const joinRoomService = async (payload) => {
       },
     });
 
-    console.log(
-  "JOIN USER:",
-  user.id,
-  user.role
-);
-
   if (!user) {
     throw new Error(
       "User not found"
     );
   }
+
+  console.log(
+    "JOIN USER:",
+    user.id,
+    user.role
+  );
 
 // ==================================
 // ADD PARTICIPANT
@@ -174,16 +174,24 @@ const addParticipant =
 
 
   // ==================================
-  // CHECK SPECIFIC ROLE ASSIGNMENT
+  // CHECK ROLE ASSIGNMENTS
   // ==================================
 
   const assignedRole =
     room.roleAssignments.find(
       (role) =>
-        role.assignmentType ===
-          "specific-user" &&
-        role.userId ===
-          Number(userId)
+        (
+          role.assignmentType ===
+            "specific-user" &&
+          role.userId ===
+            Number(userId)
+        ) ||
+        (
+          role.assignmentType ===
+            "crm-role" &&
+          role.crmRole?.toLowerCase() ===
+            user.role?.toLowerCase()
+        )
     );
 
 if (assignedRole) {
@@ -240,30 +248,36 @@ if (assignedRole) {
       user.role
     );
 
-const livekitToken =
-  await createLiveKitToken({
-    roomName:
-      room.id.toString(),
+if (hasRoleAccess) {
+  await addParticipant(
+    "listener"
+  );
 
-    participantId:
-      user.id.toString(),
+  const livekitToken =
+    await createLiveKitToken({
+      roomName:
+        room.id.toString(),
 
-    participantName:
-      user.name ||
-      user.username ||
-      `user-${user.id}`,
+      participantId:
+        user.id.toString(),
 
-    role:
+      participantName:
+        user.name ||
+        user.username ||
+        `user-${user.id}`,
+
+      role:
+        "listener",
+    });
+
+  return {
+    allowed: true,
+    roomRole:
       "listener",
-  });
-
-return {
-  allowed: true,
-  roomRole:
-    "listener",
-  room,
-  livekitToken,
-};
+    room,
+    livekitToken,
+  };
+}
 
   // ==================================
   // CHECK GUEST ACCESS

@@ -1,7 +1,7 @@
 'use client'
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { io, Socket } from 'socket.io-client'
-import { useDashboardData } from '@/app/(dashboard)/dashboard/useDashboardData'
+import { useCurrentUser } from '@/hooks/useCurrentUser'
 import { API_BASE_URL } from '@/lib/api'
 
 interface SocketContextType {
@@ -19,7 +19,7 @@ const SocketContext = createContext<SocketContextType>({
 export const useSocket = () => useContext(SocketContext)
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
-  const { me } = useDashboardData('employee') // or generic user hook
+  const { me } = useCurrentUser()
   const [socket, setSocket] = useState<Socket | null>(null)
   const [isConnected, setIsConnected] = useState(false)
   const [onlineUsers, setOnlineUsers] = useState<number[]>([])

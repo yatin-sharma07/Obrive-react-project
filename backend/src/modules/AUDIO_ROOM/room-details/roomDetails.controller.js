@@ -15,11 +15,8 @@ const getRoomDetailsController =
         roomId,
       } = req.params;
 
-      // TEMP USER ID
-      // Later from auth
       const userId =
-        req.query.userId ||
-        5;
+        req.user.id;
 
       const result =
         await getRoomDetailsService(

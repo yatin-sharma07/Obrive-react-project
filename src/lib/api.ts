@@ -16,7 +16,10 @@ export async function apiFetch(
   const { retry = true, ...rest } = options;
 
   // Get token from localStorage for fallback if cookie is not sent/working
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("token") || localStorage.getItem("accessToken")
+      : null;
   const headers = new Headers(rest.headers);
   headers.set("Content-Type", "application/json");
   if (token) {

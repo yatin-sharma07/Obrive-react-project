@@ -19,37 +19,15 @@ class LiveKitService {
       this.room =
         new Room();
 
-        await this.room.connect(
-          livekitUrl,
-          token
-        );
+      await this.room.connect(
+        livekitUrl,
+        token
+      );
 
-        // ==========================
-        // PLAY REMOTE AUDIO
-        // ==========================
-
-        this.room.on(
-          "trackSubscribed",
-          (
-            track
-          ) => {
-            if (
-              track.kind ===
-              "audio"
-            ) {
-              track.attach();
-
-              console.log(
-                "🔊 Remote audio attached"
-              );
-            }
-          }
-        );
-
-        console.log(
-          "LiveKit connected:",
-          roomId
-        );
+      console.log(
+        "LiveKit connected:",
+        roomId
+      );
 
       return this.room;
     } catch (error) {

@@ -5,8 +5,8 @@ import React, {
   useState,
 } from "react";
 
-import { API_BASE_URL } from "@/lib/api";
-import { useDashboardData } from "@/app/(dashboard)/dashboard/useDashboardData";
+import { API_BASE_URL, apiFetch } from "@/lib/api";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import livekitService from "@app/../../backend/src/modules/AUDIO_ROOM/livekit/services/livekit.service";
 
 // ======================================================
@@ -58,9 +58,7 @@ interface Room {
 
 const RoomsHistory = () => {
   const { me } =
-    useDashboardData(
-      "employee"
-    );
+    useCurrentUser();
 
   // ======================================================
   // STATE
@@ -154,22 +152,16 @@ const RoomsHistory = () => {
             }
 
             const response =
-              await fetch(
-                `${API_BASE_URL}/audio-room/join`,
+              await apiFetch(
+                "/audio-room/join",
                 {
                   method:
                     "POST",
-
-                  headers: {
-                    "Content-Type":
-                      "application/json",
-                  },
 
                   body:
                     JSON.stringify(
                       {
                         roomId,
-                        userId,
                       }
                     ),
                 }

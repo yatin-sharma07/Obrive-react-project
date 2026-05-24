@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { API_BASE_URL } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
 
 // ======================================================
 // UI CLASSES
@@ -299,7 +299,7 @@ const handleAddOtherId = (
     try {
       setLoadingUsers(true);
 
-      const response = await fetch( `${API_BASE_URL}/audio-room/users`);
+      const response = await apiFetch("/audio-room/users");
 
       const data = await response.json();
 
@@ -568,14 +568,10 @@ const handleAddOtherId = (
         }
 
         const response =
-          await fetch(
-            `${API_BASE_URL}/audio-room/create`,
+          await apiFetch(
+            "/audio-room/create",
             {
               method: "POST",
-              headers: {
-                "Content-Type":
-                  "application/json",
-              },
               body: JSON.stringify(
                 payload
               ),

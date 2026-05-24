@@ -9,9 +9,11 @@ const {
 } = require(
   "./roomDetails.controller"
 );
+const auth = require("../../../middleware/auth");
 
 router.get(
   "/room-details/:roomId",
+  auth,
   getRoomDetailsController
 );
 

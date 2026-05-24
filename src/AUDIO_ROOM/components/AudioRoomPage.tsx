@@ -3,6 +3,7 @@
 import React, {
   useEffect,
   useState,
+  useRef,
 } from "react";
 
 import {
@@ -16,18 +17,17 @@ import BottomControls from "./BottomControls";
 import RaisedHandsPanel from "./RaisedHandsPanel";
 
 import {
-  API_BASE_URL,
+  apiFetch,
 } from "@/lib/api";
 
-import livekitService from "../../../backend/src/modules/AUDIO_ROOM/livekit/services/livekit.service";
-
+import livekitService from "@/AUDIO_ROOM/livekit/services/livekit.service";
 import {
   useSocket,
 } from "@/context/SocketContext";
 
 import {
-  useDashboardData,
-} from "@/app/(dashboard)/dashboard/useDashboardData";
+  useCurrentUser,
+} from "@/hooks/useCurrentUser";
 
 const AudioRoomPage =
   () => {
@@ -53,10 +53,16 @@ const AudioRoomPage =
       socket,
     } = useSocket();
 
-    const { me } =
-      useDashboardData(
-        "employee"
-      );
+    const {
+      me,
+      loading: userLoading,
+      error: userError,
+    } = useCurrentUser();
+
+    const currentUserId =
+      me?.id == null
+        ? undefined
+        : Number(me.id);
 
     const currentUserRole =
       roomData?.myRole ||
@@ -73,7 +79,7 @@ const AudioRoomPage =
       participantGroups.find(
         (participant: any) =>
           Number(participant.id) ===
-          Number(me?.id)
+          currentUserId
       );
 
     const canModerate =
@@ -90,7 +96,7 @@ const AudioRoomPage =
         if (
           !socket ||
           !roomId ||
-          !me?.id
+          !currentUserId
         ) {
           return;
         }
@@ -104,7 +110,7 @@ const AudioRoomPage =
               ),
 
             userId:
-              me.id,
+              currentUserId,
           }
         );
       };
@@ -146,6 +152,23 @@ const connectLiveKit =
           ),
       });
 
+      const speakerRoles =
+  [
+    "host",
+    "moderator",
+    "speaker",
+  ];
+
+if (
+  speakerRoles.includes(
+    parsedSession.roomRole
+      ?.toLowerCase()
+  )
+) {
+  await livekitService
+    .enableMicrophone();
+}
+
       console.log(
         "✅ LiveKit room connected"
       );
@@ -168,14 +191,14 @@ const connectLiveKit =
         try {
           if (
             !roomId ||
-            !me?.id
+            !currentUserId
           ) {
             return;
           }
 
           const response =
-            await fetch(
-              `${API_BASE_URL}/audio-room/room-details/${roomId}?userId=${me.id}`
+            await apiFetch(
+              `/audio-room/room-details/${roomId}`
             );
 
           const data =
@@ -216,22 +239,17 @@ const connectLiveKit =
         try {
           if (
             !roomId ||
-            !me?.id
+            !currentUserId
           ) {
             return;
           }
 
           const response =
-            await fetch(
-              `${API_BASE_URL}/audio-room/join`,
+            await apiFetch(
+              "/audio-room/join",
               {
                 method:
                   "POST",
-
-                headers: {
-                  "Content-Type":
-                    "application/json",
-                },
 
                 body:
                   JSON.stringify(
@@ -240,9 +258,6 @@ const connectLiveKit =
                         Number(
                           roomId
                         ),
-
-                      userId:
-                        me.id,
                     }
                   ),
               }
@@ -255,6 +270,27 @@ const connectLiveKit =
             "Joined room:",
             data
           );
+
+          if (
+            response.ok &&
+            data?.data?.livekitToken
+          ) {
+            sessionStorage.setItem(
+              "audio-room-session",
+              JSON.stringify({
+                roomId:
+                  Number(
+                    roomId
+                  ),
+                roomRole:
+                  data.data.roomRole,
+                livekitToken:
+                  data.data.livekitToken,
+              })
+            );
+          }
+
+          return data.data;
 
         } catch (
           error
@@ -314,9 +350,22 @@ const connectLiveKit =
         async () => {
 
           if (
+  hasInitialized.current
+) {
+  return;
+}
+
+hasInitialized.current =
+  true;
+
+          if (
             !roomId ||
-            !me?.id
+            !currentUserId
           ) {
+            if (!userLoading) {
+              setLoading(false);
+            }
+
             return;
           }
 
@@ -357,14 +406,15 @@ const connectLiveKit =
               ),
 
             userId:
-              me?.id,
+              currentUserId,
           }
         );
       };
     }, [
-      me?.id,
+      currentUserId,
       roomId,
       socket,
+      userLoading,
     ]);
 
     // ==========================
@@ -410,7 +460,7 @@ const connectLiveKit =
               participantGroups.find(
                 (participant: any) =>
                   Number(participant.id) ===
-                  Number(me?.id)
+                  currentUserId
               );
 
             setRoomData(
@@ -441,14 +491,15 @@ const connectLiveKit =
           handleParticipantUpdate
         );
       };
-    }, [socket, roomId, me?.id]);
+    }, [socket, roomId, currentUserId]);
 
     // ==========================
     // LOADING
     // ==========================
 
     if (
-      loading
+      loading ||
+      userLoading
     ) {
       return (
         <div className="flex h-screen items-center justify-center">
@@ -465,6 +516,25 @@ const connectLiveKit =
                   roomId
                 )
               }
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (
+      userError ||
+      !currentUserId
+    ) {
+      return (
+        <div className="flex h-screen items-center justify-center">
+          <div className="text-center">
+            <div className="text-lg font-semibold">
+              Unable to load room
+            </div>
+
+            <div className="text-sm text-slate-500">
+              {userError || "Please login again before joining this room."}
             </div>
           </div>
         </div>
@@ -508,7 +578,7 @@ const connectLiveKit =
                     )
                   }
                   currentUserId={
-                    me?.id
+                    currentUserId
                   }
                   canModerate={
                     canModerate
@@ -529,7 +599,7 @@ const connectLiveKit =
                     )
                   }
                   currentUserId={
-                    me?.id
+                    currentUserId
                   }
                   canModerate={
                     canModerate
@@ -550,7 +620,7 @@ const connectLiveKit =
                     )
                   }
                   currentUserId={
-                    me?.id
+                    currentUserId
                   }
                   canModerate={
                     canModerate
@@ -576,18 +646,8 @@ const connectLiveKit =
           </div>
 
           <BottomControls
-
-                isMuted={
-                    roomData?.participants
-                      ?.hostAndSpeakers
-                      ?.find(
-                        (p: any) =>
-                          p.id === me?.id
-                      )?.isMuted ?? true
-                  }
-
             userId={
-              me?.id
+              currentUserId
             }
             roomId={
               Number(
@@ -596,10 +656,6 @@ const connectLiveKit =
             }
             role={
               currentUserRole
-            }
-            isMuted={
-              currentParticipant?.isMuted ??
-              true
             }
             isChatOpen={
               isChatOpen
