@@ -95,6 +95,35 @@ class LiveKitService {
     );
   }
 }
+
+  async disableMicrophone() {
+  try {
+    if (!this.room) {
+      return;
+    }
+
+    await this.room.localParticipant
+      .setMicrophoneEnabled(
+        false
+      );
+
+    console.log(
+      "Microphone disabled"
+    );
+  } catch (error) {
+    console.error(
+      "Mic disable error:",
+      error
+    );
+  }
+}
+
+  isMicrophoneEnabled() {
+    return Boolean(
+      this.room?.localParticipant
+        ?.isMicrophoneEnabled
+    );
+  }
 }
 
 export default new LiveKitService();

@@ -1,7 +1,6 @@
 "use client";
 
-import useMicrophone from "@/AUDIO_ROOM/hooks/useMicrophone";
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Mic,
   MicOff,
@@ -23,10 +22,17 @@ import {
 import {
   useSocket,
 } from "@/context/SocketContext";
+import livekitService from "@/AUDIO_ROOM/livekit/services/livekit.service";
 
 interface BottomControlsProps {
   roomId: number;
   userId?: number;
+  participants?: {
+    id: number;
+    name: string;
+    role: string;
+    isMuted?: boolean;
+  }[];
   
 
   role:
@@ -39,6 +45,7 @@ interface BottomControlsProps {
   isChatOpen?: boolean;
 
   isMicEnabled?: boolean;
+  isMuted?: boolean;
 
   setIsChatOpen?: (
     value: boolean
@@ -51,8 +58,10 @@ const BottomControls = ({
   roomId,
   role,
   userId,
+  participants = [],
   isChatOpen = false,
   isMicEnabled = false,
+  isMuted = true,
   setIsChatOpen,
 }: BottomControlsProps) => {
   const {
@@ -60,8 +69,11 @@ const BottomControls = ({
   } = useSocket();
 
   const [showModerationMenu, setShowModerationMenu] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
-  const { isMicEnabled: micActive, startMic, stopMic,} =  useMicrophone();
+  const [micActive, setMicActive] =
+    useState(
+      isMicEnabled ||
+      !isMuted
+    );
 
   const canSpeak =
     role !== "listener";
@@ -71,11 +83,36 @@ const BottomControls = ({
     role === "host" ||
     role === "admin";
 
+  const moderationParticipants =
+    participants.filter(
+      (participant) => {
+        const participantRole =
+          participant.role
+            ?.toLowerCase();
+
+        return (
+          participant.id !==
+            userId &&
+          participantRole !==
+            "listener"
+        );
+      }
+    );
+
   console.log(
   "Current Role:",
   role
 );
 
+  useEffect(() => {
+    setMicActive(
+      isMicEnabled ||
+      !isMuted
+    );
+  }, [
+    isMicEnabled,
+    isMuted,
+  ]);
 
 
 
@@ -91,6 +128,8 @@ const handleMicToggle =
     }
 
     try {
+      const nextMuted =
+        micActive;
 
       // ==========================
       // TURN MIC ON
@@ -100,7 +139,8 @@ const handleMicToggle =
         !micActive
       ) {
 
-        await startMic();
+        await livekitService
+          .enableMicrophone();
 
       }
 
@@ -110,9 +150,14 @@ const handleMicToggle =
 
       else {
 
-        stopMic();
+        await livekitService
+          .disableMicrophone();
 
       }
+
+      setMicActive(
+        !nextMuted
+      );
 
       // ==========================
       // SOCKET UPDATE
@@ -123,7 +168,7 @@ const handleMicToggle =
           {
             roomId: Number(roomId),
             userId,
-            isMuted: micActive,
+            isMuted: nextMuted,
           }
         );
 
@@ -557,156 +602,171 @@ const handleRemoveParticipant =
                     space-y-2
                   "
                 >
-                  <button
-                    onClick={() =>
-                      handleMuteSpeaker(
-                        selectedUserId || 0
+                  {moderationParticipants.length ===
+                  0 ? (
+                    <div
+                      className="
+                        px-2
+                        py-3
+                        text-xs
+                        text-slate-500
+                      "
+                    >
+                      No speakers available
+                    </div>
+                  ) : (
+                    moderationParticipants.map(
+                      (
+                        participant
+                      ) => (
+                        <div
+                          key={
+                            participant.id
+                          }
+                          className="
+                            rounded
+                            border
+                            border-slate-200
+                            p-2
+                          "
+                        >
+                          <div className="mb-2">
+                            <div className="text-xs font-semibold text-slate-700">
+                              {
+                                participant.name
+                              }
+                            </div>
+                            <div className="text-[10px] uppercase text-slate-400">
+                              {
+                                participant.role
+                              }
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-1">
+                            {participant.isMuted ? (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleUnmuteSpeaker(
+                                    participant.id
+                                  )
+                                }
+                                className="
+                                  flex
+                                  items-center
+                                  justify-center
+                                  gap-1
+                                  rounded
+                                  border
+                                  border-green-200
+                                  bg-green-50
+                                  px-2
+                                  py-1
+                                  text-[10px]
+                                  text-green-700
+                                  hover:bg-green-100
+                                "
+                              >
+                                <Volume2
+                                  size={12}
+                                />
+                                Unmute
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleMuteSpeaker(
+                                    participant.id
+                                  )
+                                }
+                                className="
+                                  flex
+                                  items-center
+                                  justify-center
+                                  gap-1
+                                  rounded
+                                  border
+                                  border-red-200
+                                  bg-red-50
+                                  px-2
+                                  py-1
+                                  text-[10px]
+                                  text-red-700
+                                  hover:bg-red-100
+                                "
+                              >
+                                <VolumeX
+                                  size={12}
+                                />
+                                Mute
+                              </button>
+                            )}
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleDowngradeSpeaker(
+                                  participant.id
+                                )
+                              }
+                              className="
+                                flex
+                                items-center
+                                justify-center
+                                gap-1
+                                rounded
+                                border
+                                border-amber-200
+                                bg-amber-50
+                                px-2
+                                py-1
+                                text-[10px]
+                                text-amber-700
+                                hover:bg-amber-100
+                              "
+                            >
+                              <LogOut
+                                size={12}
+                              />
+                              Listen
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleRemoveParticipant(
+                                  participant.id
+                                )
+                              }
+                              className="
+                                col-span-2
+                                flex
+                                items-center
+                                justify-center
+                                gap-1
+                                rounded
+                                border
+                                border-red-300
+                                bg-red-100
+                                px-2
+                                py-1
+                                text-[10px]
+                                text-red-700
+                                hover:bg-red-200
+                              "
+                            >
+                              <Trash2
+                                size={12}
+                              />
+                              Remove
+                            </button>
+                          </div>
+                        </div>
                       )
-                    }
-                    disabled={
-                      !selectedUserId
-                    }
-                    className="
-                      w-full
-                      flex
-                      items-center
-                      gap-2
-                      px-3
-                      py-2
-                      rounded
-                      text-sm
-                      border
-                      border-gray-300
-                      hover:bg-gray-100
-                      disabled:opacity-50
-                      disabled:cursor-not-allowed
-                    "
-                  >
-                    <VolumeX
-                      size={16}
-                    />
-                    Mute Speaker
-                  </button>
-
-                  <button
-                    onClick={() =>
-                      handleUnmuteSpeaker(
-                        selectedUserId || 0
-                      )
-                    }
-                    disabled={
-                      !selectedUserId
-                    }
-                    className="
-                      w-full
-                      flex
-                      items-center
-                      gap-2
-                      px-3
-                      py-2
-                      rounded
-                      text-sm
-                      border
-                      border-gray-300
-                      hover:bg-gray-100
-                      disabled:opacity-50
-                      disabled:cursor-not-allowed
-                    "
-                  >
-                    <Volume2
-                      size={16}
-                    />
-                    Unmute Speaker
-                  </button>
-
-                  <hr
-                    className="
-                      my-2
-                    "
-                  />
-
-                  <button
-                    onClick={() =>
-                      handleDowngradeSpeaker(
-                        selectedUserId || 0
-                      )
-                    }
-                    disabled={
-                      !selectedUserId
-                    }
-                    className="
-                      w-full
-                      flex
-                      items-center
-                      gap-2
-                      px-3
-                      py-2
-                      rounded
-                      text-sm
-                      border
-                      border-amber-300
-                      hover:bg-amber-100
-                      disabled:opacity-50
-                      disabled:cursor-not-allowed
-                      text-amber-700
-                    "
-                  >
-                    <LogOut
-                      size={16}
-                    />
-                    Downgrade to Listener
-                  </button>
-
-                  <button
-                    onClick={() =>
-                      handleRemoveParticipant(
-                        selectedUserId || 0
-                      )
-                    }
-                    disabled={
-                      !selectedUserId
-                    }
-                    className="
-                      w-full
-                      flex
-                      items-center
-                      gap-2
-                      px-3
-                      py-2
-                      rounded
-                      text-sm
-                      border
-                      border-red-300
-                      hover:bg-red-100
-                      disabled:opacity-50
-                      disabled:cursor-not-allowed
-                      text-red-700
-                    "
-                  >
-                    <Trash2
-                      size={16}
-                    />
-                    Remove from Room
-                  </button>
-
-                  <hr
-                    className="
-                      my-2
-                    "
-                  />
-
-                  <div
-                    className="
-                      px-2
-                      py-1
-                      text-xs
-                      text-slate-500
-                    "
-                  >
-                    Selected User ID:{" "}
-                    {selectedUserId ||
-                      "None"}
-                  </div>
+                    )
+                  )}
                 </div>
               </div>
             )}
@@ -715,7 +775,7 @@ const handleRemoveParticipant =
 
         {/* Chat Toggle */}
         <button
-          onClick={() => setIsChatOpen && setIsChatOpen(!isChatOpen)}
+          onClick={() => setIsChatOpen?.(!isChatOpen)}
           className={`
             flex
             h-12

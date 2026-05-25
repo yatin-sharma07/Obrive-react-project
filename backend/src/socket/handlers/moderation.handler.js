@@ -22,6 +22,7 @@ exports.registerModerationHandler = (io, socket) => {
         },
         data: {
           isMuted: true,
+          isSpeaking: false,
         },
       });
 
@@ -62,6 +63,7 @@ exports.registerModerationHandler = (io, socket) => {
         },
         data: {
           isMuted: false,
+          isSpeaking: true,
         },
       });
 
@@ -94,7 +96,7 @@ exports.registerModerationHandler = (io, socket) => {
     }
 
     try {
-      const result = await prisma.room_participants.updateMany({
+      await prisma.room_participants.updateMany({
         where: {
           roomId: Number(roomId),
           userId: Number(userId),
@@ -103,6 +105,7 @@ exports.registerModerationHandler = (io, socket) => {
         data: {
           roomRole: "listener",
           isMuted: true,
+          isSpeaking: false,
         },
       });
 

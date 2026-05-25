@@ -1,6 +1,6 @@
 "use client";
 
-import React, {
+import {
   useEffect,
   useState,
   useRef,
@@ -67,6 +67,18 @@ const AudioRoomPage =
       me?.id == null
         ? undefined
         : Number(me.id);
+
+    const currentUserIdRef =
+      useRef<
+        number | undefined
+      >(currentUserId);
+
+    useEffect(() => {
+      currentUserIdRef.current =
+        currentUserId;
+    }, [
+      currentUserId,
+    ]);
 
     const currentUserRole =
       roomData?.myRole ||
@@ -167,23 +179,6 @@ const connectLiveKit =
           "ROLE:",
           parsedSession.roomRole
         );
-
-      const speakerRoles =
-        [
-          "host",
-          "moderator",
-          "speaker",
-        ];
-
-if (
-  speakerRoles.includes(
-    parsedSession.roomRole
-      ?.toLowerCase()
-  )
-) {
-  await livekitService
-    .enableMicrophone();
-}
 
       console.log(
         "✅ LiveKit room connected"
@@ -326,13 +321,31 @@ if (
           if (!socket) return;
 
           // Listen for real-time moderation updates
-          socket.on("speaker_muted", (data) => {
+          socket.on("speaker_muted", async (data) => {
             console.log("Speaker muted:", data.userId);
+
+            if (
+              Number(data.userId) ===
+              currentUserIdRef.current
+            ) {
+              await livekitService
+                .disableMicrophone();
+            }
+
             fetchRoomDetails();
           });
 
-          socket.on("speaker_unmuted", (data) => {
+          socket.on("speaker_unmuted", async (data) => {
             console.log("Speaker unmuted:", data.userId);
+
+            if (
+              Number(data.userId) ===
+              currentUserIdRef.current
+            ) {
+              await livekitService
+                .enableMicrophone();
+            }
+
             fetchRoomDetails();
           });
 
@@ -684,11 +697,19 @@ if (
             role={
               currentUserRole
             }
+            participants={
+              participantGroups
+            }
             isChatOpen={
               isChatOpen
             }
             setIsChatOpen={
               setIsChatOpen
+            }
+            isMuted={
+              currentParticipant
+                ?.isMuted ??
+              true
             }
           />
         </div>

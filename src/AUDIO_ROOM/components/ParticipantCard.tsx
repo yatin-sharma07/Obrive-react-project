@@ -1,13 +1,11 @@
 "use client";
 
-import React from "react";
 import {
   Mic,
   MicOff,
   Crown,
   Shield,
   Volume2,
-  VolumeX,
   LogOut,
   Trash2,
 } from "lucide-react";
@@ -91,7 +89,7 @@ const ParticipantCard = ({
         !canModerate ||
         participant.id ===
           currentUserId ||
-        isMuted
+        !isMuted
       ) {
         return;
       }
