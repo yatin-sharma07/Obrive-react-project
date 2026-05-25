@@ -147,6 +147,11 @@ const connectLiveKit =
           session
         );
 
+        console.log(
+        "SESSION:",
+        parsedSession
+      );
+
       await livekitService.connect({
         token:
           parsedSession
@@ -158,12 +163,17 @@ const connectLiveKit =
           ),
       });
 
+      console.log(
+          "ROLE:",
+          parsedSession.roomRole
+        );
+
       const speakerRoles =
-  [
-    "host",
-    "moderator",
-    "speaker",
-  ];
+        [
+          "host",
+          "moderator",
+          "speaker",
+        ];
 
 if (
   speakerRoles.includes(

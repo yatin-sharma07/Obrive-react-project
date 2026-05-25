@@ -24,6 +24,28 @@ class LiveKitService {
         token
       );
 
+      // ==========================
+      // PLAY REMOTE AUDIO
+      // ==========================
+
+      this.room.on(
+        "trackSubscribed",
+        (
+          track
+        ) => {
+          if (
+            track.kind ===
+            "audio"
+          ) {
+            track.attach();
+
+            console.log(
+              "🔊 Remote audio attached"
+            );
+          }
+        }
+      );
+
       console.log(
         "LiveKit connected:",
         roomId
