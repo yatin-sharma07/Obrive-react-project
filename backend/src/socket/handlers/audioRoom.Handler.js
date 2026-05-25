@@ -100,60 +100,66 @@ exports.registerAudioRoomHandler =
         payload,
         legacyUserId
       ) => {
-        const roomId =
-          typeof payload ===
-          "object"
-            ? payload.roomId
-            : payload;
-
-        const userId =
-          Number(
+        try {
+          const roomId =
             typeof payload ===
             "object"
-              ? payload.userId
-              : legacyUserId
-          ) ||
-          Number(
-            socket.user?.id
+              ? payload.roomId
+              : payload;
+
+          const userId =
+            Number(
+              typeof payload ===
+              "object"
+                ? payload.userId
+                : legacyUserId
+            ) ||
+            Number(
+              socket.user?.id
+            );
+
+          if (
+            !roomId ||
+            !userId
+          ) {
+            return;
+          }
+
+          await prisma.room_participants.updateMany(
+            {
+              where: {
+                roomId:
+                  Number(
+                    roomId
+                  ),
+
+                userId:
+                  userId,
+
+                leftAt:
+                  null,
+              },
+
+              data: {
+                leftAt:
+                  new Date(),
+              },
+            }
           );
 
-        if (
-          !roomId ||
-          !userId
-        ) {
-          return;
+          socket.leave(
+            `audio-room:${roomId}`
+          );
+
+          await emitParticipantUpdate(
+            roomId,
+            userId
+          );
+        } catch (error) {
+          console.error(
+            `Error processing leave_audio_room: ${error.message}`
+          );
         }
-
-        await prisma.room_participants.updateMany(
-          {
-            where: {
-              roomId:
-                Number(
-                  roomId
-                ),
-
-              userId:
-                userId,
-
-              leftAt:
-                null,
-            },
-
-            data: {
-              leftAt:
-                new Date(),
-            },
-          }
-        );
-
-        socket.leave(
-          `audio-room:${roomId}`
-        );
-
-        await emitParticipantUpdate(
-          roomId,
-          userId
-        );
       }
     );
 

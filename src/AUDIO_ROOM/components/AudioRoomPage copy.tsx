@@ -49,12 +49,8 @@ const AudioRoomPage =
     const roomId =
       params.roomId;
 
-    const hasJoinedRoom =
-      useRef(false);
-
     const {
       socket,
-      isConnected,
     } = useSocket();
 
     const {
@@ -117,8 +113,6 @@ const AudioRoomPage =
               currentUserId,
           }
         );
-
-        hasJoinedRoom.current = true;
       };
 
 
@@ -404,28 +398,18 @@ if (
             "audio-room-session"
           );
 
-        // Only emit leave if socket is connected and we've joined
-        if (
-          socket?.connected &&
-          hasJoinedRoom.current &&
-          roomId &&
-          currentUserId
-        ) {
-          socket.emit(
-            "leave_audio_room",
-            {
-              roomId:
-                Number(
-                  roomId
-                ),
+        socket?.emit(
+          "leave_audio_room",
+          {
+            roomId:
+              Number(
+                roomId
+              ),
 
-              userId:
-                currentUserId,
-            }
-          );
-        }
-
-        hasJoinedRoom.current = false;
+            userId:
+              currentUserId,
+          }
+        );
       };
     }, [
       currentUserId,
