@@ -38,6 +38,7 @@ interface ProjectsProps {
   onViewAll?: () => void;
   variant?: ProjectCardVariant;
   onSelectProject?: (project: ProjectItem) => void;
+  setActiveSection: (section: string) => void;
 }
 
 export default function Projects({

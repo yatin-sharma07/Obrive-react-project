@@ -209,11 +209,37 @@ class SupervisorService {
           where: { employee_id: employeeId },
         });
 
+        await tx.conversation_unread.deleteMany({
+          where: { user_id: employeeId },
+        });
+
+        await tx.conversation_participants.deleteMany({
+          where: { user_id: employeeId },
+        });
+
+        await tx.messages.updateMany({
+          where: { sender_id: employeeId },
+          data: { sender_id: null },
+        });
+
+        await tx.conversations.updateMany({
+          where: { created_by: employeeId },
+          data: { created_by: 1 }, // Fallback to a system/admin user
+        });
+
+        await tx.room_configs.updateMany({
+          where: { createdBy: employeeId },
+          data: { createdBy: null },
+        });
+
         await tx.users.delete({
           where: {
             id: employeeId,
           },
         });
+      }, {
+        timeout: 30000, // 30 seconds timeout
+        maxWait: 5000,   // 5 seconds max wait for connection
       });
 
       return { id: employeeId };

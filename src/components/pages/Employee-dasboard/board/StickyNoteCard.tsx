@@ -60,6 +60,7 @@ export type StickyNoteFields = {
 	position?: number;
 	canDelete?: boolean;
 	onDeletePress?: () => void;
+	authorName?: string;
 };
 
 function paletteFor(color?: string) {
@@ -76,6 +77,7 @@ export default function StickyNoteCard({
 	position,
 	canDelete,
 	onDeletePress,
+	authorName,
 }: StickyNoteFields) {
 	const style = paletteFor(color);
 	const shortDate =
@@ -106,9 +108,16 @@ export default function StickyNoteCard({
 						aria-hidden
 					/>
 					<div className="flex min-h-0 min-w-0 flex-1 flex-col">
-						<p className="truncate text-[8px] tabular-nums leading-none text-gray-400">
-							NOTE-{noteId}
-						</p>
+						<div className="flex justify-between items-center">
+							<p className="truncate text-[8px] tabular-nums leading-none text-gray-400">
+								NOTE-{noteId}
+							</p>
+							{authorName && (
+								<p className="truncate text-[8px] font-bold text-blue-500 max-w-[50%]">
+									{authorName}
+								</p>
+							)}
+						</div>
 						<p
 							className="mt-1 line-clamp-2 text-[10px] font-semibold leading-snug text-[#1a472a]"
 							title={content}
@@ -144,6 +153,7 @@ export function StickyNoteDetailModal({
 	position,
 	canDelete,
 	onDeletePress,
+	authorName,
 }: StickyNoteFields & { open: boolean; onClose: () => void }) {
 	if (!open) return null;
 
@@ -208,6 +218,12 @@ export function StickyNoteDetailModal({
 							<div className="hidden h-auto w-px shrink-0 bg-[#eef4ff] sm:block" />
 
 							<div className="grid min-w-0 flex-1 grid-cols-2 gap-2 sm:grid-cols-3">
+								<div>
+									<p className="text-[10px] text-gray-400">Author</p>
+									<p className="mt-0.5 break-all text-xs font-bold text-blue-500">
+										{authorName || "Unknown"}
+									</p>
+								</div>
 								<div>
 									<p className="text-[10px] text-gray-400">Note date</p>
 									<p className="mt-0.5 break-all text-xs font-bold text-[#1a472a]">

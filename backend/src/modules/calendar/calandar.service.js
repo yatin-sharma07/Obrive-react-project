@@ -38,6 +38,7 @@ const createTask = async (taskData) => {
     title,
     description,
     deadline,
+    location,
     status = 'pending',
     assigned_to,
     created_by,
@@ -65,6 +66,7 @@ const createTask = async (taskData) => {
       task_number: generatedTaskNumber,
       description: description || null,
       deadline: deadline ? new Date(deadline) : null,
+      location: location || null,
       status,
       assigned_to: assigned_to || null,
       created_by: created_by || null,
@@ -86,6 +88,7 @@ const updateTask = async (taskId, updateData) => {
     title,
     description,
     deadline,
+    location,
     status,
     assigned_to
   } = updateData;
@@ -95,6 +98,7 @@ const updateTask = async (taskId, updateData) => {
   if (title !== undefined) dataToUpdate.title = title;
   if (description !== undefined) dataToUpdate.description = description;
   if (deadline !== undefined) dataToUpdate.deadline = deadline ? new Date(deadline) : null;
+  if (location !== undefined) dataToUpdate.location = location;
   if (status !== undefined) dataToUpdate.status = status;
   if (assigned_to !== undefined) dataToUpdate.assigned_to = assigned_to;
 

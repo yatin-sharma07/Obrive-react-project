@@ -1,15 +1,19 @@
 const { prisma } = require('../../../prisma');
 
-// ── Get all sticky notes for a user ──────────────────────────
-exports.getAllStickyNotes = async (userId) => {
+// ── Get all sticky notes ──────────────────────────
+exports.getAllStickyNotes = async (_userId) => {
   return await prisma.sticky_notes.findMany({
-    where: { user_id: userId },
+    include: {
+      users: {
+        select: { name: true }
+      }
+    },
     orderBy: [{ note_date: 'desc' }, { position: 'asc' }],
   });
 };
 
 // ── Get sticky notes by date ─────────────────────────────────
-exports.getStickyNotesByDate = async (userId, date) => {
+exports.getStickyNotesByDate = async (_userId, date) => {
   const startDate = new Date(date);
   startDate.setHours(0, 0, 0, 0);
 
@@ -18,18 +22,22 @@ exports.getStickyNotesByDate = async (userId, date) => {
 
   return await prisma.sticky_notes.findMany({
     where: {
-      user_id: userId,
       note_date: {
         gte: startDate,
         lte: endDate,
       },
+    },
+    include: {
+      users: {
+        select: { name: true }
+      }
     },
     orderBy: { position: 'asc' },
   });
 };
 
 // ── Get sticky notes for a date range ────────────────────────
-exports.getStickyNotesByDateRange = async (userId, startDate, endDate) => {
+exports.getStickyNotesByDateRange = async (_userId, startDate, endDate) => {
   const start = new Date(startDate);
   start.setHours(0, 0, 0, 0);
 
@@ -38,22 +46,30 @@ exports.getStickyNotesByDateRange = async (userId, startDate, endDate) => {
 
   return await prisma.sticky_notes.findMany({
     where: {
-      user_id: userId,
       note_date: {
         gte: start,
         lte: end,
       },
+    },
+    include: {
+      users: {
+        select: { name: true }
+      }
     },
     orderBy: [{ note_date: 'desc' }, { position: 'asc' }],
   });
 };
 
 // ── Get sticky notes by color ────────────────────────────────
-exports.getStickyNotesByColor = async (userId, color) => {
+exports.getStickyNotesByColor = async (_userId, color) => {
   return await prisma.sticky_notes.findMany({
     where: {
-      user_id: userId,
       color: color.toLowerCase(),
+    },
+    include: {
+      users: {
+        select: { name: true }
+      }
     },
     orderBy: [{ note_date: 'desc' }, { position: 'asc' }],
   });
@@ -85,6 +101,11 @@ exports.createStickyNote = async (userId, data) => {
       note_date: noteDate,
       position,
     },
+    include: {
+      users: {
+        select: { name: true }
+      }
+    }
   });
 };
 

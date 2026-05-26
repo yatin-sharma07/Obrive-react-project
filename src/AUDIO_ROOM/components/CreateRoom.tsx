@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useState } from "react";
 import { apiFetch } from "@/lib/api";
@@ -227,11 +227,11 @@ const handleAddOtherId = (
   user: any
 ) => {
   if (!user || !user.id) {
-    console.warn("❌ Invalid user object:", user);
+    console.warn("Γ¥î Invalid user object:", user);
     return;
   }
 
-  console.log("✅ Adding user to role:", { role, user });
+  console.log("Γ£à Adding user to role:", { role, user });
 
   setOtherUserIds((prev) => ({
     ...prev,
@@ -311,10 +311,10 @@ const handleAddOtherId = (
 
       setAllUsers(data.data || []);
 
-      console.log("✅ Users loaded:", data.data);
+      console.log("Γ£à Users loaded:", data.data);
     } catch (error) {
       console.error(
-        "❌ Error fetching users:",
+        "Γ¥î Error fetching users:",
         error
       );
     } finally {
@@ -544,12 +544,12 @@ const handleAddOtherId = (
           buildPayload();
 
         console.log(
-          "📤 Payload:",
+          "≡ƒôñ Payload:",
           payload
         );
 
                 console.log(
-          "🎭 Role Assignments:",
+          "≡ƒÄ¡ Role Assignments:",
           payload.roleAssignments
         );
 
@@ -590,7 +590,7 @@ const handleAddOtherId = (
           );
 
           console.error(
-            "❌ API Error:",
+            "Γ¥î API Error:",
             data
           );
 
@@ -598,7 +598,7 @@ const handleAddOtherId = (
         }
 
         console.log(
-          "✅ Room created:",
+          "Γ£à Room created:",
           data
         );
 
@@ -982,7 +982,7 @@ const handleAddOtherId = (
                                           </div>
 
                                           <div className="text-slate-500">
-                                            {user.userid} • {user.role}
+                                            {user.userid} ΓÇó {user.role}
                                           </div>
                                         </div>
                                       ))}
@@ -1009,7 +1009,7 @@ const handleAddOtherId = (
                                     }}
                                     className="text-blue-700 hover:text-blue-900 font-bold"
                                   >
-                                    ×
+                                    ├ù
                                   </button>
                                 </div>
                               ))}
@@ -1166,14 +1166,14 @@ const handleAddOtherId = (
             {/* Error Message Display */}
             {error && (
               <div className="w-full rounded-[5px] border border-red-300 bg-red-50 p-2 text-[9px] text-red-700">
-                ❌ {error}
+                Γ¥î {error}
               </div>
             )}
 
             {/* Success Message Display */}
             {success && (
               <div className="w-full rounded-[5px] border border-green-300 bg-green-50 p-2 text-[9px] text-green-700">
-                ✅ Room created successfully!
+                Γ£à Room created successfully!
               </div>
             )}
 

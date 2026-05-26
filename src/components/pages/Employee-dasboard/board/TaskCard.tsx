@@ -13,6 +13,7 @@ type Task = {
 	color?: string;
 	position?: number;
 	user_id?: string;
+	author_name?: string;
 	status?: "pending" | "in-progress" | "completed";
 	description?: string;
 	task_number?: string;
@@ -174,6 +175,7 @@ export default function TaskCard({
 						position={task.position}
 						canDelete={canDelete}
 						onDeletePress={() => setShowConfirm(true)}
+						authorName={task.author_name}
 					/>
 				)}
 			</div>
@@ -190,6 +192,7 @@ export default function TaskCard({
 					position={task.position}
 					canDelete={canDelete}
 					onDeletePress={() => setShowConfirm(true)}
+					authorName={task.author_name}
 				/>
 			) : null}
 

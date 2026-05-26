@@ -33,6 +33,7 @@ interface Conversation {
   last_message: {
     content: string
     created_at: string
+    type?: 'text' | 'system'
   } | null
   unread_count: number
 }
@@ -214,7 +215,12 @@ export default function Messenger() {
     if (!newMessage.trim() || !activeConversation?.id) return
     
     if (!socket || !isConnected) {
-      alert('Messenger is not connected. Please wait or refresh.')
+      setAlert({
+        isOpen: true,
+        title: 'Connection Error',
+        description: 'Messenger is not connected. Please wait or refresh.',
+        type: 'error'
+      })
       return
     }
 
@@ -490,7 +496,7 @@ export default function Messenger() {
                   isActive={activeConversation?.id === conv.id}
                   onClick={() => setActiveConversation(conv)}
                   isOnline={false}
-                  currentUserId={me?.id}
+                  currentUserId={me?.id ? Number(me.id) : undefined}
                 />
               ))}
             </div>

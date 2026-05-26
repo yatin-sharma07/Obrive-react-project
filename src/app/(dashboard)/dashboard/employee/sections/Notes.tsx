@@ -17,6 +17,7 @@ type NoteCard = {
 	color?: string;
 	position?: number;
 	user_id?: string;
+	author_name?: string;
 };
 
 export default function Notes() {
@@ -64,7 +65,7 @@ export default function Notes() {
 				if (cancelled) return;
 
 				const mapped: NoteCard[] = json.data.map(
-					(note: Record<string, unknown>) => ({
+					(note: any) => ({
 						id: String(note.id),
 						title: String(note.content ?? ""),
 						note_date: new Date(String(note.note_date)).toLocaleDateString(
@@ -75,6 +76,7 @@ export default function Notes() {
 							note.position != null ? Number(note.position) : undefined,
 						user_id:
 							note.user_id != null ? String(note.user_id) : undefined,
+						author_name: note.users?.name,
 					}),
 				);
 

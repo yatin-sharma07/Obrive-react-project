@@ -27,6 +27,8 @@ type LeaveSummary = {
     id: number;
     leaveType?: string;
     leaveDate?: string;
+    startDate?: string;
+    endDate?: string;
     reason?: string | null;
     status?: string;
   }>;
@@ -345,7 +347,10 @@ export default function Vacations() {
           />
 
           <LeaveRequestHistory 
-            requests={summary?.requests || []} 
+            requests={(summary?.requests || []).map(r => ({
+              ...r,
+              leaveDate: r.leaveDate || r.startDate // Support both naming conventions
+            }))} 
             onDelete={handleDeleteLeave}
           />
         </div>
