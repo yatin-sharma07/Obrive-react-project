@@ -27,6 +27,10 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (!me?.id) return
 
+    const token = localStorage.getItem('token') || localStorage.getItem('accessToken')
+
+    if (!token) return
+
     const socketUrl =
       process.env.NEXT_PUBLIC_BACKEND_URL ||
       API_BASE_URL?.replace(/\/api\/?$/, '') ||
@@ -35,8 +39,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     const socketInstance = io(socketUrl, {
       withCredentials: true,
       auth: {
-        token: localStorage.getItem('token') || localStorage.getItem('accessToken'),
-        userId: me.id,
+        token,
       },
     })
 

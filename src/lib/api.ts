@@ -42,7 +42,12 @@ export async function apiFetch(
       return apiFetch(endpoint, { ...options, retry: false });
     } else {
     
-      return Promise.reject("Session expired");
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("token");
+        localStorage.removeItem("accessToken");
+      }
+
+      return Promise.reject(new Error("Session expired"));
     }
   }
 
@@ -58,9 +63,23 @@ async function refreshAccessToken(): Promise<boolean> {
 
     if (!res.ok) return false;
 
-    //  backend set new access token cookie
+    const data = await res.json().catch(() => null);
+
+    if (
+      typeof window !== "undefined" &&
+      data?.data?.accessToken
+    ) {
+      localStorage.setItem("accessToken", data.data.accessToken);
+      localStorage.setItem("token", data.data.accessToken);
+    }
+
     return true;
   } catch (error) {
     return false;
   }
 }
+
+//1. these functions are used in the app to make API calls with automatic token refresh handling.
+//2. apiFetch is the main function that components will use to call APIs. It automatically includes the access token from localStorage (for fallback) and handles 401 responses by trying to refresh the token and retrying the request once.
+//3. refreshAccessToken is a helper function that calls the refresh endpoint to get a new access token. It returns true if successful, false otherwise.
+

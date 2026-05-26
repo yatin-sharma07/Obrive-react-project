@@ -54,12 +54,6 @@ exports.registerAudioRoomHandler =
 
         const userId =
           Number(
-            typeof payload ===
-            "object"
-              ? payload.userId
-              : legacyUserId
-          ) ||
-          Number(
             socket.user?.id
           );
 
@@ -108,12 +102,6 @@ exports.registerAudioRoomHandler =
               : payload;
 
           const userId =
-            Number(
-              typeof payload ===
-              "object"
-                ? payload.userId
-                : legacyUserId
-            ) ||
             Number(
               socket.user?.id
             );

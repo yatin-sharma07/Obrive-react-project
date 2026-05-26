@@ -12,8 +12,16 @@ const createLiveKitToken =
     role,
   }) => {
 
-          const apiKey =process.env .LIVEKIT_API_KEY;
+          const apiKey = process.env.LIVEKIT_API_KEY;
           const apiSecret = process.env.LIVEKIT_API_SECRET;
+
+    if (!apiKey || !apiSecret) {
+      const error = new Error(
+        "LiveKit credentials are not configured"
+      );
+      error.status = 500;
+      throw error;
+    }
 
     const normalizedRole =
       role?.toUpperCase();

@@ -2,6 +2,9 @@ const { prisma } = require("../../../prisma");
 const {
   getRoomDetailsService,
 } = require("../../modules/AUDIO_ROOM/room-details/roomDetails.service");
+const {
+  canModerateRoom,
+} = require("../../modules/AUDIO_ROOM/audioRoomAuthz");
 
 exports.registerModerationHandler = (io, socket) => {
   const emitParticipantUpdate = async (roomId, userId) => {
@@ -26,6 +29,13 @@ exports.registerModerationHandler = (io, socket) => {
     }
 
     try {
+      if (!(await canModerateRoom(roomId, socket.user?.id))) {
+        socket.emit("audio_room_error", {
+          message: "Only hosts or moderators can mute speakers",
+        });
+        return;
+      }
+
       await prisma.room_participants.updateMany({
         where: {
           roomId: Number(roomId),
@@ -70,6 +80,13 @@ exports.registerModerationHandler = (io, socket) => {
     }
 
     try {
+      if (!(await canModerateRoom(roomId, socket.user?.id))) {
+        socket.emit("audio_room_error", {
+          message: "Only hosts or moderators can unmute speakers",
+        });
+        return;
+      }
+
       await prisma.room_participants.updateMany({
         where: {
           roomId: Number(roomId),
@@ -114,6 +131,13 @@ exports.registerModerationHandler = (io, socket) => {
     }
 
     try {
+      if (!(await canModerateRoom(roomId, socket.user?.id))) {
+        socket.emit("audio_room_error", {
+          message: "Only hosts or moderators can change participant roles",
+        });
+        return;
+      }
+
       await prisma.room_participants.updateMany({
         where: {
           roomId: Number(roomId),
@@ -158,6 +182,13 @@ exports.registerModerationHandler = (io, socket) => {
     }
 
     try {
+      if (!(await canModerateRoom(roomId, socket.user?.id))) {
+        socket.emit("audio_room_error", {
+          message: "Only hosts or moderators can remove participants",
+        });
+        return;
+      }
+
       await prisma.room_participants.updateMany({
         where: {
           roomId: Number(roomId),

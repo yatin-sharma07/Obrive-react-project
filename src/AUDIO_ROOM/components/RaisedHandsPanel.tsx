@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 
 import {
-  API_BASE_URL,
+  apiFetch,
 } from "@/lib/api";
 
 import {
@@ -68,8 +68,8 @@ const RaisedHandsPanel = ({
       }
 
       const response =
-        await fetch(
-          `${API_BASE_URL}/audio-room/hand-requests/${roomId}`
+        await apiFetch(
+          `/audio-room/hand-requests/${roomId}`
         );
 
       const data =
@@ -95,8 +95,8 @@ const RaisedHandsPanel = ({
       action: "approve" | "reject"
     ) => {
       const response =
-        await fetch(
-          `${API_BASE_URL}/audio-room/hand-action`,
+        await apiFetch(
+          "/audio-room/hand-action",
           {
             method:
               "POST",

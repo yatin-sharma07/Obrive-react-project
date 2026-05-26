@@ -5,29 +5,18 @@ const cookie = require("cookie");
 
 exports.socketAuthMiddleware = async (socket, next) => {
   try {
-    let token = socket.handshake.auth.token || socket.handshake.headers.authorization?.split(" ")[1];
+    let token =
+      socket.handshake.auth.token ||
+      socket.handshake.headers.authorization?.split(" ")[1];
 
-    // If no token in auth or header, check cookies
-    // if (!token && socket.handshake.headers.cookie) {
-    //   const cookies = cookie.parse(socket.handshake.headers.cookie);
-    //   token = cookies.accessToken;
-    // }
+    if (!token && socket.handshake.headers.cookie) {
+      const cookies = cookie.parse(socket.handshake.headers.cookie);
+      token = cookies.accessToken;
+    }
 
-    // if (!token) {
-    //   return next(new Error("Authentication error: No token provided"));
-    // }
-// ✅ DEVELOPMENT MODE: Allow connection without token if userId is provided
-if (!token) {
-  const userId = socket.handshake.auth.userId;
-  if (userId) {
-    console.log(`⚠️  DEVELOPMENT MODE: Connecting user ${userId} without authentication`);
-    socket.user = { id: userId, name: `User ${userId}` };
-    return next();
-  }
-  // If no token AND no userId fallback, reject
-  return next(new Error("Authentication error: No token or userId provided"));
-}
-
+    if (!token) {
+      return next(new Error("Authentication error: No token provided"));
+    }
 
     const decoded = verifyAccessToken(token);
     const user = await prisma.users.findUnique({

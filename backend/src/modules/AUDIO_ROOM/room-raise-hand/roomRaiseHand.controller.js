@@ -13,7 +13,10 @@ const raiseHandController =
     try {
       const result =
         await raiseHandService(
-          req.body
+          {
+            ...req.body,
+            userId: req.user.id,
+          }
         );
 
       return res

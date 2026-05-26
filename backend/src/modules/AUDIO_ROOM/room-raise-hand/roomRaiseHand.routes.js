@@ -9,9 +9,11 @@ const {
 } = require(
   "./roomRaiseHand.controller"
 );
+const auth = require("../../../middleware/auth");
 
 router.post(
   "/raise-hand",
+  auth,
   raiseHandController
 );
 

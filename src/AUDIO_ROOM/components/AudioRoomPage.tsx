@@ -8,6 +8,7 @@ import {
 
 import {
   useParams,
+  useRouter,
 } from "next/navigation";
 
 import RoomHeader from "./RoomHeader";
@@ -45,6 +46,8 @@ const AudioRoomPage =
 
     const params =
       useParams();
+    const router =
+      useRouter();
 
     const roomId =
       params.roomId;
@@ -78,6 +81,22 @@ const AudioRoomPage =
         currentUserId;
     }, [
       currentUserId,
+    ]);
+
+    useEffect(() => {
+      if (
+        !userLoading &&
+        (userError || !currentUserId)
+      ) {
+        router.replace(
+          "/employee-login"
+        );
+      }
+    }, [
+      currentUserId,
+      router,
+      userError,
+      userLoading,
     ]);
 
     const currentUserRole =
@@ -124,9 +143,6 @@ const AudioRoomPage =
               Number(
                 roomId
               ),
-
-            userId:
-              currentUserId,
           }
         );
 
@@ -138,48 +154,99 @@ const AudioRoomPage =
 // CONNECT LIVEKIT
 // ==========================
 
+const requestLiveKitToken =
+  async (roomRole?: string) => {
+    const response =
+      await apiFetch(
+        "/audio-room/livekit/token",
+        {
+          method:
+            "POST",
+
+          body:
+            JSON.stringify(
+              {
+                roomId:
+                  Number(
+                    roomId
+                  ),
+              }
+            ),
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (
+      !response.ok
+    ) {
+      throw new Error(
+        data.message ||
+          "Failed to create LiveKit token"
+      );
+    }
+
+    sessionStorage.setItem(
+      "audio-room-session",
+      JSON.stringify({
+        roomId:
+          Number(
+            roomId
+          ),
+        roomRole:
+          data.data.roomRole ||
+          roomRole,
+        livekitToken:
+          data.data.token,
+      })
+    );
+
+    return data.data.token;
+  };
+
 const connectLiveKit =
-  async () => {
+  async (livekitToken?: string) => {
     try {
-      const session =
-        sessionStorage.getItem(
-          "audio-room-session"
-        );
+      let token =
+        livekitToken;
 
-      if (!session) {
-        console.warn(
-          "No audio room session found"
-        );
+      if (!token) {
+        const session =
+          sessionStorage.getItem(
+            "audio-room-session"
+          );
 
-        return;
+        if (session) {
+          token =
+            JSON.parse(
+              session
+            )?.livekitToken;
+        }
       }
 
-      const parsedSession =
-        JSON.parse(
-          session
-        );
+      if (!token) {
+        token =
+          await requestLiveKitToken(
+            currentUserRole
+          );
+      }
 
-        console.log(
-        "SESSION:",
-        parsedSession
-      );
+      if (!token) {
+        throw new Error(
+          "LiveKit token unavailable"
+        );
+      }
 
       await livekitService.connect({
         token:
-          parsedSession
-            .livekitToken,
+          token,
 
         roomId:
           String(
             roomId
           ),
       });
-
-      console.log(
-          "ROLE:",
-          parsedSession.roomRole
-        );
-
       console.log(
         "✅ LiveKit room connected"
       );
@@ -281,25 +348,6 @@ const connectLiveKit =
             "Joined room:",
             data
           );
-
-          if (
-            response.ok &&
-            data?.data?.livekitToken
-          ) {
-            sessionStorage.setItem(
-              "audio-room-session",
-              JSON.stringify({
-                roomId:
-                  Number(
-                    roomId
-                  ),
-                roomRole:
-                  data.data.roomRole,
-                livekitToken:
-                  data.data.livekitToken,
-              })
-            );
-          }
 
           return data.data;
 
@@ -467,9 +515,17 @@ const connectLiveKit =
             return;
           }
 
-          await joinRoom();
+          const joinedRoom =
+            await joinRoom();
 
-          await connectLiveKit();
+          const livekitToken =
+            await requestLiveKitToken(
+              joinedRoom?.roomRole
+            );
+
+          await connectLiveKit(
+            livekitToken
+          );
 
           joinSocketRoom();
 
@@ -509,9 +565,6 @@ const connectLiveKit =
                 Number(
                   roomId
                 ),
-
-              userId:
-                currentUserId,
             }
           );
         }

@@ -7,9 +7,13 @@ const router =
 const {
   handleHandRequestActionController,
 } = require("./roomHandAction.controller");
+const auth = require("../../../middleware/auth");
+const { requireRoomRoles } = require("../audioRoomAuthz");
 
 router.post(
   "/hand-action",
+  auth,
+  requireRoomRoles(["host", "moderator", "admin"]),
   handleHandRequestActionController
 );
 

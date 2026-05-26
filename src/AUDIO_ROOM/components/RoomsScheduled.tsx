@@ -5,7 +5,7 @@ import React, {
   useState,
 } from "react";
 
-import { API_BASE_URL } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
 
 // ======================================================
 // UI CLASSES
@@ -66,8 +66,8 @@ const ScheduledRooms = () => {
         setLoading(true);
 
         const response =
-          await fetch(
-            `${API_BASE_URL}/audio-room/rooms`
+          await apiFetch(
+            "/audio-room/rooms"
           );
 
         const data =
@@ -124,8 +124,8 @@ const handleStartNow =
   ) => {
     try {
       const response =
-        await fetch(
-          `${API_BASE_URL}/audio-room/start-room`,
+        await apiFetch(
+          "/audio-room/start-room",
           {
             method:
               "POST",

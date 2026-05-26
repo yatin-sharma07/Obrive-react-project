@@ -11,10 +11,12 @@ const {
 );
 
 const auth = require("../../../middleware/auth");
+const { requireRoomRoles } = require("../audioRoomAuthz");
 
 router.post(
   "/end-room",
-  // auth,
+  auth,
+  requireRoomRoles(["host", "admin"]),
   endRoomController
 );
 

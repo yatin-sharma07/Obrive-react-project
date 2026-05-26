@@ -9,9 +9,13 @@ const {
 } = require(
   "./speakerDowngrade.controller"
 );
+const auth = require("../../../middleware/auth");
+const { requireRoomRoles } = require("../audioRoomAuthz");
 
 router.post(
   "/downgrade-speaker",
+  auth,
+  requireRoomRoles(["host", "moderator", "admin"]),
   downgradeToListenerController
 );
 

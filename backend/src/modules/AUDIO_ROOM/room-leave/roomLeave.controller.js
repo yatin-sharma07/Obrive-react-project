@@ -13,7 +13,10 @@ const leaveRoomController =
     try {
       const result =
         await leaveRoomService(
-          req.body
+          {
+            ...req.body,
+            userId: req.user.id,
+          }
         );
 
       return res

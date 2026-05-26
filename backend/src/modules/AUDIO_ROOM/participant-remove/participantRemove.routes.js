@@ -9,9 +9,13 @@ const {
 } = require(
   "./participantRemove.controller"
 );
+const auth = require("../../../middleware/auth");
+const { requireRoomRoles } = require("../audioRoomAuthz");
 
 router.post(
   "/remove-participant",
+  auth,
+  requireRoomRoles(["host", "moderator", "admin"]),
   removeParticipantController
 );
 

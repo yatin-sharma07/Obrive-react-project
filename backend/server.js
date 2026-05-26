@@ -131,6 +131,7 @@ app.use('/api/work-sessions', require('./src/modules/work-sessions/work-sessions
 // Chat routes
 app.use('/api/chat', require('./src/modules/chat/chat.routes'));
 // AUDIO-ROOM Routes ===========================================================================
+app.use( "/api/audio-room", require( "./src/modules/AUDIO_ROOM/livekit/routes/livekit.routes"));
 app.use( "/api/audio-room", require( "./src/modules/AUDIO_ROOM/room-config/roomConfig.routes"));
 app.use( "/api/audio-room", require( "./src/modules/AUDIO_ROOM/room-start/roomStart.routes"));
 app.use( "/api/audio-room", require( "./src/modules/AUDIO_ROOM/room-end/roomEnd.routes"));

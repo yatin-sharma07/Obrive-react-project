@@ -5,9 +5,8 @@ import React, {
   useState,
 } from "react";
 
-import { API_BASE_URL, apiFetch } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import livekitService from "@app/../../backend/src/modules/AUDIO_ROOM/livekit/services/livekit.service";
 
 // ======================================================
 // UI CLASSES
@@ -87,8 +86,8 @@ const RoomsHistory = () => {
         setLoading(true);
 
         const response =
-          await fetch(
-            `${API_BASE_URL}/audio-room/rooms`
+          await apiFetch(
+            "/audio-room/rooms"
           );
 
         const data =
@@ -195,29 +194,12 @@ const RoomsHistory = () => {
               data
             );
 
-            // ==================================
-            // CONNECT LIVEKIT
-            // ==================================
-
-            // await livekitService.connect({
-            //   token:
-            //     data.data.livekitToken,
-
-            //   roomId:
-            //     roomId.toString(),
-            // });
-
-            // STORE ROOM SESSION
             sessionStorage.setItem(
               "audio-room-session",
               JSON.stringify({
                 roomId,
                 roomRole:
                   data.data.roomRole,
-
-                livekitToken:
-                  data.data
-                    .livekitToken,
               })
             );
 
@@ -254,8 +236,8 @@ const handleEndRoom =
       }
 
       const response =
-        await fetch(
-          `${API_BASE_URL}/audio-room/end-room`,
+        await apiFetch(
+          "/audio-room/end-room",
           {
             method:
               "POST",

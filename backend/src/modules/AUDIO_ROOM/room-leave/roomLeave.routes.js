@@ -9,9 +9,11 @@ const {
 } = require(
   "./roomLeave.controller"
 );
+const auth = require("../../../middleware/auth");
 
 router.post(
   "/leave-room",
+  auth,
   leaveRoomController
 );
 

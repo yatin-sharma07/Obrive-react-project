@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 
 import {
-  API_BASE_URL,
+  apiFetch,
 } from "@/lib/api";
 import {
   useSocket,
@@ -213,8 +213,8 @@ const handleEndRoom =
   async () => {
     try {
       const response =
-        await fetch(
-          `${API_BASE_URL}/audio-room/end-room`,
+        await apiFetch(
+          "/audio-room/end-room",
           {
             method:
               "POST",
@@ -269,8 +269,8 @@ const handleLeaveRoom =
       // const userId = 1;
 
       const response =
-        await fetch(
-          `${API_BASE_URL}/audio-room/leave-room`,
+        await apiFetch(
+          "/audio-room/leave-room",
           {
             method:
               "POST",
@@ -325,8 +325,8 @@ const handleLeaveRoom =
   async () => {
     try {
       const response =
-        await fetch(
-          `${API_BASE_URL}/audio-room/raise-hand`,
+        await apiFetch(
+          "/audio-room/raise-hand",
           {
             method:
               "POST",

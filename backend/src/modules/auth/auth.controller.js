@@ -2,6 +2,12 @@ const service = require('./auth.service');
 const { successResponse, errorResponse } = require('../../utils/apiResponse');
 const workSessionService = require('../work-sessions/work-sessions.service');
 
+const authCookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+};
+
 exports.loginUser = async (req, res, next) => {
   try {
     const result = await service.loginUser({
@@ -9,17 +15,9 @@ exports.loginUser = async (req, res, next) => {
       ip:        req.ip,
       userAgent: req.headers['user-agent'],
     });
-     res.cookie("accessToken", result.accessToken, {
-      httpOnly: true,
-      secure: false, // true in production (HTTPS)
-      sameSite: "lax",
-    });
+     res.cookie("accessToken", result.accessToken, authCookieOptions);
 
-    res.cookie("refreshToken", result.refreshToken, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-    });
+    res.cookie("refreshToken", result.refreshToken, authCookieOptions);
     successResponse(res, result, 'Login successful');
   } catch (err) { next(err); }
 };
@@ -76,16 +74,8 @@ exports.logout = async (req, res, next) => {
       logId:  req.user.logId,
     });
 
-    res.clearCookie('accessToken', {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
-    });
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
-    });
+    res.clearCookie('accessToken', authCookieOptions);
+    res.clearCookie('refreshToken', authCookieOptions);
 
     successResponse(res, result, 'Logged out');
   } catch (err) { next(err); }
@@ -100,6 +90,7 @@ exports.refreshToken = async (req, res, next) => {
     }
 
     const result = await service.refreshToken(token);
+    res.cookie("accessToken", result.accessToken, authCookieOptions);
     successResponse(res, result);
   } catch (err) {
     next(err);
