@@ -320,9 +320,74 @@ const connectLiveKit =
           useEffect(() => {
           if (!socket) return;
 
+          const updateParticipantMuteState =
+            (
+              targetUserId: number,
+              nextIsMuted: boolean
+            ) => {
+              setRoomData(
+                (previousRoomData: any) => {
+                  if (
+                    !previousRoomData
+                      ?.participants
+                  ) {
+                    return previousRoomData;
+                  }
+
+                  const updateGroup =
+                    (participants: any[] = []) =>
+                      participants.map(
+                        (participant) =>
+                          Number(
+                            participant.id
+                          ) ===
+                          targetUserId
+                            ? {
+                                ...participant,
+                                isMuted:
+                                  nextIsMuted,
+                                isSpeaking:
+                                  !nextIsMuted,
+                              }
+                            : participant
+                      );
+
+                  return {
+                    ...previousRoomData,
+                    participants: {
+                      ...previousRoomData.participants,
+                      hostAndSpeakers:
+                        updateGroup(
+                          previousRoomData
+                            .participants
+                            .hostAndSpeakers
+                        ),
+                      moderators:
+                        updateGroup(
+                          previousRoomData
+                            .participants
+                            .moderators
+                        ),
+                      listeners:
+                        updateGroup(
+                          previousRoomData
+                            .participants
+                            .listeners
+                        ),
+                    },
+                  };
+                }
+              );
+            };
+
           // Listen for real-time moderation updates
           socket.on("speaker_muted", async (data) => {
             console.log("Speaker muted:", data.userId);
+
+            updateParticipantMuteState(
+              Number(data.userId),
+              true
+            );
 
             if (
               Number(data.userId) ===
@@ -332,11 +397,15 @@ const connectLiveKit =
                 .disableMicrophone();
             }
 
-            fetchRoomDetails();
           });
 
           socket.on("speaker_unmuted", async (data) => {
             console.log("Speaker unmuted:", data.userId);
+
+            updateParticipantMuteState(
+              Number(data.userId),
+              false
+            );
 
             if (
               Number(data.userId) ===
@@ -346,7 +415,6 @@ const connectLiveKit =
                 .enableMicrophone();
             }
 
-            fetchRoomDetails();
           });
 
           socket.on("role_changed", (data) => {

@@ -184,7 +184,8 @@ const RaisedHandsPanel = ({
   }, [socket, roomId, canModerate]);
 
   if (
-    !canModerate
+    !canModerate ||
+    requests.length === 0
   ) {
     return null;
   }
@@ -219,16 +220,11 @@ const RaisedHandsPanel = ({
         </div>
       </div>
 
-      {requests.length === 0 ? (
-        <p className="text-[9px] text-slate-500">
-          No raised hands.
-        </p>
-      ) : (
-        <div className="flex flex-col gap-2">
-          {requests.map(
-            (request) => (
-              <div
-                key={request.id}
+      <div className="flex flex-col gap-2">
+        {requests.map(
+          (request) => (
+            <div
+              key={request.id}
                 className="
                   flex
                   items-center
@@ -301,7 +297,6 @@ const RaisedHandsPanel = ({
             )
           )}
         </div>
-      )}
     </aside>
   );
 };

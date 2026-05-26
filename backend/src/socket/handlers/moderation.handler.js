@@ -1,6 +1,18 @@
 const { prisma } = require("../../../prisma");
+const {
+  getRoomDetailsService,
+} = require("../../modules/AUDIO_ROOM/room-details/roomDetails.service");
 
 exports.registerModerationHandler = (io, socket) => {
+  const emitParticipantUpdate = async (roomId, userId) => {
+    const roomDetails = await getRoomDetailsService(roomId, userId);
+
+    io.to(`audio-room:${roomId}`).emit("participant_updated", {
+      roomId: Number(roomId),
+      participants: roomDetails.participants,
+    });
+  };
+
   // ==========================
   // MUTE SPEAKER
   // ==========================
@@ -35,8 +47,11 @@ exports.registerModerationHandler = (io, socket) => {
         {
           userId: Number(userId),
           isMuted: true,
+          roomId: Number(roomId),
         }
       );
+
+      await emitParticipantUpdate(roomId, userId);
     } catch (error) {
       console.error("❌ Mute speaker error:", error);
     }
@@ -76,8 +91,11 @@ exports.registerModerationHandler = (io, socket) => {
         {
           userId: Number(userId),
           isMuted: false,
+          roomId: Number(roomId),
         }
       );
+
+      await emitParticipantUpdate(roomId, userId);
     } catch (error) {
       console.error("❌ Unmute speaker error:", error);
     }
@@ -121,9 +139,7 @@ exports.registerModerationHandler = (io, socket) => {
         }
       );
 
-      io.to(`audio-room:${roomId}`).emit(
-        "participant_updated"
-      );
+      await emitParticipantUpdate(roomId, userId);
     } catch (error) {
       console.error("❌ Downgrade speaker error:", error);
     }
@@ -164,9 +180,7 @@ exports.registerModerationHandler = (io, socket) => {
         }
       );
 
-      io.to(`audio-room:${roomId}`).emit(
-        "participant_updated"
-      );
+      await emitParticipantUpdate(roomId, userId);
     } catch (error) {
       console.error("❌ Remove participant error:", error);
     }

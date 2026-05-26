@@ -81,9 +81,19 @@ class LiveKitService {
     }
 
     await this.room.localParticipant
-      .setMicrophoneEnabled(
-        true
-      );
+  .setMicrophoneEnabled(
+    true,
+    {
+      echoCancellation:
+        true,
+
+      noiseSuppression:
+        true,
+
+      autoGainControl:
+        true,
+    }
+  );
 
     console.log(
       "🎤 Microphone enabled"
