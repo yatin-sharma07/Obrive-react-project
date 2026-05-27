@@ -3,7 +3,7 @@ const { registerMessageHandler } = require("./message.handler");
 const { registerTypingHandler } = require("./typing.handler");
 const { registerPresenceHandler } = require("./presence.handler");
 const { joinConversationRoom, leaveConversationRoom } = require("../room/room.manager");
-const { registerAudioRoomHandler,} = require( "./audioRoom.handler" );  //AR
+const { registerAudioRoomHandler,} = require("./audioRoom.Handler");  //AR
 const { registerModerationHandler } = require("./moderation.handler"); //AR
 
 exports.registerConnectionHandler = (io, socket) => {
