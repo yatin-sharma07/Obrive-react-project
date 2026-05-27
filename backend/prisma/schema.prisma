@@ -550,7 +550,7 @@ model CommunityPost {
   createdAt      DateTime              @default(now())
   updatedAt      DateTime              @updatedAt
 
-  author         User                  @relation(fields: [authorId], references: [id])
+  author         users                 @relation(fields: [authorId], references: [id])
 
   media          CommunityPostMedia[]
   comments       CommunityComment[]
@@ -607,7 +607,7 @@ model CommunityComment {
 
   post          CommunityPost        @relation(fields: [postId], references: [id], onDelete: Cascade)
 
-  author        User                 @relation(fields: [authorId], references: [id])
+  author        users                @relation(fields: [authorId], references: [id])
 
   parent        CommunityComment?    @relation("CommentReplies", fields: [parentId], references: [id])
 
@@ -634,7 +634,7 @@ model CommunityPostLike {
 
   createdAt    DateTime          @default(now())
 
-  user         User              @relation(fields: [userId], references: [id])
+  user         users             @relation(fields: [userId], references: [id])
 
   post         CommunityPost     @relation(fields: [postId], references: [id], onDelete: Cascade)
 
@@ -653,7 +653,7 @@ model CommunityCommentLike {
 
   createdAt    DateTime             @default(now())
 
-  user         User                 @relation(fields: [userId], references: [id])
+  user         users                @relation(fields: [userId], references: [id])
 
   comment      CommunityComment     @relation(fields: [commentId], references: [id], onDelete: Cascade)
 
@@ -672,7 +672,7 @@ model CommunitySavedPost {
 
   createdAt    DateTime          @default(now())
 
-  user         User              @relation(fields: [userId], references: [id])
+  user         users             @relation(fields: [userId], references: [id])
 
   post         CommunityPost     @relation(fields: [postId], references: [id], onDelete: Cascade)
 
