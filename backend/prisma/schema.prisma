@@ -63,8 +63,8 @@ model projects {
   progress            Int                   @default(0)
   leader_id           Int?
   created_at          DateTime?             @default(now()) @db.Timestamp(6)
-  project_status  String?  @db.Text
-  client_id       String?  @db.VarChar(255)
+  project_status      String?               @db.Text
+  client_id           String?               @db.VarChar(255)
   project_assignments project_assignments[]
   tasks               tasks[]
   leader              users?                @relation("ProjectLeader", fields: [leader_id], references: [id])
@@ -83,21 +83,21 @@ model sticky_notes {
 }
 
 model tasks {
-  id          Int       @id @default(autoincrement())
-  project_id  Int?
-  task_number String    @db.VarChar(20)
-  title       String    @db.VarChar(255)
-  description String?
-  deadline    DateTime? @db.Date
-  status      String?   @default("pending") @db.VarChar(20)
-  assigned_to Int?
-  created_by  Int?
-  location    String?   @db.VarChar(255)
-  created_at  DateTime? @default(now()) @db.Timestamp(6)
-  updated_at  DateTime? @default(now()) @db.Timestamp(6)
-  assigned_user  users?    @relation("TaskAssignedTo", fields: [assigned_to], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  creator        users?    @relation("TaskCreatedBy", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  projects    projects? @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id            Int       @id @default(autoincrement())
+  project_id    Int?
+  task_number   String    @db.VarChar(20)
+  title         String    @db.VarChar(255)
+  description   String?
+  deadline      DateTime? @db.Date
+  status        String?   @default("pending") @db.VarChar(20)
+  assigned_to   Int?
+  created_by    Int?
+  location      String?   @db.VarChar(255)
+  created_at    DateTime? @default(now()) @db.Timestamp(6)
+  updated_at    DateTime? @default(now()) @db.Timestamp(6)
+  assigned_user users?    @relation("TaskAssignedTo", fields: [assigned_to], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  creator       users?    @relation("TaskCreatedBy", fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  projects      projects? @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([project_id], map: "idx_tasks_project_id")
   @@index([assigned_to], map: "idx_tasks_assigned_to")
@@ -135,39 +135,39 @@ model users {
   approved_leaves     leaves[]              @relation("LeaveApprovedBy")
   room_configs        room_configs[]
   handRaises          room_hand_raises[]
-  
+
   // Chat relations
-  created_conversations conversations[]     @relation("CreatedConversations")
+  created_conversations conversations[]             @relation("CreatedConversations")
   conversations         conversation_participants[]
   messages              messages[]
   unread_conversations  conversation_unread[]
   roomParticipants      room_participants[]
-  
+
   //community
-  communityPosts        CommunityPost[]
-  communityComments     CommunityComment[]
-  communityPostLikes     CommunityPostLike[]
-  communityCommentLikes  CommunityCommentLike[]
-  communitySavedPosts    CommunitySavedPost[]
+  communityPosts        CommunityPost[]         @relation("CommunityPostAuthor")
+  communityComments     CommunityComment[]      @relation("CommunityCommentAuthor")
+  communityPostLikes    CommunityPostLike[]     @relation("CommunityPostLikeUser")
+  communityCommentLikes CommunityCommentLike[]  @relation("CommunityCommentLikeUser")
+  communitySavedPosts   CommunitySavedPost[]    @relation("CommunitySavedPostUser")
 
   //Room relations
   room_role_assignments room_role_assignments[] @relation("RoomRoleAssignmentUser")
-  room_invites room_invites[] @relation("RoomInviteUser")
+  room_invites          room_invites[]          @relation("RoomInviteUser")
 }
 
 model leaves {
-  id              Int       @id @default(autoincrement())
-  user_id         Int
-  leave_type      String    @db.VarChar(50)  // 'vacation', 'sick_leave', 'work_remotely'
-  start_date      DateTime  @db.Date
-  end_date        DateTime  @db.Date
-  status          String    @default("pending") @db.VarChar(20)  // 'pending', 'approved', 'rejected'
-  reason          String?
-  approved_by     Int?
-  created_at      DateTime  @default(now()) @db.Timestamp(6)
-  updated_at      DateTime  @default(now()) @db.Timestamp(6)
-  users           users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  approver        users?    @relation("LeaveApprovedBy", fields: [approved_by], references: [id], onDelete: NoAction)
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  leave_type  String   @db.VarChar(50) // 'vacation', 'sick_leave', 'work_remotely'
+  start_date  DateTime @db.Date
+  end_date    DateTime @db.Date
+  status      String   @default("pending") @db.VarChar(20) // 'pending', 'approved', 'rejected'
+  reason      String?
+  approved_by Int?
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+  updated_at  DateTime @default(now()) @db.Timestamp(6)
+  users       users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  approver    users?   @relation("LeaveApprovedBy", fields: [approved_by], references: [id], onDelete: NoAction)
 
   @@index([user_id], map: "idx_leaves_user_id")
   @@index([start_date], map: "idx_leaves_start_date")
@@ -175,47 +175,46 @@ model leaves {
 }
 
 model work_sessions {
-  id                  Int       @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-  userId              Int
+  userId Int
 
-  sessionStart        DateTime  @default(now())
+  sessionStart DateTime @default(now())
 
-  startedAt           DateTime?
+  startedAt DateTime?
 
-  lastHeartbeat       DateTime? @default(now())
+  lastHeartbeat DateTime? @default(now())
 
-  sessionEnd          DateTime?
+  sessionEnd DateTime?
 
-  workDate            DateTime? @default(now()) @db.Date
+  workDate DateTime? @default(now()) @db.Date
 
-  totalActiveDuration Int       @default(0)
+  totalActiveDuration Int @default(0)
 
-  status              String    @default("active")
+  status String @default("active")
 
-  isAutoEnded         Boolean   @default(false)
+  isAutoEnded Boolean @default(false)
 
-  created_at          DateTime  @default(now())
+  created_at DateTime @default(now())
 
-  updated_at          DateTime  @updatedAt
+  updated_at DateTime @updatedAt
 
-  users               users     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  users users @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, workDate])
-
   @@index([status])
 }
 
 model leave_requests {
-  id         Int       @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   user_id    Int
-  leave_date DateTime  @db.Date
-  leave_type String    @db.VarChar(20)
+  leave_date DateTime @db.Date
+  leave_type String   @db.VarChar(20)
   reason     String?
-  status     String    @default("pending") @db.VarChar(20)
-  created_at DateTime  @default(now()) @db.Timestamp(6)
-  updated_at DateTime  @updatedAt @db.Timestamp(6)
-  users      users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  status     String   @default("pending") @db.VarChar(20)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @updatedAt @db.Timestamp(6)
+  users      users    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([user_id, leave_date], map: "leave_requests_user_id_leave_date_key")
   @@index([leave_date], map: "idx_leave_requests_leave_date")
@@ -223,15 +222,14 @@ model leave_requests {
   @@index([status], map: "idx_leave_requests_status")
 }
 
-
 model conversations {
-  id            Int       @id @default(autoincrement())
-  type          String    @default("direct") // direct | group
-  name          String?   @db.VarChar(255)
-  created_by    Int
-  created_at    DateTime  @default(now())
+  id         Int      @id @default(autoincrement())
+  type       String   @default("direct") // direct | group
+  name       String?  @db.VarChar(255)
+  created_by Int
+  created_at DateTime @default(now())
 
-  creator       users     @relation("CreatedConversations", fields: [created_by], references: [id])
+  creator users @relation("CreatedConversations", fields: [created_by], references: [id])
 
   participants  conversation_participants[]
   messages      messages[]
@@ -241,62 +239,58 @@ model conversations {
 }
 
 model conversation_participants {
-  id               Int      @id @default(autoincrement())
-  conversation_id  Int
-  user_id          Int
-  joined_at        DateTime @default(now())
-  is_hidden        Boolean  @default(false)
-  deleted_until    DateTime? // Hide messages sent before this date
-  last_read_at     DateTime?
+  id              Int       @id @default(autoincrement())
+  conversation_id Int
+  user_id         Int
+  joined_at       DateTime  @default(now())
+  is_hidden       Boolean   @default(false)
+  deleted_until   DateTime? // Hide messages sent before this date
+  last_read_at    DateTime?
 
-  conversation     conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  conversation conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
 
-  user             users @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user users @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@unique([conversation_id, user_id])
-
   @@index([user_id])
   @@index([conversation_id])
 }
 
 model messages {
-  id               BigInt    @id @default(autoincrement())
-  conversation_id  Int
-  sender_id        Int?
-  content          String
-  type             String    @default("text") // text | system
+  id              BigInt @id @default(autoincrement())
+  conversation_id Int
+  sender_id       Int?
+  content         String
+  type            String @default("text") // text | system
 
-  created_at       DateTime  @default(now())
+  created_at DateTime @default(now())
 
-  is_edited        Boolean   @default(false)
+  is_edited Boolean @default(false)
 
-  conversation     conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  conversation conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
 
-  sender           users? @relation(fields: [sender_id], references: [id])
+  sender users? @relation(fields: [sender_id], references: [id])
 
   @@index([conversation_id, created_at])
   @@index([sender_id])
 }
 
 model conversation_unread {
-  id               Int      @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-  user_id          Int
-  conversation_id  Int
+  user_id         Int
+  conversation_id Int
 
-  unread_count     Int      @default(0)
+  unread_count Int @default(0)
 
-  updated_at       DateTime @updatedAt
+  updated_at DateTime @updatedAt
 
-  user             users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  conversation     conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  user         users         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  conversation conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
 
   @@unique([user_id, conversation_id])
-
   @@index([user_id])
 }
-
-
 
 //=======================================================================================
 //|| ROOM MODELS
@@ -304,78 +298,79 @@ model conversation_unread {
 
 //=======================================================================================
 model room_configs {
-  id                      Int      @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-  roomName                String   @db.VarChar(100)
-  roomDescription         String?  @db.Text
+  roomName        String  @db.VarChar(100)
+  roomDescription String? @db.Text
 
-  roomType                String   @db.VarChar(50)
-  roomStatus              String   @default("draft") @db.VarChar(50)
+  roomType   String @db.VarChar(50)
+  roomStatus String @default("draft") @db.VarChar(50)
 
-  startTime               DateTime?
-  endTime                 DateTime?
+  startTime DateTime?
+  endTime   DateTime?
 
-  participantLimit        Int
+  participantLimit Int
 
-  visibility              String   @db.VarChar(50)
+  visibility String @db.VarChar(50)
 
-  allowGuestUsers         Boolean  @default(false)
+  allowGuestUsers Boolean @default(false)
 
-  guestJoinMode           String?  @db.VarChar(50)
+  guestJoinMode String? @db.VarChar(50)
 
-  createdBy               Int?
-  creator                 users?   @relation(fields: [createdBy], references: [id])
+  createdBy Int?
+  creator   users? @relation(fields: [createdBy], references: [id])
 
-  notificationSettings    Json?
+  notificationSettings Json?
 
-  redirectAfterRoomEnd    String?  @default("/room-ended")
+  redirectAfterRoomEnd String? @default("/room-ended")
 
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  roleAssignments         room_role_assignments[]
-  joinPermissions         room_join_permissions[]
-  invites                 room_invites[]
-  notifications           room_notifications[]
-  participants            room_participants[]
-  handRaises              room_hand_raises[]
+  roleAssignments room_role_assignments[]
+  joinPermissions room_join_permissions[]
+  invites         room_invites[]
+  notifications   room_notifications[]
+  participants    room_participants[]
+  handRaises      room_hand_raises[]
 
   @@index([createdBy])
   @@index([roomStatus])
   @@index([visibility])
   @@index([startTime])
 }
+
 //=======================================================================================
 model room_join_permissions {
-  id                 Int      @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-  roomConfigId       Int
-  roomConfig         room_configs @relation(fields: [roomConfigId], references: [id], onDelete: Cascade)
+  roomConfigId Int
+  roomConfig   room_configs @relation(fields: [roomConfigId], references: [id], onDelete: Cascade)
 
-  permissionType     String   @db.VarChar(50)
-  crmRole            String?  @db.VarChar(50)
+  permissionType String  @db.VarChar(50)
+  crmRole        String? @db.VarChar(50)
 
-  createdAt          DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([roomConfigId])
 }
 
 //=======================================================================================
 model room_role_assignments {
-  id                   Int      @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-  roomConfigId         Int
-  roomConfig           room_configs @relation(fields: [roomConfigId], references: [id], onDelete: Cascade)
+  roomConfigId Int
+  roomConfig   room_configs @relation(fields: [roomConfigId], references: [id], onDelete: Cascade)
 
-  assignmentType       String   @db.VarChar(50)
-  crmRole              String?  @db.VarChar(50)
+  assignmentType String  @db.VarChar(50)
+  crmRole        String? @db.VarChar(50)
 
-  userId               Int?
-  user                 users? @relation("RoomRoleAssignmentUser", fields: [userId], references: [id])
+  userId Int?
+  user   users? @relation("RoomRoleAssignmentUser", fields: [userId], references: [id])
 
-  assignedRoomRole     String   @db.VarChar(50)
+  assignedRoomRole String @db.VarChar(50)
 
-  createdAt            DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([roomConfigId])
   @@index([userId])
@@ -383,102 +378,102 @@ model room_role_assignments {
 
 //=======================================================================================
 model room_invites {
-  id                  Int      @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-  roomConfigId        Int
-  roomConfig          room_configs @relation(fields: [roomConfigId], references: [id], onDelete: Cascade)
+  roomConfigId Int
+  roomConfig   room_configs @relation(fields: [roomConfigId], references: [id], onDelete: Cascade)
 
-  inviteToken         String   @unique
+  inviteToken String @unique
 
-  inviteRole          String   @db.VarChar(50)
+  inviteRole String @db.VarChar(50)
 
-  invitedUserId       Int?
+  invitedUserId Int?
 
   invitedUser users? @relation("RoomInviteUser", fields: [invitedUserId], references: [id])
 
-  guestEmail          String?
+  guestEmail String?
 
-  requiresPasskey     Boolean  @default(false)
+  requiresPasskey Boolean @default(false)
 
-  passkey             String?
+  passkey String?
 
-  status              String   @default("active") @db.VarChar(50)
+  status String @default("active") @db.VarChar(50)
 
-  expiresAt           DateTime?
+  expiresAt DateTime?
 
-  createdBy           Int?
+  createdBy Int?
 
-  createdAt           DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([roomConfigId])
 }
+
 //=======================================================================================
 model room_templates {
-  id                   Int      @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-  templateName         String   @db.VarChar(100)
+  templateName String @db.VarChar(100)
 
-  createdBy            Int?
+  createdBy Int?
 
-  configurationData    Json
+  configurationData Json
 
-  createdAt            DateTime @default(now())
+  createdAt DateTime @default(now())
 }
+
 //=======================================================================================
 model room_notifications {
-  id                  Int      @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-  roomConfigId        Int
-  roomConfig          room_configs @relation(fields: [roomConfigId], references: [id], onDelete: Cascade)
+  roomConfigId Int
+  roomConfig   room_configs @relation(fields: [roomConfigId], references: [id], onDelete: Cascade)
 
-  notificationType    String   @db.VarChar(50)
+  notificationType String @db.VarChar(50)
 
-  scheduledTime       DateTime
+  scheduledTime DateTime
 
-  status              String   @default("pending") @db.VarChar(50)
+  status String @default("pending") @db.VarChar(50)
 
-  createdAt           DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([roomConfigId])
 }
 
 //=======================================================================================
 model room_participants {
-  id          Int      @id @default(autoincrement())
-  roomId      Int
-  userId      Int
-  roomRole    String
-  joinedAt    DateTime @default(now())
-  leftAt      DateTime?
-  isMuted     Boolean @default(true)
-  isSpeaking  Boolean @default(false)
+  id         Int       @id @default(autoincrement())
+  roomId     Int
+  userId     Int
+  roomRole   String
+  joinedAt   DateTime  @default(now())
+  leftAt     DateTime?
+  isMuted    Boolean   @default(true)
+  isSpeaking Boolean   @default(false)
 
-  room        room_configs @relation(fields: [roomId], references: [id])
-  user users @relation(fields: [userId], references: [id])
+  room room_configs @relation(fields: [roomId], references: [id])
+  user users        @relation(fields: [userId], references: [id])
 }
 
 //=======================================================================================
 model room_hand_raises {
-  id            Int       @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-  roomId        Int
-  userId        Int
+  roomId Int
+  userId Int
 
-  status        String    @default("pending")
-  requestedAt   DateTime  @default(now())
-  respondedAt   DateTime?
+  status      String    @default("pending")
+  requestedAt DateTime  @default(now())
+  respondedAt DateTime?
 
-  room          room_configs @relation(fields: [roomId], references: [id])
-  user          users @relation(fields: [userId], references: [id])
+  room room_configs @relation(fields: [roomId], references: [id])
+  user users        @relation(fields: [userId], references: [id])
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 /////////// POSTS /////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 // 1. Enums ===================================================================== 
-
 
 enum CommunityPostType {
   DISCUSSION
@@ -522,8 +517,6 @@ enum CommunityReportType {
   OTHER
 }
 
-
-
 // 2. Community Posts Table ===================================================================== 
 model CommunityPost {
   id             String                @id @default(uuid())
@@ -545,44 +538,43 @@ model CommunityPost {
   saveCount      Int                   @default(0)
   viewCount      Int                   @default(0)
 
-  authorId       String
+  author_id      Int
 
   createdAt      DateTime              @default(now())
   updatedAt      DateTime              @updatedAt
 
-  author         users                 @relation(fields: [authorId], references: [id])
+  author         users                 @relation("CommunityPostAuthor", fields: [author_id], references: [id])
 
   media          CommunityPostMedia[]
   comments       CommunityComment[]
   likes          CommunityPostLike[]
   savedBy        CommunitySavedPost[]
 
-  @@index([authorId])
+  @@index([author_id])
   @@index([createdAt])
 
   @@map("community_posts")
-} 
+}
 
 // 3. Post Media Table  ===================================================================== 
 
 // For multiple images.
 
 model CommunityPostMedia {
-  id           String               @id @default(uuid())
+  id String @id @default(uuid())
 
-  postId       String
+  postId String
 
-  mediaUrl     String
-  mediaType    CommunityMediaType   @default(IMAGE)
+  mediaUrl  String
+  mediaType CommunityMediaType @default(IMAGE)
 
-  sortOrder    Int                  @default(0)
+  sortOrder Int @default(0)
 
-  createdAt    DateTime             @default(now())
+  createdAt DateTime @default(now())
 
-  post         CommunityPost        @relation(fields: [postId], references: [id], onDelete: Cascade)
+  post CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@index([postId])
-
   @@map("community_post_media")
 }
 
@@ -596,7 +588,7 @@ model CommunityComment {
   content       String               @db.Text
 
   postId        String
-  authorId      String
+  author_id     Int
   parentId      String?
 
   likeCount     Int                  @default(0)
@@ -607,16 +599,15 @@ model CommunityComment {
 
   post          CommunityPost        @relation(fields: [postId], references: [id], onDelete: Cascade)
 
-  author        users                @relation(fields: [authorId], references: [id])
+  author        users                @relation("CommunityCommentAuthor", fields: [author_id], references: [id])
 
   parent        CommunityComment?    @relation("CommentReplies", fields: [parentId], references: [id])
-
   replies       CommunityComment[]   @relation("CommentReplies")
 
   likes         CommunityCommentLike[]
 
   @@index([postId])
-  @@index([authorId])
+  @@index([author_id])
   @@index([parentId])
 
   @@map("community_comments")
@@ -629,16 +620,16 @@ model CommunityComment {
 model CommunityPostLike {
   id           String            @id @default(uuid())
 
-  userId       String
+  user_id      Int
   postId       String
 
   createdAt    DateTime          @default(now())
 
-  user         users             @relation(fields: [userId], references: [id])
+  user         users             @relation("CommunityPostLikeUser", fields: [user_id], references: [id])
 
   post         CommunityPost     @relation(fields: [postId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, postId])
+  @@unique([user_id, postId])
 
   @@map("community_post_likes")
 }
@@ -648,16 +639,16 @@ model CommunityPostLike {
 model CommunityCommentLike {
   id           String               @id @default(uuid())
 
-  userId       String
+  user_id      Int
   commentId    String
 
   createdAt    DateTime             @default(now())
 
-  user         users                @relation(fields: [userId], references: [id])
+  user         users                @relation("CommunityCommentLikeUser", fields: [user_id], references: [id])
 
   comment      CommunityComment     @relation(fields: [commentId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, commentId])
+  @@unique([user_id, commentId])
 
   @@map("community_comment_likes")
 }
@@ -667,16 +658,16 @@ model CommunityCommentLike {
 model CommunitySavedPost {
   id           String            @id @default(uuid())
 
-  userId       String
+  user_id      Int
   postId       String
 
   createdAt    DateTime          @default(now())
 
-  user         users             @relation(fields: [userId], references: [id])
+  user         users             @relation("CommunitySavedPostUser", fields: [user_id], references: [id])
 
   post         CommunityPost     @relation(fields: [postId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, postId])
+  @@unique([user_id, postId])
 
   @@map("community_saved_posts")
 }
