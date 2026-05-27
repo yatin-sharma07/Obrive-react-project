@@ -15,6 +15,7 @@ router.patch("/employees/:employeeId/block", ctrl.blockEmployeeAccess);
 router.get("/employees/:employeeId", ctrl.getEmployeeStatus);
 router.get("/employees/:employeeId/projects", ctrl.getEmployeeProjects);
 router.delete("/employees/:employeeId", ctrl.deleteEmployee);
+router.post("/add-user", ctrl.addUser);
 
 // Project endpoints
 router.get("/projects", ctrl.getSupervisorProjects);

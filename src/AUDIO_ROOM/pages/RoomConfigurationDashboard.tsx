@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import RoomConfigurationLayout from "../layouts/RoomConfiguratoinLayout";
+import { useRouter } from "next/navigation";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 // Components
 import CreateRoom from "../components/CreateRoom";
@@ -21,9 +23,20 @@ type ActiveSection =
   | "settings";
 
 const RoomConfigurationDashboard = () => {
+  const router = useRouter();
+  const { me, loading } = useCurrentUser();
   const [activeSection, setActiveSection] = useState<ActiveSection>("create-room");
 
-  const renderComponent = () => { 
+  const isSupervisor = me?.role === "supervisor";
+
+  useEffect(() => {
+    if (!loading && !isSupervisor) {
+      router.replace("/not-found");
+    }
+  }, [isSupervisor, loading, router]);
+
+  const renderComponent = () => {
+
     switch (activeSection) {
       case "create-room":
         return <CreateRoom />;
@@ -47,6 +60,10 @@ const RoomConfigurationDashboard = () => {
         return <CreateRoom />;
     }
   };
+
+  if (loading || !isSupervisor) {
+    return null;
+  }
 
   return (
     <RoomConfigurationLayout

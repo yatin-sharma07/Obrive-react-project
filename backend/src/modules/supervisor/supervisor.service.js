@@ -1,5 +1,7 @@
 // backend/src/modules/supervisor/supervisor.service.js
 const { prisma } = require("../../../prisma");
+const bcrypt = require('bcrypt');
+
 
 class SupervisorService {
   async getAllEmployees(_supervisorId) {
@@ -335,6 +337,53 @@ class SupervisorService {
       throw new Error(`Failed to delete leave request: ${error.message}`);
     }
   }
+
+
+  async addUser({email, password, role, name, userid}) {
+        try {
+          if (!role || !email || !password) {
+            throw new Error("Role, email, and password are required");
+          }
+
+          const existingUser = await prisma.users.findUnique({ where: { email: email } });
+
+          if (existingUser) {
+            throw new Error("User already exists");
+          }
+
+          const hashedPassword = await bcrypt.hash(password, 10);
+          const newUser = await prisma.users.create({
+            data: {
+              userid,
+              email,
+              name,
+              password: hashedPassword,
+              role,
+              status: "online",
+              is_active: true,
+              created_at: new Date(),
+              updated_at: new Date(),
+            }, // this will store the new user in the database with the provided email, hashed password, role, and default status of online and is_active true. The created_at field will be set to the current date and time, while updated_at will be null since it's a new user.
+            // select: {
+            //   id: true, 
+            //   email: true,
+            //   role: true,
+            //   status: true,
+            //   is_active: true, // setting id , email, role, status, and is_active to be true to return these fields in the response
+            // },
+          });
+
+          return newUser;
+
+
+        } catch (error) {
+          throw new Error(`Failed to add user: ${error.message}`);
+        }
+
 }
 
+}
 module.exports = new SupervisorService();
+
+
+

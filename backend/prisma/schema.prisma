@@ -142,6 +142,13 @@ model users {
   messages              messages[]
   unread_conversations  conversation_unread[]
   roomParticipants      room_participants[]
+  
+  //community
+  communityPosts        CommunityPost[]
+  communityComments     CommunityComment[]
+  communityPostLikes     CommunityPostLike[]
+  communityCommentLikes  CommunityCommentLike[]
+  communitySavedPosts    CommunitySavedPost[]
 
   //Room relations
   room_role_assignments room_role_assignments[] @relation("RoomRoleAssignmentUser")
@@ -463,4 +470,213 @@ model room_hand_raises {
 
   room          room_configs @relation(fields: [roomId], references: [id])
   user          users @relation(fields: [userId], references: [id])
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+/////////// POSTS /////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+// 1. Enums ===================================================================== 
+
+
+enum CommunityPostType {
+  DISCUSSION
+  IMAGE
+  ARTICLE
+  POLL
+  ROOM_DISCUSSION
+}
+
+enum CommunityVisibility {
+  PUBLIC
+  FOLLOWERS
+  PRIVATE
+}
+
+enum CommunityPostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+  DELETED
+}
+
+enum CommunityMediaType {
+  IMAGE
+  VIDEO
+}
+
+enum CommunityReportStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+  REJECTED
+}
+
+enum CommunityReportType {
+  SPAM
+  HARASSMENT
+  ABUSE
+  MISINFORMATION
+  INAPPROPRIATE
+  OTHER
+}
+
+
+
+// 2. Community Posts Table ===================================================================== 
+model CommunityPost {
+  id             String                @id @default(uuid())
+
+  title          String                @db.VarChar(300)
+  content        String                @db.Text
+  slug           String?               @unique
+
+  postType       CommunityPostType     @default(DISCUSSION)
+  visibility     CommunityVisibility   @default(PUBLIC)
+  status         CommunityPostStatus   @default(PUBLISHED)
+
+  isPinned       Boolean               @default(false)
+  isLocked       Boolean               @default(false)
+
+  likeCount      Int                   @default(0)
+  commentCount   Int                   @default(0)
+  shareCount     Int                   @default(0)
+  saveCount      Int                   @default(0)
+  viewCount      Int                   @default(0)
+
+  authorId       String
+
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  author         User                  @relation(fields: [authorId], references: [id])
+
+  media          CommunityPostMedia[]
+  comments       CommunityComment[]
+  likes          CommunityPostLike[]
+  savedBy        CommunitySavedPost[]
+
+  @@index([authorId])
+  @@index([createdAt])
+
+  @@map("community_posts")
+} 
+
+// 3. Post Media Table  ===================================================================== 
+
+// For multiple images.
+
+model CommunityPostMedia {
+  id           String               @id @default(uuid())
+
+  postId       String
+
+  mediaUrl     String
+  mediaType    CommunityMediaType   @default(IMAGE)
+
+  sortOrder    Int                  @default(0)
+
+  createdAt    DateTime             @default(now())
+
+  post         CommunityPost        @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+
+  @@map("community_post_media")
+}
+
+// 4. Comments Table (Nested Replies)  ===================================================================== 
+
+//This is the correct self-relation syntax.
+
+model CommunityComment {
+  id            String               @id @default(uuid())
+
+  content       String               @db.Text
+
+  postId        String
+  authorId      String
+  parentId      String?
+
+  likeCount     Int                  @default(0)
+  replyCount    Int                  @default(0)
+
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+
+  post          CommunityPost        @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  author        User                 @relation(fields: [authorId], references: [id])
+
+  parent        CommunityComment?    @relation("CommentReplies", fields: [parentId], references: [id])
+
+  replies       CommunityComment[]   @relation("CommentReplies")
+
+  likes         CommunityCommentLike[]
+
+  @@index([postId])
+  @@index([authorId])
+  @@index([parentId])
+
+  @@map("community_comments")
+}
+
+// 5. Post Likes Table  ===================================================================== 
+
+//Prevents duplicate likes.
+
+model CommunityPostLike {
+  id           String            @id @default(uuid())
+
+  userId       String
+  postId       String
+
+  createdAt    DateTime          @default(now())
+
+  user         User              @relation(fields: [userId], references: [id])
+
+  post         CommunityPost     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+
+  @@map("community_post_likes")
+}
+
+// 6. Comment Likes Table  ===================================================================== 
+
+model CommunityCommentLike {
+  id           String               @id @default(uuid())
+
+  userId       String
+  commentId    String
+
+  createdAt    DateTime             @default(now())
+
+  user         User                 @relation(fields: [userId], references: [id])
+
+  comment      CommunityComment     @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, commentId])
+
+  @@map("community_comment_likes")
+}
+
+// 7. Saved Posts Table ===================================================================== 
+
+model CommunitySavedPost {
+  id           String            @id @default(uuid())
+
+  userId       String
+  postId       String
+
+  createdAt    DateTime          @default(now())
+
+  user         User              @relation(fields: [userId], references: [id])
+
+  post         CommunityPost     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+
+  @@map("community_saved_posts")
 }

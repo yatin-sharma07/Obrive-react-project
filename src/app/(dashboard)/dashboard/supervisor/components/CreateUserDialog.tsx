@@ -47,10 +47,7 @@ function generateUserId(role: RoleOption) {
   return `${prefix}-${Date.now()}`;
 }
 
-export default function CreateUserDialog({
-  open,
-  onClose,
-}: CreateUserDialogProps) {
+export default function CreateUserDialog({ open, onClose,}:CreateUserDialogProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<RoleOption>("employee");
@@ -112,25 +109,19 @@ export default function CreateUserDialog({
       return;
     }
 
-    if (role === "client") {
-      setError(
-        "Client creation is not available from the current backend. The existing schema stores clients in the same users table, but this project only exposes an employee-create endpoint for supervisors right now.",
-      );
-      return;
-    }
-
     try {
       setSubmitting(true);
       setError("");
       setSuccess("");
 
-      const response = await apiFetch("/temp/add-employee", {
+      const response = await apiFetch("/supervisor/add-user", {
         method: "POST",
         body: JSON.stringify({
           userid: generateUserId(role),
           email: trimmedEmail,
           name: derivedName || "User",
           password: password.trim(),
+          role: role,
         }),
       });
 

@@ -24,13 +24,7 @@ export default function AudioRoomLayout({
   }, [isBlocked, loading, me, router]);
 
   if (loading || !me || isBlocked) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <div className="text-sm font-medium text-slate-600">
-          Loading audio room...
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (

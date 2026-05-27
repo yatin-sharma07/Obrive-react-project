@@ -115,6 +115,7 @@ app.use('/api/client',    require('./src/modules/clients/client.routes')); // al
 app.use('/api/hr',        require('./src/modules/hr/hr.routes'));
 app.use('/api/admin',     require('./src/modules/admin/admin.routes'));
 app.use('/api/supervisor', require('./src/modules/supervisor/supervisor.routes'));
+// app.use('/api/adduser', require('./src/modules/supervisor/supervisor.routes'));
 app.use('/api/meetings',  require('./src/modules/meeting/meeting.routes'));
 app.use('/api/projects',  require('./src/modules/projects/projects.routes'));
 app.use('/api/tasks',     require('./src/modules/tasks/tasks.routes'));
@@ -193,60 +194,29 @@ app.use(require('./src/middleware/errorHandler'));
 
 // ── Start ─────────────────────────────────────────────────────
 async function bootstrap() {
-  try {
+  try { 
+    
     await connectWithRetry(5);
 
-    console.log(
-      '✅ Database connected'
-    );
-
+    console.log( '✅ Database connected' );
+    // Start cron jobs
     startWorkSessionCron();
 
     // Initialize Socket.io
     initializeSocket(server);
 
-    server.listen(
-      PORT,
-      '0.0.0.0',
-      () => {
-        console.log(
-          `🚀 Server running on port ${PORT}`
-        );
+    // Start server
+    server.listen( PORT, '0.0.0.0', () => {
+        console.log( `🚀 Server running on port ${PORT}` );
       }
     );
   } catch (err) {
-    console.error(
-      '❌ Failed to start:',
-      err
-    );
-
+    console.error( '🔴 Failed to start:', err );
     process.exit(1);
   }
 }
 
-// backend/server.js - Add this temporary endpoint
-app.post('/api/temp/add-employee', async (req, res) => {
-  try {
-    const { userid, email, name, password } = req.body;
-    const bcrypt = require('bcrypt');
-    const { prisma } = require('./prisma');
-    
-    const hashedPassword = await bcrypt.hash(password, 10);
-    
-    await prisma.$executeRaw`
-      INSERT INTO users (userid, email, name, role, password, status, created_at, updated_at) 
-      VALUES (${userid}, ${email}, ${name}, 'employee', ${hashedPassword}, 'online', NOW(), NOW())
-      ON CONFLICT (email) DO UPDATE SET 
-        password = ${hashedPassword},
-        status = 'online',
-        updated_at = NOW()
-    `;
-    
-    res.json({ success: true, message: `Employee ${email} added/updated` });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+
 bootstrap();
 
 process.on('SIGINT', async () => {

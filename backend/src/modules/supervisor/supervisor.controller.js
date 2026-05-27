@@ -109,3 +109,14 @@ exports.deleteLeaveRequest = async (req, res) => {
     errorResponse(res, error.message, 400);
   }
 };
+
+
+exports.addUser = async (req, res) => {
+  try {
+    const { email, password, role, name, userid } = req.body;
+    const newUser = await supervisorService.addUser({ email, password, role, name, userid });
+    successResponse(res, newUser, "User added successfully");
+  } catch (error) {
+    errorResponse(res, error.message, 400);
+  } 
+};

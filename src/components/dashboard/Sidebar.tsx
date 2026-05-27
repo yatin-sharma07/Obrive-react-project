@@ -3,7 +3,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import supportImg from "@/assets/images/sidebar/support.png"
-import { MessageCircle, LogOut, X } from 'lucide-react'
+import { MessageCircle, LogOut, X, Icon } from 'lucide-react'
 import { apiFetch } from '@/lib/api'
 import PrimaryLogo from '@/components/shared/logo/PrimaryLogo'
 
@@ -37,6 +37,11 @@ export default function Sidebar({ navItems, activeSection, setActiveSection, set
     } finally {
       router.push('/employee-login')
     }
+  }
+
+  const sendTo = () => {
+    // router.push('/audio-room/configuration')
+    window.open('/audio-room/configuration', '_blank')
   }
 
   return (
@@ -93,6 +98,8 @@ export default function Sidebar({ navItems, activeSection, setActiveSection, set
                 )
               })}
             </nav>
+
+
 
             <div
               className="mx-4 mb-4 flex h-60 flex-col justify-end rounded-2xl bg-[#D9F2F2] sm:bg-fill  bg-center bg-no-repeat p-3"
@@ -181,6 +188,18 @@ export default function Sidebar({ navItems, activeSection, setActiveSection, set
             )
           })}
         </nav>
+
+        {!isCollapsed && (
+          <div className="px-4 pb-4">
+            <button
+              type="button"
+              onClick={sendTo}
+              className="w-full flex items-center gap-3 px-4 py-3  my-2 rounded-none text-[#073933] font-bold transition-all duration-200 hover:bg-[#0a4a42] hover:text-white hover:border-[#38b4a6] border-b-3 border-[#073933] cursor-pointer"
+            >
+              <span className="text-sm">Obrive Conferences</span>
+            </button>
+          </div>
+        )}
 
         {!isCollapsed && (
           <div className="mx-4 mb-4 p-3 bg-[#D9F2F2] rounded-2xl flex flex-col bg-no-repeat bg-cover bg-center h-70 justify-end relative" style={{ backgroundImage: `url(${supportImg.src})` }} >
