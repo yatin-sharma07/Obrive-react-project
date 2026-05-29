@@ -9,6 +9,17 @@ type FetchOptions = RequestInit & {
   retry?: boolean;
 };
 
+export function clearAuthStorage() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  localStorage.removeItem("token");
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("user");
+  sessionStorage.removeItem("audio-room-session");
+}
+
 export async function apiFetch(
   endpoint: string,
   options: FetchOptions = {}
@@ -41,11 +52,8 @@ export async function apiFetch(
       // Retry original request ONCE
       return apiFetch(endpoint, { ...options, retry: false });
     } else {
-    
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("token");
-        localStorage.removeItem("accessToken");
-      }
+
+      clearAuthStorage();
 
       return Promise.reject(new Error("Session expired"));
     }

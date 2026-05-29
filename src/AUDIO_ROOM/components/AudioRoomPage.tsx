@@ -110,6 +110,16 @@ const AudioRoomPage =
         ...(roomData?.participants?.listeners || []),
       ];
 
+    const roomTitle =
+      roomData?.room?.roomName ||
+      roomData?.roomName ||
+      "Live Room";
+
+    const roomDescription =
+      roomData?.room?.roomDescription ||
+      roomData?.roomDescription ||
+      "Room details will appear here.";
+
     const currentParticipant =
       participantGroups.find(
         (participant: any) =>
@@ -494,6 +504,7 @@ const connectLiveKit =
       
       const initializeRoom =
         async () => {
+        try {
 
 //           if (
 //   hasInitialized.current
@@ -518,7 +529,14 @@ const connectLiveKit =
           const joinedRoom =
             await joinRoom();
 
+          if (!joinedRoom) {
+            throw new Error(
+              "Failed to join room"
+            );
+          }
+
           const livekitToken =
+            joinedRoom.livekitToken ||
             await requestLiveKitToken(
               joinedRoom?.roomRole
             );
@@ -530,6 +548,15 @@ const connectLiveKit =
           joinSocketRoom();
 
           await fetchRoomDetails();
+
+      } catch (error) {
+        console.error(
+          "Room initialization failed:",
+          error
+        );
+      } finally {
+        setLoading(false);
+      }
         };
 
       initializeRoom();
@@ -706,7 +733,11 @@ const connectLiveKit =
       <div className="relative h-screen w-full overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100">
         <div className="h-full flex flex-col min-h-0">
 
-          <RoomHeader />
+          <RoomHeader
+            title={roomTitle}
+            description={roomDescription}
+            participantCount={ participantGroups.length }
+          />
 
           <RaisedHandsPanel
             roomId={
@@ -792,7 +823,7 @@ const connectLiveKit =
             </div>
 
             {/* Chat */}
-            {isChatOpen && (
+            {/* {isChatOpen && (
               <div className="w-[360px] shrink-0 border-l border-slate-200/60 bg-white/40 backdrop-blur-md overflow-y-auto">
                 <ChatPanel
                   isChatOpen={
@@ -803,7 +834,7 @@ const connectLiveKit =
                   }
                 />
               </div>
-            )}
+            )} */}
           </div>
 
           <BottomControls

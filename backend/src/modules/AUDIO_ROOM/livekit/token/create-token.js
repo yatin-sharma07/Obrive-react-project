@@ -32,7 +32,9 @@ const createLiveKitToken =
       normalizedRole ===
         "MODERATOR" ||
       normalizedRole ===
-        "SPEAKER";
+        "SPEAKER" ||
+      normalizedRole ===
+        "ADMIN";
 
     const token =
       new AccessToken(

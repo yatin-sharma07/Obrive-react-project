@@ -61,20 +61,122 @@ const joinRoomService = async (payload) => {
     );
   }
 
+  const isRoomCreator =
+    Number(room.createdBy) ===
+    Number(user.id);
+
+  const isAdminUser =
+    user.role?.toLowerCase() ===
+    "admin";
+
+  const isSupervisorUser =
+    user.role?.toLowerCase() ===
+    "supervisor";
+
   console.log(
     "JOIN USER:",
     user.id,
     user.role
   );
 
+  if (isRoomCreator) {
+    await addParticipant(
+      "host"
+    );
+
+    const livekitToken =
+      await createLiveKitToken({
+        roomName:
+          room.id.toString(),
+
+        participantId:
+          user.id.toString(),
+
+        participantName:
+          user.name ||
+          user.username ||
+          `user-${user.id}`,
+
+        role:
+          "host",
+      });
+
+    return {
+      allowed: true,
+      roomRole:
+        "host",
+      room,
+      livekitToken,
+    };
+  }
+
+  if (isAdminUser) {
+    await addParticipant(
+      "moderator"
+    );
+
+    const livekitToken =
+      await createLiveKitToken({
+        roomName:
+          room.id.toString(),
+
+        participantId:
+          user.id.toString(),
+
+        participantName:
+          user.name ||
+          user.username ||
+          `user-${user.id}`,
+
+        role:
+          "moderator",
+      });
+
+    return {
+      allowed: true,
+      roomRole:
+        "moderator",
+      room,
+      livekitToken,
+    };
+  }
+
+  if (isSupervisorUser) {
+    await addParticipant(
+      "moderator"
+    );
+
+    const livekitToken =
+      await createLiveKitToken({
+        roomName:
+          room.id.toString(),
+
+        participantId:
+          user.id.toString(),
+
+        participantName:
+          user.name ||
+          user.username ||
+          `user-${user.id}`,
+
+        role:
+          "moderator",
+      });
+
+    return {
+      allowed: true,
+      roomRole:
+        "moderator",
+      room,
+      livekitToken,
+    };
+  }
+
 // ==================================
 // ADD PARTICIPANT
 // ==================================
 
-const addParticipant =
-  async (
-    roomRole
-  ) => {
+async function addParticipant(roomRole) {
     await prisma.$transaction(
       async (tx) => {
         const activeParticipants =
@@ -170,7 +272,7 @@ const addParticipant =
           roomDetails.participants,
       }
     );
-  };
+}
 
 
   // ==================================

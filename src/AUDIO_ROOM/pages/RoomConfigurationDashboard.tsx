@@ -27,13 +27,16 @@ const RoomConfigurationDashboard = () => {
   const { me, loading } = useCurrentUser();
   const [activeSection, setActiveSection] = useState<ActiveSection>("create-room");
 
-  const isSupervisor = me?.role === "supervisor";
+  const canAccessRoomConfiguration =
+    ["supervisor", "admin"].includes(
+      me?.role?.toLowerCase() || ""
+    );
 
   useEffect(() => {
-    if (!loading && !isSupervisor) {
+    if (!loading && !canAccessRoomConfiguration) {
       router.replace("/not-found");
     }
-  }, [isSupervisor, loading, router]);
+  }, [canAccessRoomConfiguration, loading, router]);
 
   const renderComponent = () => {
 
@@ -61,7 +64,7 @@ const RoomConfigurationDashboard = () => {
     }
   };
 
-  if (loading || !isSupervisor) {
+  if (loading || !canAccessRoomConfiguration) {
     return null;
   }
 

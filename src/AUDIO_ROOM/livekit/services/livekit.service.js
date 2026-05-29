@@ -5,6 +5,8 @@ import {
 class LiveKitService {
   constructor() {
     this.room = null;
+    this.isConnecting = false;
+    this.pendingDisconnect = false;
   }
 
   async connect({
@@ -12,6 +14,9 @@ class LiveKitService {
     roomId,
   }) {
     try {
+      this.isConnecting = true;
+      this.pendingDisconnect = false;
+
       const livekitUrl =
         process.env
           .NEXT_PUBLIC_LIVEKIT_URL;
@@ -51,6 +56,12 @@ class LiveKitService {
         roomId
       );
 
+      if (this.pendingDisconnect) {
+        this.room.disconnect();
+        this.room = null;
+        this.pendingDisconnect = false;
+      }
+
       return this.room;
     } catch (error) {
       console.error(
@@ -59,14 +70,29 @@ class LiveKitService {
       );
 
       throw error;
+    } finally {
+      this.isConnecting = false;
+
+      if (this.pendingDisconnect && this.room) {
+        this.room.disconnect();
+        this.room = null;
+        this.pendingDisconnect = false;
+      }
     }
   }
 
   disconnect() {
+    if (this.isConnecting) {
+      this.pendingDisconnect = true;
+      return;
+    }
+
     if (this.room) {
       this.room.disconnect();
       this.room = null;
     }
+
+    this.pendingDisconnect = false;
   }
 
   getRoom() {

@@ -12,6 +12,29 @@ const createRoomConfigService =
 
     return await prisma.$transaction(
       async (tx) => {
+        const creator =
+          await tx.users.findUnique({
+            where: {
+              id: Number(userId),
+            },
+            select: {
+              id: true,
+              role: true,
+            },
+          });
+
+        if (!creator) {
+          throw new Error(
+            "Creator not found"
+          );
+        }
+
+        const creatorRoomRole =
+          creator.role?.toLowerCase() ===
+          "supervisor"
+            ? "moderator"
+            : "host";
+
         // ==================================
         // CREATE ROOM CONFIG
         // ==================================
@@ -63,17 +86,27 @@ const createRoomConfigService =
             }
           );
 
+        await tx.room_participants.create(
+          {
+            data: {
+              roomId: createdRoom.id,
+              userId,
+              roomRole: creatorRoomRole,
+            },
+          }
+        );
+
         // ==================================
         // ROLE ASSIGNMENTS
         // ==================================
 
-        // Auto-add creator as host
+        // Auto-add creator with their creator role
         const allRoleAssignments = [
           {
             roomConfigId: createdRoom.id,
             assignmentType: "specific-user",
             crmRole: null,
-            assignedRoomRole: "host",
+            assignedRoomRole: creatorRoomRole,
             userId: userId,
           },
           ...(roleAssignments?.map(

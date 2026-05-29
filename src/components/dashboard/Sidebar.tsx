@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import supportImg from "@/assets/images/sidebar/support.png"
 import { MessageCircle, LogOut, X, Icon } from 'lucide-react'
-import { apiFetch } from '@/lib/api'
+import { apiFetch, clearAuthStorage } from '@/lib/api'
 import PrimaryLogo from '@/components/shared/logo/PrimaryLogo'
 
 type NavItem = {
@@ -35,6 +35,7 @@ export default function Sidebar({ navItems, activeSection, setActiveSection, set
     } catch (error) {
       console.error('Logout failed', error)
     } finally {
+      clearAuthStorage()
       router.push('/employee-login')
     }
   }

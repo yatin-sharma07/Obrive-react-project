@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 
 // ======================================================
@@ -53,6 +54,8 @@ interface Invite {
 // ======================================================
 
 const CreateRoom = () => {
+  const router = useRouter();
+
   // ======================================================
   // FORM STATE
   // ======================================================
@@ -603,6 +606,10 @@ const handleAddOtherId = (
         );
 
         setSuccess(true);
+
+        if (data?.data?.id) {
+          router.push(`/audio-room/room/${data.data.id}`);
+        }
 
         setTimeout(() => {
           setSuccess(false);

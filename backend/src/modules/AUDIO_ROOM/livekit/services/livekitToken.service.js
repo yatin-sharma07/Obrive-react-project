@@ -41,6 +41,30 @@ const assertRoomAccess = async (roomId, userId) => {
     throw error;
   }
 
+  if (Number(room.createdBy) === Number(userId)) {
+    return {
+      room,
+      user,
+      roomRole: "host",
+    };
+  }
+
+  if (user.role?.toLowerCase() === "admin") {
+    return {
+      room,
+      user,
+      roomRole: "moderator",
+    };
+  }
+
+  if (user.role?.toLowerCase() === "supervisor") {
+    return {
+      room,
+      user,
+      roomRole: "moderator",
+    };
+  }
+
   const participant = await prisma.room_participants.findFirst({
     where: {
       roomId: Number(roomId),

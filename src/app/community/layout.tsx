@@ -1,21 +1,25 @@
-import { Poppins } from "next/font/google";
-import type { ReactNode } from "react";
-import "../../COMMUNITY/css/community.css";
+import { ReactNode } from "react";
+import { Nunito } from "next/font/google";
 
-const communityFont = Poppins({
+const nunito = Nunito({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-community",
+  weight: ["400", "500", "700"],
+  display: "swap",
+  preload: true,
 });
+
+interface CommunityLayoutProps {
+  children: ReactNode;
+}
 
 export default function CommunityLayout({
   children,
-}: {
-  children: ReactNode;
-}) {
+}: CommunityLayoutProps) {
   return (
-    <div className={communityFont.className}>
+    <section
+      className={`${nunito.className} min-h-screen bg-[#effbf0] text-slate-950`}
+    >
       {children}
-    </div>
+    </section>
   );
 }

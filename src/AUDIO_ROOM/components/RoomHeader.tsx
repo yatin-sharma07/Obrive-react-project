@@ -7,7 +7,17 @@ import {
   ChevronDown,
 } from "lucide-react";
 
-const RoomHeader = () => {
+interface RoomHeaderProps {
+  title?: string;
+  description?: string;
+  participantCount?: number;
+}
+
+const RoomHeader = ({
+  title,
+  description,
+  participantCount = 0,
+}: RoomHeaderProps) => {
   return (
     <header
       className="
@@ -43,14 +53,14 @@ const RoomHeader = () => {
                 className="text-green-500"
               />
 
-              <span className="text-[8px] font-medium text-green-700">
+              <span className="text-[10px] font-medium text-green-700">
                 Live Room
               </span>
             </div>
 
             {/* Room Title */}
-            <h1 className="text-[10px] font-semibold text-slate-800 truncate">
-              Product Planning Meeting
+            <h1 className="text-[12px] font-semibold text-slate-800 truncate">
+              {title || "Live Room"}
             </h1>
 
             {/* Dropdown */}
@@ -59,9 +69,8 @@ const RoomHeader = () => {
             </button> */}
           </div>
 
-          <p className="text-[8px] text-slate-500 mt-1">
-            Discussing product roadmap and
-            upcoming feature planning.
+          <p className="text-[10px] text-slate-500 mt-1">
+            {description || "Room details will appear here."}
           </p>
         </div>
 
@@ -86,7 +95,7 @@ const RoomHeader = () => {
 
           <div>
             <p className="text-[10px] font-medium text-slate-800">
-              23 Participants
+              {participantCount} Participants
             </p>
 
             <p className="text-[8px] text-slate-500">

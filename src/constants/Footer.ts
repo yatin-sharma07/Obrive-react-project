@@ -25,7 +25,7 @@ export const GROUPS = [
       { label: "AR Development", href: "/solutions/augmented-reality-development" },
       { label: "VR Development", href: "/solutions/virtual-reality-development" },
       { label: "3D Modelling", href: "/solutions/3d-design-development" },
-      { label: "Spatial Computing", href: "/solutions/spatial-computing-app-development" },
+      { label: "Spatial Computing", href: "/solutions/spatial-computing-app-development" }, 
     ],
   },
   {
@@ -33,7 +33,7 @@ export const GROUPS = [
     items: [
       { label: "Obrive Resources", href: "/resources" },
       { label: "Obrive Help Desk", href: "/support/help-center" },
-      { label: "Community Forum", href: "/coming-soon/community-form" },
+      { label: "Community Forum", href: "/community" },
       { label: "Obrive Legal", href: "/legal" },
     ],
   },
