@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/lib/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 
+import Image from "next/image";
+
 const CommunityPage = () => {
   const router = useRouter();
   const [scrollY, setScrollY] = useState(0);
@@ -16,6 +18,25 @@ const CommunityPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const { me, loading: userLoading, refetch } = useCurrentUser();
+
+// avatars
+
+const [avatarData] = useState(() =>
+  Array.from({ length: 30 }, (_, index) => ({
+    id      : index,
+    image   : `https://randomuser.me/api/portraits/${ index % 2 === 0 ? "men" : "women" }/${(index % 50) + 1}.jpg`,
+    x       : Math.random() * 100,
+    y       : Math.random() * 100,
+    size    : 40 + Math.random() * 80,
+    blur    : Math.random() * 4,
+    opacity : 0.3 + Math.random() * 0.7,
+    z       : Math.floor(Math.random() * 20),
+    rotation: -25 + Math.random() * 50,
+    // Adding random duration and delay for each avatar to create a more dynamic animation effect
+    duration: 15 + Math.random() * 20,
+    delay: Math.random() * 10,
+  }))
+);
 
 // Handle login form if not logged in and trying to access rooms page -----------------------------------
 
@@ -88,6 +109,37 @@ const CommunityPage = () => {
 
   return (
     <div className="font-sans text-gray-950 min-h-screen relative w-full">
+
+
+                      <div className="fixed inset-0 z-10 pointer-events-none">
+                          {avatarData.map((avatar, index) => (
+                            <Image
+                              key={index}
+                              src={avatar.image}
+                              alt=""
+                              width={50}
+                              height={50}
+                              className="absolute rounded-full object-cover border-2 border-amber-100 shadow-xl"
+                              style={{
+                                    left: `${avatar.x}vw`,
+                                    top: `${avatar.y}vh`,
+                                    width: `${avatar.size}px`,
+                                    height: `${avatar.size}px`,
+                                    filter: `blur(${avatar.blur}px)`,
+                                    opacity: avatar.opacity,
+                                    zIndex: avatar.z,
+                                    // transform: `rotate(${avatar.rotation}deg)`,
+                                    // animationDuration: `${avatar.duration}s`,
+                                    // animationDelay: `${avatar.delay}s`,
+                                    // animationName: `float${index}`,
+                                    // animationTimingFunction: "ease-in-out",
+                                    // animationIterationCount: "infinite",
+                                    animation: ` floatAvatar ${avatar.duration}s ease-in-out ${avatar.delay}s infinite`,
+                              }}
+
+                            />
+                          ))}
+                        </div>
 
       <header className="fixed top-0 left-0 w-full z-50 px-15 py-8 flex justify-between items-center bg-transparent pointer-events-auto">
         <div className="font-black tracking-tight text-xl">obrive.</div>

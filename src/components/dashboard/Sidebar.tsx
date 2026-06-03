@@ -16,6 +16,7 @@ type NavItem = {
 export default function Sidebar({ navItems, activeSection, setActiveSection, setSupportOpen,
   mobileOpen = false,
   onMobileClose,
+  currentRole,
 }: {
   navItems: NavItem[]
   activeSection: string
@@ -23,9 +24,12 @@ export default function Sidebar({ navItems, activeSection, setActiveSection, set
   setSupportOpen:(key:boolean)=>void
   mobileOpen?: boolean
   onMobileClose?: () => void
+  currentRole?: string
 }) {
   const router = useRouter()
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const normalizedRole = String(currentRole || '').toLowerCase()
+  const canSeeConferences = normalizedRole === 'supervisor' || normalizedRole === 'admin'
 
   const handleLogout = async () => {
     try {
@@ -190,7 +194,7 @@ export default function Sidebar({ navItems, activeSection, setActiveSection, set
           })}
         </nav>
 
-        {!isCollapsed && (
+        {!isCollapsed && canSeeConferences && (
           <div className="px-4 pb-4">
             <button
               type="button"

@@ -10,6 +10,7 @@ router.get('/clients/list', authenticate, ctrl.getAllClients);
 // Generic routes after
 router.get('/', authenticate, ctrl.getProjects);
 router.post('/', authenticate, ctrl.createProject);
+router.delete('/:id', authenticate, ctrl.deleteProject);
 
 router.get('/:id', authenticate, ctrl.getProjectById);
 router.get('/:id/status', authenticate, ctrl.getProjectStatus);

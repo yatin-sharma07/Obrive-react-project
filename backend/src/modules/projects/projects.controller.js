@@ -64,6 +64,20 @@ exports.createProject = async (req, res) => {
   }
 };
 
+exports.deleteProject = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    await projectService.deleteProject(id, userId);
+
+    successResponse(res, null, 'Project deleted successfully');
+  } catch (err) {
+    const statusCode = err.message.includes('permission') ? 403 : 404;
+    errorResponse(res, err.message, statusCode);
+  }
+};
+
 exports.updateProjectProgress = async (req, res) => {
   try {
     const { id } = req.params;

@@ -315,6 +315,48 @@ class ProjectService {
     });
   }
 
+  async deleteProject(projectId, userId) {
+    const targetProject = await prisma.projects.findUnique({
+      where: { id: parseInt(projectId) },
+    });
+
+    if (!targetProject) {
+      throw new Error('Project not found');
+    }
+
+    const requestingUser = await prisma.users.findUnique({
+      where: { id: parseInt(userId) },
+    });
+
+    if (!requestingUser) {
+      throw new Error('User not found');
+    }
+
+    if (
+      requestingUser.role !== 'supervisor' &&
+      requestingUser.role !== 'hr' &&
+      requestingUser.role !== 'admin'
+    ) {
+      throw new Error('Only supervisors, HR, or admins can delete projects');
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.tasks.deleteMany({
+        where: { project_id: parseInt(projectId) },
+      });
+
+      await tx.project_assignments.deleteMany({
+        where: { project_id: parseInt(projectId) },
+      });
+
+      await tx.projects.delete({
+        where: { id: parseInt(projectId) },
+      });
+    });
+
+    return { message: 'Project deleted successfully' };
+  }
+
   async updateProjectProgress(projectId, progress, userId) {
     const project = await prisma.projects.findUnique({
       where: { id: parseInt(projectId) },

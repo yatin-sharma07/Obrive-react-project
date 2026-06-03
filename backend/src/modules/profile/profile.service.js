@@ -23,7 +23,7 @@ class ProfileService {
 
     if (!existing) {
       const err = new Error('Profile not found');
-      err.status = 404;
+      err.status = 404; 
       throw err;
     }
 

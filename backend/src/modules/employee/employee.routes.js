@@ -1,57 +1,50 @@
-const router       = require('express').Router();
-const ctrl         = require('./employee.controller');
+const router = require('express').Router();
+const ctrl = require('./employee.controller');
 const authenticate = require('../../middleware/auth');
-const { authorize }= require('../../middleware/rbac');
-const validate     = require('../../middleware/validate');
-const { body, query } = require('express-validator');
+const { authorize } = require('../../middleware/rbac');
+const zodValidate = require('../../middleware/zodValidate');
+const { updateProfileSchema, availabilitySchema, slotIdParamSchema, employeeIdParamSchema } = require('./employee.validation');
 
-
-router.post('/login', ctrl.login);  
+router.post('/login', ctrl.login);
 
 router.use(authenticate);
 
-// ── Profile 
-router.get('/me',    authorize('employee'), ctrl.getMyProfile);
-router.put('/me',    authorize('EMPLOYEE'), ctrl.updateMyProfile);
-
-// ── Availability Calendar 
-router.get('/availability',
-  authorize('EMPLOYEE', 'HR', 'ADMIN'),
-  ctrl.getMyAvailability
+// Profile
+router.get('/me', authorize('employee'), ctrl.getMyProfile);
+router.put('/me', authorize('employee'), zodValidate({ part: 'body', schema: updateProfileSchema }), ctrl.updateMyProfile
 );
 
-router.post('/availability',
-  authorize('EMPLOYEE'),
-  [
-    body('date').isDate().withMessage('Valid date required (YYYY-MM-DD)'),
-    body('startTime').matches(/^\d{2}:\d{2}$/).withMessage('startTime must be HH:MM'),
-    body('endTime').matches(/^\d{2}:\d{2}$/).withMessage('endTime must be HH:MM'),
-    body('slotType').isIn(['FREE', 'BUSY']).withMessage('slotType must be FREE or BUSY'),
-  ],
-  validate,
-  ctrl.addAvailabilitySlot
+// Availability
+router.get('/availability', authorize('employee', 'hr', 'admin'), ctrl.getMyAvailability);
+router.post('/availability',  authorize('employee'), zodValidate({ part: 'body', schema: availabilitySchema }), ctrl.addAvailabilitySlot
 );
+
+ 
 
 router.put('/availability/:slotId',
-  authorize('EMPLOYEE'),
+  authorize('employee'),
+  zodValidate({ part: 'params', schema: slotIdParamSchema }),
+  zodValidate({ part: 'body', schema: availabilitySchema }),
   ctrl.updateAvailabilitySlot
 );
 
 router.delete('/availability/:slotId',
-  authorize('EMPLOYEE'),
+  authorize('employee'),
+  zodValidate({ part: 'params', schema: slotIdParamSchema }),
   ctrl.deleteAvailabilitySlot
 );
 
 // ── HR/Admin: view a specific employee's availability ────────
 router.get('/:employeeId/availability',
-  authorize('HR', 'ADMIN'),
+  authorize('hr', 'admin'),
+  zodValidate({ part: 'params', schema: employeeIdParamSchema }),
   ctrl.getEmployeeAvailability
 );
 
 // ── My projects ──────────────────────────────────────────────
-router.get('/my-projects', authorize('EMPLOYEE'), ctrl.getMyProjects);
+router.get('/my-projects', authorize('employee'), ctrl.getMyProjects);
 
 // ── Login logs (own) ─────────────────────────────────────────
-router.get('/my-logs', authorize('EMPLOYEE'), ctrl.getMyLogs);
+router.get('/my-logs', authorize('employee'), ctrl.getMyLogs);
 
 module.exports = router;

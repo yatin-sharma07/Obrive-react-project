@@ -62,6 +62,7 @@ export default function ClientDashboard() {
             activeSection={activeSection}
             setActiveSection={setActiveSection}
             setSupportOpen={setSupportOpen}
+            currentRole="client"
             mobileOpen={isMobileSidebarOpen}
             onMobileClose={() => setIsMobileSidebarOpen(false)}
           />

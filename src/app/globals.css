@@ -281,3 +281,38 @@ body {
 .bg-gradient\/60 {
   background: linear-gradient(90deg, rgba(89, 208, 181, 0.6), rgba(202, 237, 229, 0.6), rgba(202, 237, 229, 0.6)) !important;
 }
+
+
+
+
+@keyframes floatAvatar {
+  0% {
+    transform:
+      translate(0px, 0px)
+      rotate(0deg);
+  }
+
+  25% {
+    transform:
+      translate(30px, 40px)
+      rotate(5deg);
+  }
+
+  50% {
+    transform:
+      translate(-20px, 80px)
+      rotate(-5deg);
+  }
+
+  75% {
+    transform:
+      translate(40px, 120px)
+      rotate(3deg);
+  }
+
+  100% {
+    transform:
+      translate(0px, 160px)
+      rotate(0deg);
+  }
+}

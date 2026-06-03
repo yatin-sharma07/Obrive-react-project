@@ -75,6 +75,7 @@ export default function EmployeeDashboard() {
             activeSection={activeSection}
             setActiveSection={setActiveSection}
             setSupportOpen={setSupportOpen}
+            currentRole="employee"
             mobileOpen={isMobileSidebarOpen}
             onMobileClose={() => setIsMobileSidebarOpen(false)}
           />

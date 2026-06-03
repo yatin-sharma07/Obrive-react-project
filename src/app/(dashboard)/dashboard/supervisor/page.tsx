@@ -42,6 +42,7 @@ export default function SupervisorDashboard() {
           activeSection={activeSection}
           setActiveSection={setActiveSection}
           setSupportOpen={setSupportOpen}
+          currentRole="supervisor"
           mobileOpen={isMobileSidebarOpen}
           onMobileClose={() => setIsMobileSidebarOpen(false)}
         />

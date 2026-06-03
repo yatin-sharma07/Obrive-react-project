@@ -166,7 +166,7 @@ export default function ProfilePage() {
     <div className="min-h-screen w-screen bg-gradient-to-br from-slate-50 to-slate-100 overflow-auto">
       <div className="mx-auto max-w-5xl p-8">
         <div className="mb-12">
-          <h1 className="text-3xl font-bold text-slate-900">Complete Your Profile</h1>
+          <h1 className="text-3xl font-bold text-slate-900">Profile</h1>
           <p className="text-slate-600 mt-2">Please fill in all required fields to continue</p>
         </div>
 

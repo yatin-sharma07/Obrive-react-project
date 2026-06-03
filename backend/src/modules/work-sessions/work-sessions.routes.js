@@ -1,6 +1,8 @@
 const router = require('express').Router();
 const authenticate = require('../../middleware/auth');
+const zodValidate = require('../../middleware/zodValidate');
 const ctrl = require('./work-sessions.controller');
+const { sessionIdSchema } = require('./work-sessions.validation');
 
 
 // =====================================================
@@ -21,6 +23,7 @@ router.post(
 router.post(
   '/heartbeat',
   authenticate,
+  zodValidate({ part: 'body', schema: sessionIdSchema }),
   ctrl.heartbeat
 );
 
@@ -43,6 +46,7 @@ router.get(
 router.post(
   '/stop',
   authenticate,
+  zodValidate({ part: 'body', schema: sessionIdSchema }),
   ctrl.endSession
 );
 

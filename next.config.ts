@@ -48,6 +48,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'api.dicebear.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'randomuser.me', // <-- added randomuser.me to allowed domains for avatars , it is written in this format because of next/image remotePatterns requirement
+      },
     ],
   },
 
@@ -194,4 +198,8 @@ const nextConfig: NextConfig = {
   },
 };
 
+
+
+
 export default withMDX(nextConfig);
+

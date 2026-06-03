@@ -8,7 +8,7 @@ class VacationsService {
         id: true,
         name: true,
         email: true,
-        userid: true,
+        userid: true, 
         leaves: {
           select: {
             id: true,
@@ -19,7 +19,7 @@ class VacationsService {
             status: true,
             reason: true,
             users: {
-              select: {
+              select: {  
                 id: true,
                 name: true,
                 email: true,
