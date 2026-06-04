@@ -15,6 +15,12 @@ router.post(
   ctrl.startSession
 );
 
+router.post(
+  '/start-session',
+  authenticate,
+  ctrl.startSession
+);
+
 
 // =====================================================
 // HEARTBEAT
@@ -45,6 +51,13 @@ router.get(
 
 router.post(
   '/stop',
+  authenticate,
+  zodValidate({ part: 'body', schema: sessionIdSchema }),
+  ctrl.endSession
+);
+
+router.post(
+  '/end-session',
   authenticate,
   zodValidate({ part: 'body', schema: sessionIdSchema }),
   ctrl.endSession

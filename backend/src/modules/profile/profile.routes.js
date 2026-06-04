@@ -7,6 +7,11 @@ const { ProfileIdSchema, UpdateProfileSchema } = require('./profile.validation')
 router.use(authenticate); 
 
 router.get('/:id', zodValidate({ part: 'params', schema: ProfileIdSchema }), controller.getProfileById);
-router.put('/:id', zodValidate({ part: 'body', schema: UpdateProfileSchema }), controller.updateProfileById);
+router.put(
+  '/:id',
+  zodValidate({ part: 'params', schema: ProfileIdSchema }),
+  zodValidate({ part: 'body', schema: UpdateProfileSchema }),
+  controller.updateProfileById
+);
 
 module.exports = router;

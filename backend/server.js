@@ -1,9 +1,7 @@
 require('dotenv').config();
 
 // Fix for BigInt serialization
-BigInt.prototype.toJSON = function() {
-  return this.toString();
-};
+BigInt.prototype.toJSON = function() { return this.toString();};
 
 const express    = require('express');
 const cors       = require('cors');
@@ -13,6 +11,7 @@ const { prisma, connectWithRetry } = require('./prisma');
 const bcrypt     = require('bcrypt');
 const jwt        = require('jsonwebtoken');
 const startWorkSessionCron = require('./src/jobs/workSessionCron');
+const startAudioRoomCron = require('./src/jobs/audioRoomCron');
 const http = require('http');
 const { initializeSocket } = require('./src/socket');
 
@@ -24,79 +23,14 @@ const cookieParser = require('cookie-parser');
 // ── Middleware ───────────────────────────────────────────────
 app.use(helmet());
 app.use(cors({
-  origin: [ process.env.CLIENT_URL || 'http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002',],
+  origin: [ process.env.CLIENT_URL || 'http://localhost:3000'],
   credentials: true,
-}));
+})); // Allow cookies to be sent from frontend domains, multiple origins for testing with different frontends
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan('dev'));
-
-// ============================================
-// ✅ PUBLIC TEST ENDPOINT (NO AUTH REQUIRED)
-// ============================================
-// app.post('/api/employee/login-direct', async (req, res) => {
-//   try {
-//     const { email, password } = req.body;
-    
-//     console.log(`🔐 Login attempt: ${email}`);
-    
-//     // Find employee - NO STATUS CHECK
-//     const result = await prisma.$queryRaw`
-//       SELECT id, email, name, role, status, password 
-//       FROM users 
-//       WHERE email = ${email} AND role = 'employee'
-//       LIMIT 1
-//     `;
-    
-//     const employee = result[0];
-    
-//     if (!employee) {
-//       console.log(`❌ Employee not found: ${email}`);
-//       return res.status(401).json({ success: false, message: 'Employee not found' });
-//     }
-    
-//     console.log(`✅ Found employee: ${employee.email}, Status: ${employee.status}`);
-    
-//     // Compare password
-//     const isValid = await bcrypt.compare(password, employee.password);
-    
-//     if (!isValid) {
-//       console.log(`❌ Invalid password for: ${email}`);
-//       return res.status(401).json({ success: false, message: 'Invalid password' });
-//     }
-    
-//     // Generate token
-//     const token = jwt.sign(
-//       { id: employee.id, email: employee.email, name: employee.name, role: employee.role },
-//       process.env.JWT_SECRET,
-//       { expiresIn: '24h' }
-//     );
-    
-//     console.log(`✅ Login successful: ${email}`);
-    
-//     res.json({
-//       success: true,
-//       message: 'Login successful',
-//       data: {
-//         token,
-//         user: {
-//           id: employee.id,
-//           email: employee.email,
-//           name: employee.name,
-//           role: employee.role
-//         }
-//       }
-//     });
-//   } catch (error) {
-//     console.error('❌ Login error:', error);
-//     res.status(500).json({ success: false, message: error.message });
-//   }
-// });
-
-
-
-
+ 
 
 // ============================================
 // ✅ PUBLIC HEALTH CHECK
@@ -165,6 +99,7 @@ async function bootstrap() {
     console.log( '✅ Database connected' );
     // Start cron jobs
     startWorkSessionCron();
+    startAudioRoomCron();
     // Initialize Socket.io
     initializeSocket(server);
     // Start server

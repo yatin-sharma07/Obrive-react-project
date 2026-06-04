@@ -201,7 +201,7 @@ export default function Sidebar({ navItems, activeSection, setActiveSection, set
               onClick={sendTo}
               className="w-full flex items-center gap-3 px-4 py-3  my-2 rounded-none text-[#073933] font-bold transition-all duration-200 hover:bg-[#0a4a42] hover:text-white hover:border-[#38b4a6] border-b-3 border-[#073933] cursor-pointer"
             >
-              <span className="text-sm">Obrive Conferences</span>
+              <span className="text-sm">Community Rooms</span>
             </button>
           </div>
         )}

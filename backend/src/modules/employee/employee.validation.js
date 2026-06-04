@@ -1,8 +1,17 @@
 const { z } = require('zod');
 
+const loginSchema = z.object({
+  email: z.string().email('Valid email required'),
+  password: z.string().min(1, 'Password required'),
+});
+
 const updateProfileSchema = z.object({
   fullName: z.string().min(1),
   phone: z.string().optional(),
+});
+
+const availabilityQuerySchema = z.object({
+  date: z.string().optional(),
 });
 
 const availabilitySchema = z.object({
@@ -13,11 +22,18 @@ const availabilitySchema = z.object({
 });
 
 const slotIdParamSchema = z.object({
-  slotId: z.string().min(1),
+  slotId: z.coerce.number().int().positive(),
 });
 
 const employeeIdParamSchema = z.object({
-  employeeId: z.string().min(1),
+  employeeId: z.coerce.number().int().positive(),
 });
 
-module.exports = { updateProfileSchema, availabilitySchema, slotIdParamSchema, employeeIdParamSchema };
+module.exports = {
+  availabilityQuerySchema,
+  availabilitySchema,
+  employeeIdParamSchema,
+  loginSchema,
+  slotIdParamSchema,
+  updateProfileSchema,
+};

@@ -2,19 +2,20 @@ const router       = require('express').Router();
 const ctrl         = require('./admin.controller');
 const authenticate = require('../../middleware/auth');
 const { authorize }= require('../../middleware/rbac');
-const validate     = require('../../middleware/validate');
-const { body }     = require('express-validator');
+const zodValidate  = require('../../middleware/zodValidate');
+const {
+  CreateClientBodySchema,
+  CreateEmployeeBodySchema,
+  CreateHrBodySchema,
+  LogsQuerySchema,
+  UserIdParamSchema,
+} = require('./admin.validation');
 
 // ── Create Employee (ADMIN + HR) ─────────────────────────────
 router.post('/users/employee',
   authenticate,
   authorize('ADMIN', 'HR'),
-  [
-    body('email').isEmail().withMessage('Valid email required'),
-    body('password').isLength({ min: 6 }).withMessage('Min 6 characters'),
-    body('fullName').notEmpty().withMessage('Full name required'),
-  ],
-  validate,
+  zodValidate({ part: 'body', schema: CreateEmployeeBodySchema }),
   ctrl.createEmployee
 );
 
@@ -22,12 +23,7 @@ router.post('/users/employee',
 router.post('/users/hr',
   authenticate,
   authorize('ADMIN'),
-  [
-    body('email').isEmail().withMessage('Valid email required'),
-    body('password').isLength({ min: 6 }).withMessage('Min 6 characters'),
-    body('fullName').notEmpty().withMessage('Full name required'),
-  ],
-  validate,
+  zodValidate({ part: 'body', schema: CreateHrBodySchema }),
   ctrl.createHr
 );
 
@@ -35,13 +31,7 @@ router.post('/users/hr',
 router.post('/users/client',
   authenticate,
   authorize('ADMIN', 'HR'),
-  [
-    body('email').isEmail().withMessage('Valid email required'),
-    body('password').isLength({ min: 6 }).withMessage('Min 6 characters'),
-    body('companyName').notEmpty().withMessage('Company name required'),
-    body('contactName').notEmpty().withMessage('Contact name required'),
-  ],
-  validate,
+  zodValidate({ part: 'body', schema: CreateClientBodySchema }),
   ctrl.createClient
 );
 
@@ -49,6 +39,7 @@ router.post('/users/client',
 router.put('/users/:id/toggle-active',
   authenticate,
   authorize('ADMIN', 'HR'),
+  zodValidate({ part: 'params', schema: UserIdParamSchema }),
   ctrl.toggleUserActive
 );
 
@@ -56,6 +47,7 @@ router.put('/users/:id/toggle-active',
 router.delete('/users/:id',
   authenticate,
   authorize('ADMIN'),
+  zodValidate({ part: 'params', schema: UserIdParamSchema }),
   ctrl.deleteUser
 );
 
@@ -70,6 +62,7 @@ router.get('/users',
 router.get('/logs',
   authenticate,
   authorize('ADMIN'),
+  zodValidate({ part: 'query', schema: LogsQuerySchema }),
   ctrl.getAllLogs
 );
 

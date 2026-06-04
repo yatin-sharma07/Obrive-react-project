@@ -1,47 +1,34 @@
 const router = require('express').Router();
-const { body, query } = require('express-validator');
 const authenticate = require('../../middleware/auth');
 const { authorize } = require('../../middleware/rbac');
-const validate = require('../../middleware/validate');
+const zodValidate = require('../../middleware/zodValidate');
 const ctrl = require('./leaves.controller');
+const {
+  ApplyLeaveBodySchema,
+  LeaveDashboardQuerySchema,
+  LeaveIdParamSchema,
+} = require('./leaves.validation');
 
 router.use(authenticate);
 
 router.get(
   '/dashboard',
   authorize('employee', 'supervisor', 'hr'),
-  [
-    query('date')
-      .optional()
-      .isISO8601()
-      .withMessage('date must be a valid date in YYYY-MM-DD format'),
-  ],
-  validate,
+  zodValidate({ part: 'query', schema: LeaveDashboardQuerySchema }),
   ctrl.getDashboard
 );
 
 router.post(
   '/apply',
   authorize('employee'),
-  [
-    body('leaveType')
-      .isIn(['vacation', 'sick'])
-      .withMessage('leaveType must be either vacation or sick'),
-    body('leaveDate')
-      .isISO8601()
-      .withMessage('leaveDate must be a valid date in YYYY-MM-DD format'),
-    body('reason')
-      .optional()
-      .isString()
-      .withMessage('reason must be a string'),
-  ],
-  validate,
+  zodValidate({ part: 'body', schema: ApplyLeaveBodySchema }),
   ctrl.applyLeave
 );
 
 router.delete(
   '/:id',
   authorize('employee', 'supervisor', 'hr'),
+  zodValidate({ part: 'params', schema: LeaveIdParamSchema }),
   ctrl.deleteLeave
 );
 

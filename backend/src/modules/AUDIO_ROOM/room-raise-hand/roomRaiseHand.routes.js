@@ -10,10 +10,13 @@ const {
   "./roomRaiseHand.controller"
 );
 const auth = require("../../../middleware/auth");
+const zodValidate = require("../../../middleware/zodValidate");
+const { RoomRaiseHandBodySchema } = require("./roomRaiseHand.validation");
 
 router.post(
   "/raise-hand",
   auth,
+  zodValidate({ part: "body", schema: RoomRaiseHandBodySchema }),
   raiseHandController
 );
 

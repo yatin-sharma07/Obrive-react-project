@@ -52,15 +52,10 @@ export default function CommunityRooms() {
       return true;
     }
 
-    // If no join permissions defined, allow by default
     const perms = room?.joinPermissions || [];
-
-    // allow if allowGuestUsers is true
     if (room?.allowGuestUsers) return true;
-
     if (!perms || perms.length === 0) return true;
 
-    // check for explicit allow for user's crmRole
     return perms.some((p: any) => {
       const crm = p?.crmRole;
       if (!crm) return false;
@@ -72,7 +67,6 @@ export default function CommunityRooms() {
 
   const filteredRooms = rooms.filter((room) => {
     const term = searchTerm.trim().toLowerCase();
-
     if (!term) return true;
 
     const roomName = String(room.roomName || room.name || "").toLowerCase();
@@ -110,14 +104,14 @@ export default function CommunityRooms() {
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl">
               <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-[#076d47] shadow-sm backdrop-blur">
-                Live audio lobby
+                Live Conversations
               </div>
               <h1 className="text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
                 Step into the room.
                 <span className="block text-[#076d47]">Join conversations live.</span>
               </h1>
               <p className="mt-4 max-w-xl text-sm leading-6 text-slate-600 sm:text-base">
-                Discover active rooms available to your role, then jump in with one tap. The lobby updates in real time and only surfaces rooms you can access.
+                Discover rooms for your interests. Join the people of obrive and other community members. The rooms update regularly based on new happenings, events, and trending topics of the time.
               </p>
             </div>
 
@@ -128,7 +122,7 @@ export default function CommunityRooms() {
               </div>
               <div className="min-w-30 rounded-3xl border border-black/10 bg-white/75 px-4 py-4 shadow-sm backdrop-blur">
                 <div className="text-2xl font-black">{allowedCount}</div>
-                <div className="mt-1 text-xs uppercase tracking-[0.18em] text-slate-500">For your role</div>
+                <div className="mt-1 text-xs uppercase tracking-[0.18em] text-slate-500">Available for you</div>
               </div>
             </div>
           </div>
@@ -158,6 +152,7 @@ export default function CommunityRooms() {
         </div>
       </div>
 
+      {/* Main Container Area */}
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-8 lg:px-12 lg:py-10">
         {filteredRooms.length === 0 ? (
           <div className="rounded-4xl border border-dashed border-black/10 bg-white/70 px-6 py-16 text-center shadow-[0_30px_80px_rgba(0,0,0,0.05)] backdrop-blur">
@@ -174,7 +169,8 @@ export default function CommunityRooms() {
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          /* RESPONSIVE CARD ENGINE: 1 column on mobile, 2 columns on medium/desktop viewports */
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {filteredRooms.map((room) => {
               const allowed = canUserJoin(room);
               const label = room.roomName || room.name || `Room ${room.id}`;
@@ -186,73 +182,72 @@ export default function CommunityRooms() {
                 .join("");
 
               return (
-                <div
-                  key={room.id}
-                  className="group rounded-[28px] border border-black/10 bg-white/85 p-4 shadow-[0_18px_50px_rgba(0,0,0,0.06)] backdrop-blur transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(0,0,0,0.1)] sm:p-5"
+                <div 
+                  key={room.id} 
+                  className="group flex flex-col justify-between rounded-xl border border-black/[0.08] bg-white/90 p-5 shadow-sm backdrop-blur transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-black/[0.15]"
                 >
-                  <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                    <div className="flex items-start gap-4">
-                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#076d47] text-lg font-black text-white shadow-lg shadow-[#076d47]/20">
+                  <div>
+                    {/* Upper Metadata Row */}
+                    <div className="flex items-start gap-3.5">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#076d47] text-sm font-bold text-white shadow-sm">
                         {initials || "R"}
                       </div>
 
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <div className="text-lg font-black tracking-tight text-slate-950 sm:text-xl">
-                            {label}
-                          </div>
-                          <span className="rounded-full bg-[#076d47]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[#076d47]">
-                            Live
-                          </span>
-                        </div>
-
-                        {room.roomDescription && (
-                          <div className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-base font-bold tracking-tight text-slate-900 group-hover:text-[#076d47] transition-colors line-clamp-1">
+                          {label}
+                        </h3>
+                        
+                        {room.roomDescription ? (
+                          <p className="mt-1.5 text-xs leading-relaxed text-slate-500 line-clamp-2">
                             {room.roomDescription}
-                          </div>
+                          </p>
+                        ) : (
+                          <p className="mt-1.5 text-xs italic text-slate-400">
+                            No layout logging details provided for this active broadcast space.
+                          </p>
                         )}
-
-                        <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                          <span className="rounded-full border border-black/10 bg-slate-50 px-3 py-1">
-                            Room #{room.id}
-                          </span>
-                          {room.roomType && (
-                            <span className="rounded-full border border-black/10 bg-slate-50 px-3 py-1">
-                              {room.roomType}
-                            </span>
-                          )}
-                          <span className="rounded-full border border-black/10 bg-slate-50 px-3 py-1">
-                            Status: {String(room.roomStatus).toLowerCase()}
-                          </span>
-                        </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 md:flex-col md:items-end md:text-right">
-                      <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                        {allowed ? "Open to you" : "Restricted"}
-                      </div>
-
-                      {allowed ? (
-                        <Link href={`/audio-room/room/${room.id}`}>
-                          <Button
-                            size="lg"
-                            className="rounded-full bg-[#076d47] px-6 text-white shadow-lg shadow-[#076d47]/20 transition hover:bg-[#055c3c]"
-                          >
-                            Join room
-                          </Button>
-                        </Link>
-                      ) : (
-                        <Button
-                          size="lg"
-                          variant="outline"
-                          disabled
-                          className="rounded-full border-black/10 bg-white/70 px-6 text-slate-400"
-                        >
-                          Not allowed
-                        </Button>
+                    {/* Badge System Logs */}
+                    <div className="mt-4 flex flex-wrap gap-1.5 items-center">
+                      <span className="rounded-md border border-black/[0.06] bg-slate-50/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                        Room #{room.id}
+                      </span>
+                      {room.roomType && (
+                        <span className="rounded-md border border-black/[0.06] bg-slate-50/60 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                          {room.roomType}
+                        </span>
                       )}
                     </div>
+                  </div>
+
+                  {/* Operational Action Footer Layer */}
+                  <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between gap-4">
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                      Access: <span className={allowed ? "text-[#076d47]" : "text-slate-500"}>{allowed ? "Open" : "Restricted"}</span>
+                    </div>
+
+                    {allowed ? (
+                      <Link href={`/audio-room/room/${room.id}`} className="shrink-0">
+                        <Button
+                          size="sm"
+                          className="rounded-lg bg-[#076d47] px-4 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#055c3c] active:scale-98"
+                        >
+                          Join Room
+                        </Button>
+                      </Link>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled
+                        className="rounded-lg border-slate-200 bg-slate-50 px-4 text-xs font-semibold text-slate-400 cursor-not-allowed"
+                      >
+                        Unavailable
+                      </Button>
+                    )}
                   </div>
                 </div>
               );

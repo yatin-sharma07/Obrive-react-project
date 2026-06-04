@@ -36,6 +36,9 @@ router.get(
 	ctrl.getTasksByProject
 );
 
+// Get all tasks assigned to or created by current user
+router.get('/my-tasks', authenticate, ctrl.getMyTasks);
+
 // Get task by ID
 router.get(
 	'/:taskId',
@@ -51,9 +54,6 @@ router.delete(
 	zodValidate({ part: 'params', schema: TaskIdParamSchema }),
 	ctrl.deleteTask
 );
-
-// Get all tasks assigned to or created by current user
-router.get('/my-tasks', authenticate, ctrl.getMyTasks);
 
 // Get project team members (for task assignment)
 router.get(

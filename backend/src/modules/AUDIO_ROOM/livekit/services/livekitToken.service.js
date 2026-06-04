@@ -18,6 +18,17 @@ const assertRoomAccess = async (roomId, userId) => {
     throw error;
   }
 
+  const now = new Date();
+  const startTime = room.startTime ? new Date(room.startTime) : null;
+  const isFutureScheduledRoom =
+    room.roomStatus === "scheduled" && (!startTime || startTime > now);
+
+  if (room.roomStatus !== "live" && isFutureScheduledRoom) {
+    const error = new Error("Room is not available yet");
+    error.status = 403;
+    throw error;
+  }
+
   if (room.roomStatus !== "live" && room.roomStatus !== "scheduled") {
     const error = new Error("Room is not available");
     error.status = 403;

@@ -23,7 +23,12 @@ module.exports = (config, legacyPart = 'body') => (req, res, next) => {
 
     const result = schema.safeParse(input);
     if (!result.success) {
-      return res.status(422).json({ success: false, errors: result.error.errors });
+      const errors = result.error.issues || result.error.errors;
+      return res.status(422).json({
+        success: false,
+        message: errors?.[0]?.message || 'Validation failed',
+        errors,
+      });
     }
 
     if (part === 'all') {

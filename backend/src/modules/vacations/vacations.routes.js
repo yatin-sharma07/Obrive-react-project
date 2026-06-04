@@ -3,7 +3,7 @@ const router = express.Router();
 const vacationsController = require('./vacations.controller');
 const authMiddleware = require('../../middleware/auth');
 const zodValidate = require('../../middleware/zodValidate');
-const { createVacationSchema } = require('./vacations.validate');
+const { CreateVacationSchema } = require('./vacations.validation');
 
 
 // Get all employees with their leaves (accessible by HR or everyone depending on rules)
@@ -11,6 +11,6 @@ const { createVacationSchema } = require('./vacations.validate');
 router.get('/', authMiddleware, vacationsController.getEmployeesWithLeaves);
 
 // Request a holiday for self only. user_id comes from authMiddleware (req.user)
-router.post('/request', authMiddleware, zodValidate(createVacationSchema), vacationsController.requestLeave);
+router.post('/request', authMiddleware, zodValidate({ part: 'body', schema: CreateVacationSchema }), vacationsController.requestLeave);
 
 module.exports = router; 

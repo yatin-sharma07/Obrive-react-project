@@ -31,17 +31,27 @@ const joinRoomService = async (payload) => {
     throw new Error("Room not found");
   }
 
+  const now = new Date();
+  const startTime = room.startTime ? new Date(room.startTime) : null;
+  const isFutureScheduledRoom =
+    room.roomStatus === "scheduled" && (!startTime || startTime > now);
+
   // ==================================
   // CHECK ROOM STATUS
   // ==================================
 
   if (
     room.roomStatus !== "live" &&
+    isFutureScheduledRoom
+  ) {
+    throw new Error("Room is not available yet");
+  }
+
+  if (
+    room.roomStatus !== "live" &&
     room.roomStatus !== "scheduled"
   ) {
-    throw new Error(
-      "Room is not available"
-    );
+    throw new Error("Room is not available");
   }
 
   // ==================================

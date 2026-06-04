@@ -3,9 +3,16 @@ const ctrl = require('./employee.controller');
 const authenticate = require('../../middleware/auth');
 const { authorize } = require('../../middleware/rbac');
 const zodValidate = require('../../middleware/zodValidate');
-const { updateProfileSchema, availabilitySchema, slotIdParamSchema, employeeIdParamSchema } = require('./employee.validation');
+const {
+  availabilityQuerySchema,
+  availabilitySchema,
+  employeeIdParamSchema,
+  loginSchema,
+  slotIdParamSchema,
+  updateProfileSchema,
+} = require('./employee.validation');
 
-router.post('/login', ctrl.login);
+router.post('/login', zodValidate({ part: 'body', schema: loginSchema }), ctrl.login);
 
 router.use(authenticate);
 
@@ -15,7 +22,12 @@ router.put('/me', authorize('employee'), zodValidate({ part: 'body', schema: upd
 );
 
 // Availability
-router.get('/availability', authorize('employee', 'hr', 'admin'), ctrl.getMyAvailability);
+router.get(
+  '/availability',
+  authorize('employee', 'hr', 'admin'),
+  zodValidate({ part: 'query', schema: availabilityQuerySchema }),
+  ctrl.getMyAvailability
+);
 router.post('/availability',  authorize('employee'), zodValidate({ part: 'body', schema: availabilitySchema }), ctrl.addAvailabilitySlot
 );
 
@@ -38,6 +50,7 @@ router.delete('/availability/:slotId',
 router.get('/:employeeId/availability',
   authorize('hr', 'admin'),
   zodValidate({ part: 'params', schema: employeeIdParamSchema }),
+  zodValidate({ part: 'query', schema: availabilityQuerySchema }),
   ctrl.getEmployeeAvailability
 );
 

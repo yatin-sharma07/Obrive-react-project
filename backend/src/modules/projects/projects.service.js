@@ -6,12 +6,12 @@ class ProjectService {
   async getProjectsByRole(userId, role) {
     let projects;
     
-    if (role === 'hr') {
+    if (role === 'hr' || role === 'supervisor' || role === 'admin') {
       projects = await this.getAllProjects();
-    } 
-    
-    if (role === 'employee') {
+    } else if (role === 'employee') {
       projects = await this.getEmployeeProjects(userId);
+    } else {
+      projects = [];
     }
 
     // if (role === 'client') {
@@ -285,6 +285,8 @@ class ProjectService {
     const { name, description, priority, project_id, team_members, deadline, client_id } = data;
     
     return await prisma.$transaction(async (tx) => {
+      const normalizedClientId = client_id == null || client_id === '' ? null : String(client_id).trim();
+
       // 1. Create the project
       const project = await tx.projects.create({
         data: {
@@ -294,7 +296,7 @@ class ProjectService {
           project_id: project_id || `PROJ-${Date.now()}`,
           deadline: deadline ? new Date(deadline) : null,
           progress: 0,
-          client_id: client_id ? String(client_id) : null,
+          client_id: normalizedClientId,
         },
       });
 

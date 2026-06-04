@@ -5,24 +5,15 @@ import {
   ChevronLeft,
   ChevronRight,
   PlusCircle,
-  LayoutTemplate,
   Radio,
   CalendarClock,
-  FolderOpen,
-  Settings,
 } from "lucide-react";
 
 interface SidebarProps {
   isCollapsed: boolean;
-  setIsCollapsed: React.Dispatch<
-    React.SetStateAction<boolean>
-  >;
-
+  setIsCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
   activeSection: string;
-
-  setActiveSection: React.Dispatch<
-    React.SetStateAction<any>
-  >;
+  setActiveSection: React.Dispatch<React.SetStateAction<any>>;
 }
 
 const sidebarItems = [
@@ -30,11 +21,6 @@ const sidebarItems = [
     id: "create-room",
     label: "Create Room",
     icon: PlusCircle,
-  },
-  {
-    id: "templates",
-    label: "Templates",
-    icon: LayoutTemplate,
   },
   {
     id: "rooms-history",
@@ -45,16 +31,6 @@ const sidebarItems = [
     id: "rooms-scheduled",
     label: "Scheduled Rooms",
     icon: CalendarClock,
-  },
-  {
-    id: "recordings",
-    label: "Room Recordings",
-    icon: FolderOpen,
-  },
-  {
-    id: "settings",
-    label: "Settings",
-    icon: Settings,
   },
 ];
 
@@ -74,118 +50,99 @@ const Sidebar = ({
         ease-in-out
         border-r
         border-slate-200/60
-        bg-white/30
+        bg-white/40
         backdrop-blur-md
-        shadow-sm
-        ${
-          isCollapsed
-            ? "w-[60px]"
-            : "w-[190px]"
-        }
+        select-none
+        flex
+        flex-col
+        ${isCollapsed ? "w-[56px]" : "w-[200px]"}
       `}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-2 py-2 border-b border-slate-200/50">
+      <div className={`flex items-center border-b border-slate-100 px-3 py-2.5 min-h-[49px] ${isCollapsed ? "justify-center" : "justify-between"}`}>
         {!isCollapsed && (
-          <div>
-            <h2 className="text-slate-800 font-semibold text-[12px] px-2">
-              Configurations
-            </h2>
-
-            {/* <p className="text-xs text-slate-500 mt-1">
-              Manage room configurations
-            </p> */}
-          </div>
+          <h2 className="text-slate-800 font-semibold text-xs tracking-tight px-1">
+            Workspace
+          </h2>
         )}
 
         {/* Collapse Button */}
         <button
-          onClick={() =>
-            setIsCollapsed(!isCollapsed)
-          }
+          onClick={() => setIsCollapsed(!isCollapsed)}
           className="
             flex
             items-center
             justify-center
-            rounded-xl
-            border
-            border-slate-200
-            bg-white/50
-            p-2
-            text-slate-600
-            transition-all
-            hover:bg-slate-100/70
+            rounded-md
+            p-1.5
+            text-slate-400
+            transition-colors
+            hover:bg-slate-100/80
+            hover:text-slate-700
           "
         >
           {isCollapsed ? (
-            <ChevronRight size={18} />
+            <ChevronRight size={15} />
           ) : (
-            <ChevronLeft size={18} />
+            <ChevronLeft size={15} />
           )}
         </button>
       </div>
 
-      {/* Sidebar Menu */}
-      <div className="flex flex-col gap-1 p-3 overflow-y-auto">
-        <p
-          className={`
-            text-[9px]
-            font-medium
-            uppercase
-            tracking-wide
-            text-slate-400
-            px-3
-            mt-2
-            ${
-              isCollapsed
-                ? "hidden"
-                : "block"
-            }
-          `}
-        >
-          Manage Rooms
-        </p>
+      {/* Sidebar Menu Body */}
+      <div className="flex flex-col gap-0.5 p-2 overflow-y-auto flex-1">
+        {!isCollapsed && (
+          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-2.5 mt-2 mb-1.5">
+            Manage Rooms
+          </p>
+        )}
 
         {sidebarItems.map((item) => {
           const Icon = item.icon;
+          const isActive = activeSection === item.id;
 
           return (
             <button
               key={item.id}
-                className={`
+              onClick={() => setActiveSection(item.id)}
+              className={`
                 group
                 flex
                 items-center
-                gap-1
-                rounded-[2px]
-                px-2
-                py-2
+                w-full
+                rounded-md
+                px-2.5
+                py-3
                 transition-all
-                duration-50
+                duration-150
+                outline-none
+                gap-2.5
                 cursor-pointer
-
                 ${
-                activeSection === item.id
-                    ? "bg-white shadow-sm text-slate-900 border border-black-500"
-                    : "text-slate-700 hover:bg-white/60"
+                  isActive
+                    ? "bg-slate-100 font-semibold text-slate-900"
+                    : "text-slate-600 font-medium hover:bg-slate-50 hover:text-slate-900"
                 }
-                `}
-              onClick={() => setActiveSection(item.id)}
+              `}
             >
-              {/* Icon */}
-              <div className="flex items-center justify-center min-w-[24px]">
+              {/* Icon Matrix Wrapper */}
+              <div className="flex items-center justify-center shrink-0">
                 <Icon
-                  size={14}
-                  className="
-                    text-slate-600
-                    group-hover:text-slate-900
-                  "
+                  size={15}
+                  className={`
+                    transition-colors duration-150
+                    ${
+                      isActive 
+                        ? "text-slate-800" 
+                        : "text-slate-400 group-hover:text-slate-600"
+                    }
+                  `}
                 />
               </div>
 
-              {/* Label */}
+              {/* Label Component */}
               {!isCollapsed && (
-                <span className="text-[10px] font-medium">
+                <span className="text-xs tracking-tight truncate">
                   {item.label}
                 </span>
               )}

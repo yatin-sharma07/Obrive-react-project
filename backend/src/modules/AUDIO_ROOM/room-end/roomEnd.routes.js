@@ -11,12 +11,15 @@ const {
 );
 
 const auth = require("../../../middleware/auth");
+const zodValidate = require("../../../middleware/zodValidate");
 const { requireRoomRoles } = require("../audioRoomAuthz");
+const { RoomEndBodySchema } = require("./roomEnd.validation");
 
 router.post(
   "/end-room",
   auth,
   requireRoomRoles(["host", "admin"]),
+  zodValidate({ part: "body", schema: RoomEndBodySchema }),
   endRoomController
 );
 

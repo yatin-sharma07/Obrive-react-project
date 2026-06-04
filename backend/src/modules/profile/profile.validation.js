@@ -5,9 +5,11 @@ const UpdateProfileSchema = z.object({
   email     : z.string().email(),
   department: z.string(),
   jobTitle  : z.string(),
-  phoneNumber: z.number().int().positive().min(10).max(13), // Assuming a 10-digit phone number
+  phoneNumber: z.coerce.number().int().positive().min(10).max(9999999999999),
   joinDate  : z.string(),
   biography : z.string(),
+}).partial().refine((data) => Object.keys(data).length > 0, {
+  message: 'At least one field is required',
 }); 
 
 const ProfileIdSchema = z.object({
