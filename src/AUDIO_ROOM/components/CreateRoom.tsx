@@ -24,7 +24,7 @@ const formatLocalDateTime = (date: Date) => {
 // ======================================================
 
 type RoomRole = "host" | "moderator" | "speaker" | "listener";
-type RoleKey = "Host" | "Modifiers" | "Speakers" | "Joinees";
+type RoleKey = "Host" | "Moderator" | "Speakers" | "Joinees";
 
 interface RoleAssignment {
   assignmentType: "crm-role" | "specific-user";
@@ -64,7 +64,7 @@ const CreateRoom = () => {
 
   const [rolePermissions, setRolePermissions] = useState<Record<RoleKey, string[]>>({
     Host: [],
-    Modifiers: [],
+    Moderator: [],
     Speakers: [],
     Joinees: [],
   });
@@ -75,14 +75,14 @@ const CreateRoom = () => {
 
   const [otherUserIds, setOtherUserIds] = useState<Record<RoleKey, any[]>>({
     Host: [],
-    Modifiers: [],
+    Moderator: [],
     Speakers: [],
     Joinees: [],
   });
 
   const [userSearch, setUserSearch] = useState({
     Host: "",
-    Modifiers: "",
+    Moderator: "",
     Speakers: "",
     Joinees: "",
   });
@@ -105,10 +105,10 @@ const CreateRoom = () => {
   // ======================================================
 
   const roleOptions = {
-    Host: ["Modifier", "HR", "other"],
-    Modifiers: ["Modifier", "HR", "other"],
-    Speakers: ["Modifier", "HR", "other"],
-    Joinees: ["Modifier", "HR", "Employee", "Client", "Guests"],
+    Host: ["Moderator", "HR", "other"],
+    Moderator: ["Moderator", "HR", "other"],
+    Speakers: ["Moderator", "HR", "other"],
+    Joinees: ["Moderator", "HR", "Employee", "Client", "Guests"],
   };
 
   // ======================================================
@@ -216,7 +216,7 @@ const CreateRoom = () => {
     const assignments: RoleAssignment[] = [];
     const roleMap = {
       Host: "host",
-      Modifiers: "moderator",
+      Moderator: "moderator",
       Speakers: "speaker",
     } as const;
 
@@ -308,10 +308,7 @@ const CreateRoom = () => {
         }
       }
 
-      const response = await apiFetch("/audio-room/create", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
+      const response = await apiFetch("/audio-room/create", { method: "POST", body: JSON.stringify(payload),});
 
       const data = await response.json();
 
@@ -322,9 +319,9 @@ const CreateRoom = () => {
 
       setSuccess(true);
 
-      if (data?.data?.id) {
-        router.push(`/audio-room/room/${data.data.id}`);
-      }
+      // if (data?.data?.id ) {
+      //   router.push(`/audio-room/room/${data.data.id}`);
+      // }
 
       setTimeout(() => {
         setSuccess(false);
@@ -621,13 +618,13 @@ const CreateRoom = () => {
         <div className="flex flex-col gap-3 pt-3 border-t border-slate-200/60 mt-2">
           {error && (
             <div className="w-full rounded-lg border border-red-200 bg-red-50/60 px-4 py-2.5 text-xs font-medium text-red-600 flex items-center gap-2">
-              <span>⚠️</span> {error}
+              <span></span> {error}
             </div>
           )}
 
           {success && (
             <div className="w-full rounded-lg border border-green-200 bg-green-50/60 px-4 py-2.5 text-xs font-medium text-green-600 flex items-center gap-2">
-              <span>✨</span> Structural configuration active. Initializing dynamic pathing...
+              <span></span> Structural configuration active. Initializing dynamic pathing...
             </div>
           )}
 

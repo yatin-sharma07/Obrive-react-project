@@ -3,8 +3,7 @@ const {
   getAllUsers,
 } = require("./roomConfig.service");
 
-const createRoomConfig =
-  async (req, res) => {
+const createRoomConfig = async (req, res) => {
     try {
       const result =
         await createRoomConfigService(
