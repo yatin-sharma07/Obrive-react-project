@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { API_BASE_URL } from "@/lib/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-
+import obriveLogo from "../../assets/images/logos/obrive-main-logo.svg";
 import Image from "next/image";
 
 const CommunityPage = () => {
@@ -136,8 +136,8 @@ useEffect(() => {
         height={50}
         className="rounded-full object-cover border-2 border-amber-100 shadow-xl"
         style={{
-          width: `${avatar.size}px`,
-          height: `${avatar.size}px`,
+          width: `calc(${avatar.size}px * 0.5)`,
+          height: `calc(${avatar.size}px * 0.5)`,
           filter: `blur(${avatar.blur}px)`,
           opacity: avatar.opacity,
           transform: `rotate(${avatar.rotation}deg)`,
@@ -148,8 +148,17 @@ useEffect(() => {
   ))}
 </div>
 
-      <header className="fixed top-0 left-0 w-full z-50 px-15 py-8 flex justify-between items-center bg-transparent pointer-events-auto">
-        <div className="font-black tracking-tight text-xl">obrive.</div>
+      <header className="fixed top-0 left-0 w-full z-50 px-6 md:px-15 py-6 md:py-8 flex justify-between items-center bg-transparent pointer-events-auto">
+        <div className="font-black tracking-tight text-xl">
+
+        <Image
+          src={obriveLogo}
+          alt="Obrive Logo"
+          width={100}
+          height={50}
+        />
+
+        </div>
         <nav className="flex gap-6 text-sm font-medium">
           <a href="#" className="border-2 border-black px-5 py-3 rounded-full  hover:text-white hover:bg-black">explore</a>
         </nav>
@@ -165,7 +174,7 @@ useEffect(() => {
               <span
                 key={`comm-${index}`}
                 style={{ transitionDelay: `${index * 30}ms` }}
-                className={`inline-block text-8xl transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+                className={`inline-block text-4xl sm:text-6xl md:text-8xl transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
                   hasTriggered
                     ? "opacity-0 -translate-y-16 rotate-12 blur-sm scale-75"
                     : "opacity-100 translate-y-0 rotate-0 scale-100"
@@ -319,18 +328,19 @@ useEffect(() => {
 
 
 
-        <footer className="items-center flex justify-between bottom-0 left-0 text-[10px] text-black font-bold flex-row bg-transparent  border-black fixed z-100 h-16  w-full px-10 py-10  sm:flex-row gap-4  pointer-events-auto">
+      <footer className="fixed bottom-0 left-0 z-50 w-full px-6 md:px-10 py-4 md:py-6 flex flex-col-reverse md:flex-row items-center justify-between gap-3 text-[10px] text-black font-bold bg-transparent pointer-events-auto">
 
-          <div className="flex gap-6 right-0">
-            <a href="#" className="hover:text-gray-700 transition-colors text-black text-[12px] font-bold ">terms</a>
-            <a href="#" className="hover:text-gray-700 transition-colors text-black text-[12px] font-bold">privacy policy</a>
-            <a href="#" className="hover:text-gray-700 transition-colors text-black text-[12px] font-bold">contact</a>
-          </div>
+              <div className="text-center md:text-left text-gray-500 md:text-black">
+                © 2026 obrive inc. all rights reserved.
+              </div>
 
-          <div  className="flex gap-6 left-0">© 2026 obrive inc. all rights reserved.</div>
+              <div className="flex gap-4 md:gap-6 justify-center">
+                <a href="#" className="hover:text-gray-700 transition-colors text-[11px] md:text-[12px] font-bold">terms</a>
+                <a href="#" className="hover:text-gray-700 transition-colors text-[11px] md:text-[12px] font-bold">privacy policy</a>
+                <a href="#" className="hover:text-gray-700 transition-colors text-[11px] md:text-[12px] font-bold">contact</a>
+              </div>
 
-
-        </footer>
+      </footer>
 
     </div>
   );

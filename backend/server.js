@@ -72,12 +72,12 @@ app.use( "/api/audio-room", require( "./src/modules/AUDIO_ROOM/room-config/roomC
 app.use( "/api/audio-room", require( "./src/modules/AUDIO_ROOM/room-start/roomStart.routes"));
 app.use( "/api/audio-room", require( "./src/modules/AUDIO_ROOM/room-end/roomEnd.routes"));
 app.use( "/api/audio-room", require( "./src/modules/AUDIO_ROOM/room-join/roomJoin.routes"));
-app.use( "/api/audio-room",  require("./src/modules/AUDIO_ROOM/room-list/roomList.routes"));
-app.use( "/api/audio-room",  require("./src/modules/AUDIO_ROOM/room-details/roomDetails.routes"));
+app.use( "/api/audio-room", require("./src/modules/AUDIO_ROOM/room-list/roomList.routes"));
+app.use( "/api/audio-room", require("./src/modules/AUDIO_ROOM/room-details/roomDetails.routes"));
 app.use( "/api/audio-room", require( "./src/modules/AUDIO_ROOM/room-leave/roomLeave.routes"));
 app.use( "/api/audio-room", require( "./src/modules/AUDIO_ROOM/room-raise-hand/roomRaiseHand.routes"));
-app.use("/api/audio-room", require("./src/modules/AUDIO_ROOM/room-hand-requests/roomHandRequests.routes"));
-app.use("/api/audio-room", require("./src/modules/AUDIO_ROOM/room-hand-action/roomHandAction.routes"));
+app.use( "/api/audio-room", require("./src/modules/AUDIO_ROOM/room-hand-requests/roomHandRequests.routes"));
+app.use( "/api/audio-room", require("./src/modules/AUDIO_ROOM/room-hand-action/roomHandAction.routes"));
 //  MODERATION ROUTES ─────────────────────────────────────────────
 app.use("/api/audio-room", require("./src/modules/AUDIO_ROOM/speaker-mute/speakerMute.routes"));
 app.use("/api/audio-room", require("./src/modules/AUDIO_ROOM/speaker-downgrade/speakerDowngrade.routes"));
