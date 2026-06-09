@@ -80,8 +80,8 @@ export default function CommunityRooms() {
 
   if (loading || userLoading) {
     return (
-      <div className="min-h-[70vh] bg-[#f6f0e7] px-4 py-10 sm:px-8 lg:px-12 col-span-3">
-        <div className="mx-auto flex max-w-6xl items-center justify-center rounded-4xl border border-black/10 bg-white/80 px-6 py-20 shadow-[0_30px_80px_rgba(0,0,0,0.06)] backdrop-blur">
+      <div className="min-h-screen bg-[#c3ead3] px-4 py-10 sm:px-8 lg:px-12 col-span-3">
+        <div className="mx-auto flex max-w-6xl items-center justify-center rounded-4xl  bg-[#c3ead3] px-6 py-20 ">
           <div className="text-center">
             <div className="mx-auto mb-4 h-14 w-14 animate-pulse rounded-full border border-black/10 bg-black/5" />
             <div className="text-lg font-semibold tracking-tight text-slate-900">
@@ -97,18 +97,18 @@ export default function CommunityRooms() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f6f0e7] text-slate-950">
-      <div className="relative overflow-hidden border-b border-black/5 bg-[#f6f0e7]">
+    <div className="min-h-screen bg-[#c3ead3] text-slate-950">
+      <div className="relative overflow-hidden border-b border-black/5 bg-[#c3ead3]">
         <div className="absolute inset-0 opacity-40 [background:radial-gradient(circle_at_top_left,rgba(7,109,71,0.18),transparent_30%),radial-gradient(circle_at_top_right,rgba(0,0,0,0.06),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(7,109,71,0.12),transparent_28%)]" />
         <div className="relative mx-auto max-w-6xl px-4 py-10 sm:px-8 sm:py-14 lg:px-12">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl">
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-[#076d47] shadow-sm backdrop-blur">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-[#074139] shadow-sm backdrop-blur">
                 Live Conversations
               </div>
-              <h1 className="text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
+              <h1 className="text-4xl font-black tracking-tight sm:text-4xl lg:text-5xl">
                 Step into the room.
-                <span className="block text-[#076d47]">Join conversations live.</span>
+                <span className="block text-[#074139]">Join conversations live.</span>
               </h1>
               <p className="mt-4 max-w-xl text-sm leading-6 text-slate-600 sm:text-base">
                 Discover rooms for your interests. Join the people of obrive and other community members. The rooms update regularly based on new happenings, events, and trending topics of the time.
@@ -156,7 +156,7 @@ export default function CommunityRooms() {
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-8 lg:px-12 lg:py-10">
         {filteredRooms.length === 0 ? (
           <div className="rounded-4xl border border-dashed border-black/10 bg-white/70 px-6 py-16 text-center shadow-[0_30px_80px_rgba(0,0,0,0.05)] backdrop-blur">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#076d47]/10 text-2xl font-black text-[#076d47]">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#074139]/10 text-2xl font-black text-[#074139]">
               0
             </div>
             <h2 className="text-2xl font-black tracking-tight">
@@ -189,12 +189,12 @@ export default function CommunityRooms() {
                   <div>
                     {/* Upper Metadata Row */}
                     <div className="flex items-start gap-3.5">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#076d47] text-sm font-bold text-white shadow-sm">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#074139] text-sm font-bold text-white shadow-sm">
                         {initials || "R"}
                       </div>
 
                       <div className="min-w-0 flex-1">
-                        <h3 className="text-base font-bold tracking-tight text-slate-900 group-hover:text-[#076d47] transition-colors line-clamp-1">
+                        <h3 className="text-base font-bold tracking-tight text-slate-900 group-hover:text-[#074139] transition-colors line-clamp-1">
                           {label}
                         </h3>
                         
@@ -226,14 +226,14 @@ export default function CommunityRooms() {
                   {/* Operational Action Footer Layer */}
                   <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between gap-4">
                     <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                      Access: <span className={allowed ? "text-[#076d47]" : "text-slate-500"}>{allowed ? "Open" : "Restricted"}</span>
+                      Access: <span className={allowed ? "text-[#074139]" : "text-slate-500"}>{allowed ? "Open" : "Restricted"}</span>
                     </div>
 
                     {allowed ? (
                       <Link href={`/audio-room/room/${room.id}`} className="shrink-0">
                         <Button
                           size="sm"
-                          className="rounded-lg bg-[#076d47] px-4 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#055c3c] active:scale-98"
+                          className="rounded-lg bg-[#074139] px-4 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#055c3c] active:scale-98"
                         >
                           Join Room
                         </Button>

@@ -1,11 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  Users,
-  Radio,
-  ChevronDown,
-} from "lucide-react";
+import { Users, Radio } from "lucide-react";
 
 interface RoomHeaderProps {
   title?: string;
@@ -13,98 +9,45 @@ interface RoomHeaderProps {
   participantCount?: number;
 }
 
-const RoomHeader = ({
-  title,
-  description,
-  participantCount = 0,
-}: RoomHeaderProps) => {
+const RoomHeader = ({ title, description, participantCount = 0 }: RoomHeaderProps) => {
   return (
-    <header
-      className="
-        border-b
-        border-slate-200/60
-        bg-white/40
-        backdrop-blur-md
-        px-3
-        py-1
-        shadow-sm
-      "
-    >
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        {/* Left Side */}
-        <div className="min-w-0">
-          <div className="flex items-center gap-3 flex-wrap">
-            {/* Room Status */}
-            <div
-              className="
-                flex
-                items-center
-                gap-2
-                rounded-full
-                border
-                border-green-200
-                bg-green-50
-                px-2
-                py-0.5
-              "
-            >
-              <Radio
-                size={8}
-                className="text-green-500"
-              />
+    <div className="w-full bg-white px-4 py-2 shadow-xs border-b border-black/[0.03]">
+      <div className="flex items-center justify-between gap-3">
+        
+        {/* Left Side Content - Compact & Inline */}
+        <div className="min-w-0 flex flex-items-center gap-3 items-center">
+          
+          {/* Micro Status Badge */}
+          <div className="flex items-center gap-1 rounded-full border border-[#076d47]/20 bg-[#076d47]/5 px-2 py-0.5 shrink-0">
+            <Radio size={10} className="text-[#076d47]" />
+            <span className="text-[9px] font-bold text-[#076d47] uppercase tracking-wider">Live</span>
+          </div>
 
-              <span className="text-[10px] font-medium text-green-700">
-                Live Room
-              </span>
-            </div>
-
-            {/* Room Title */}
-            <h1 className="text-[12px] font-semibold text-slate-800 truncate">
+          {/* Heading and Meta Description Stack */}
+          <div className="min-w-0">
+            <h1 className="text-xs font-bold text-slate-800 truncate max-w-xs sm:max-w-md md:max-w-lg leading-none">
               {title || "Live Room"}
             </h1>
-
-            {/* Dropdown */}
-            {/* <button className="text-slate-500 hover:text-slate-700 transition">
-              <ChevronDown size={18} />
-            </button> */}
-          </div>
-
-          <p className="text-[10px] text-slate-500 mt-1">
-            {description || "Room details will appear here."}
-          </p>
-        </div>
-
-        {/* Right Side */}
-        <div
-          className="
-            flex
-            items-center
-            gap-3
-            rounded-[5px]
-            border
-            border-slate-200/70
-            bg-white/50
-            px-2
-            py-1
-          "
-        >
-          <Users
-            size={18}
-            className="text-slate-600"
-          />
-
-          <div>
-            <p className="text-[10px] font-medium text-slate-800">
-              {participantCount} Participants
-            </p>
-
-            <p className="text-[8px] text-slate-500">
-              Active in room
+            <p className="text-[10px] text-slate-400 font-medium truncate max-w-xs sm:max-w-md md:max-w-xl mt-0.5 leading-none">
+              {description || "Room details will appear here."}
             </p>
           </div>
+
         </div>
+
+        {/* Right Side Metric Block - Ultra Low Profile */}
+        <div className="flex items-center gap-2 shrink-0 border border-slate-100 rounded-md bg-slate-50/50 px-2 py-1">
+          <Users size={12} className="text-slate-500" />
+          <span className="text-[10px] font-bold text-slate-700 leading-none">
+            {participantCount}
+          </span>
+          <span className="hidden sm:inline text-[9px] font-medium text-slate-400 border-l border-slate-200 pl-1.5 leading-none">
+            Active
+          </span>
+        </div>
+
       </div>
-    </header>
+    </div>
   );
 };
 

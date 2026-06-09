@@ -5,13 +5,13 @@ import { apiFetch } from "@/lib/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 // ======================================================
-// UI CLASSES
+// HIGH-PERFORMANCE MINIMALIST SOLID UI UTILITIES
 // ======================================================
 const sectionClass =
-  "rounded-xl border border-slate-200/60 bg-gradient-to-b from-white/60 to-white/30 backdrop-blur-xl p-5 shadow-sm transition-all duration-300";
+  "rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition-all";
 
 const buttonClass =
-  "rounded-lg bg-slate-900 px-3 py-1.5 text-[10px] font-medium text-white transition-all duration-200 hover:bg-slate-800 hover:shadow-sm active:scale-95";
+  "rounded-md bg-slate-900 px-3 py-1.5 text-[9px] font-semibold text-white transition-colors hover:bg-slate-800 cursor-pointer";
 
 // ======================================================
 // TYPES
@@ -47,30 +47,51 @@ const RoomsHistory = () => {
   const [error, setError] = useState("");
 
   // ======================================================
-  // FETCH ROOMS
+  // FETCH ROOMS (WITH MOUNTED CLEANUP)
   // ======================================================
   useEffect(() => {
+    let isMounted = true;
+
+    const fetchRooms = async () => {
+      try {
+        setLoading(true);
+        setError("");
+        const response = await apiFetch("/audio-room/rooms");
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Failed to fetch rooms");
+        }
+
+        if (isMounted) {
+          setRooms(data.data || []);
+        }
+      } catch (err) {
+        console.error("❌ Error loading registers:", err);
+        if (isMounted) {
+          setError(err instanceof Error ? err.message : "Something went wrong");
+        }
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
     fetchRooms();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  const fetchRooms = async () => {
+  // Post-action soft structural data sync
+  const refreshRoomsList = async () => {
     try {
-      setLoading(true);
       const response = await apiFetch("/audio-room/rooms");
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to fetch rooms");
+      if (response.ok) {
+        setRooms(data.data || []);
       }
-
-      setRooms(data.data || []);
-    } catch (error) {
-      console.error(error);
-      setError(
-        error instanceof Error ? error.message : "Something went wrong"
-      );
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      console.error("❌ Sync Error:", err);
     }
   };
 
@@ -102,7 +123,7 @@ const RoomsHistory = () => {
         throw new Error(data.message || "Failed to join room");
       }
 
-      if (!data.data.allowed) {
+      if (!data.data?.allowed) {
         alert("You don't have access to this room");
         return;
       }
@@ -118,9 +139,9 @@ const RoomsHistory = () => {
       );
 
       window.location.href = `/audio-room/room/${roomId}`;
-    } catch (error) {
-      console.error("❌ Join Error:", error);
-      alert(error instanceof Error ? error.message : "Failed to join room");
+    } catch (err) {
+      console.error("❌ Join Error:", err);
+      alert(err instanceof Error ? err.message : "Failed to join room");
     }
   };
 
@@ -149,14 +170,14 @@ const RoomsHistory = () => {
       }
 
       console.log("✅ Room Ended:", data);
-      fetchRooms();
-    } catch (error) {
-      console.error("❌ Error ending room:", error);
+      refreshRoomsList();
+    } catch (err) {
+      console.error("❌ Error ending room:", err);
     }
   };
 
   // ======================================================
-  // ROOM CARD (ENHANCED VISUALS)
+  // ROOM CARD RENDERING BLOCK
   // ======================================================
   const renderRoomCard = (room: Room) => {
     const isLive = room.roomStatus === "live";
@@ -164,25 +185,25 @@ const RoomsHistory = () => {
     return (
       <div
         key={room.id}
-        className={`group relative flex flex-col justify-between rounded-xl border p-4 transition-all duration-300 hover:-translate-y-0.5 ring-1 ring-white/10 ${
+        className={`group relative flex flex-col justify-between rounded-lg border p-4 transition-all duration-200 ${
           isLive
-            ? "border-slate-200/80 bg-gradient-to-br from-white to-slate-50/50 shadow-[0_4px_20px_-4px_rgba(148,163,184,0.15)] hover:shadow-[0_8px_30px_-4px_rgba(148,163,184,0.25)]"
-            : "border-slate-100 bg-slate-50/40 opacity-80 hover:opacity-100 shadow-sm"
+            ? "border-slate-200 bg-white shadow-sm hover:border-slate-300"
+            : "border-slate-200 bg-slate-50/60 opacity-85 hover:opacity-100"
         }`}
       >
         <div>
           {/* Header */}
           <div className="flex items-start justify-between gap-3">
-            <h3 className="text-sm font-semibold tracking-tight text-slate-800 line-clamp-1">
+            <h3 className="text-[11px] font-bold tracking-tight text-slate-800 truncate" title={room.roomName}>
               {room.roomName}
             </h3>
 
-            {/* Badge Indicator */}
+            {/* Status Badge */}
             <div
-              className={`flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
+              className={`flex items-center gap-1.5 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
                 isLive
-                  ? "bg-emerald-50 text-emerald-600 border border-emerald-200/50"
-                  : "bg-slate-100 text-slate-500 border border-slate-200/30"
+                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                  : "bg-slate-100 text-slate-500 border border-slate-200"
               }`}
             >
               {isLive && (
@@ -193,41 +214,41 @@ const RoomsHistory = () => {
           </div>
 
           {/* Description */}
-          <p className="mt-2 mb-4 line-clamp-2 text-xs text-slate-500 leading-relaxed">
+          <p className="mt-2 mb-4 text-[10px] text-slate-400 line-clamp-2 leading-relaxed">
             {room.roomDescription || "No description provided for this room."}
           </p>
         </div>
 
         {/* Technical Data & Metadata Details */}
-        <div className="mt-auto border-t border-slate-100/80 pt-3">
-          <div className="grid grid-cols-2 gap-y-1.5 text-[11px] text-slate-500">
+        <div className="mt-auto border-t border-slate-100 pt-3">
+          <div className="grid grid-cols-2 gap-y-1.5 text-[9px] text-slate-500">
             <div className="flex items-center gap-1">
-              <span className="font-medium text-slate-400">Host:</span>
-              <span className="font-medium text-slate-700 truncate max-w-[80px]">
+              <span className="font-semibold text-slate-400">Host:</span>
+              <span className="font-bold text-slate-600 truncate max-w-[85px]">
                 {room.creator?.name || "System"}
               </span>
             </div>
             <div className="flex items-center gap-1 justify-end">
-              <span className="font-medium text-slate-400">Limit:</span>
-              <span className="font-medium text-slate-700">{room.participantLimit} slots</span>
+              <span className="font-semibold text-slate-400">Limit:</span>
+              <span className="font-bold text-slate-600">{room.participantLimit} slots</span>
             </div>
             <div className="flex items-center gap-1">
-              <span className="font-medium text-slate-400">Type:</span>
-              <span className="capitalize text-slate-600">{room.roomType || "Audio"}</span>
+              <span className="font-semibold text-slate-400">Type:</span>
+              <span className="capitalize font-bold text-slate-500">{room.roomType || "Audio"}</span>
             </div>
             <div className="flex items-center gap-1 justify-end">
-              <span className="font-medium text-slate-400">Access:</span>
-              <span className="capitalize text-slate-600">{room.visibility}</span>
+              <span className="font-semibold text-slate-400">Access:</span>
+              <span className="capitalize font-bold text-slate-500">{room.visibility}</span>
             </div>
           </div>
 
-          {/* User Action Blocks */}
+          {/* User Action Control Footer */}
           <div className="mt-4 flex items-center justify-end gap-2">
             {isLive ? (
               <>
                 <button
                   onClick={() => handleEndRoom(room.id)}
-                  className="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-[10px] font-medium text-red-600 transition-all hover:bg-red-600 hover:text-white active:scale-95"
+                  className="rounded-md border border-red-200 bg-red-50 px-3 py-1.5 text-[9px] font-semibold text-red-600 transition-colors hover:bg-red-600 hover:text-white cursor-pointer"
                 >
                   End Room
                 </button>
@@ -239,7 +260,7 @@ const RoomsHistory = () => {
                 </button>
               </>
             ) : (
-              <button className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-medium text-slate-600 transition-all hover:bg-slate-50 hover:text-slate-800">
+              <button className="w-full rounded-md border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-800 cursor-pointer">
                 View Archive
               </button>
             )}
@@ -250,38 +271,38 @@ const RoomsHistory = () => {
   };
 
   // ======================================================
-  // RENDER MAIN MAIN CONTAINER
+  // RENDER CONTAINER
   // ======================================================
   return (
-    <div className="w-full h-full overflow-y-auto p-1">
+    <div className="w-full h-full overflow-y-auto p-2 bg-[#f8f9fa]">
       <div className="flex flex-col gap-6">
-        {/* Error Notification */}
+        {/* Error Notification Banner */}
         {error && (
-          <div className="rounded-lg border border-red-200 bg-red-50/80 backdrop-blur-md p-3 text-xs text-red-700 flex items-center gap-2 shadow-sm">
-            <span>❌</span> <span className="font-medium">{error}</span>
+          <div className="rounded-md border border-red-200 bg-red-50 p-3 text-[10px] text-red-700 flex items-center gap-2 shadow-sm">
+            <span className="font-bold">❌ Error:</span> <span className="font-semibold">{error}</span>
           </div>
         )}
 
         {/* Loading Spinner Skeleton state */}
         {loading && (
-          <div className="rounded-xl border border-slate-200/60 bg-white/50 p-4 text-xs text-slate-500 animate-pulse flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full border-2 border-slate-400 border-t-transparent animate-spin" />
+          <div className="rounded-md border border-slate-200 bg-white p-4 text-[10px] text-slate-500 animate-pulse flex items-center gap-2">
+            <div className="w-3.5 h-3.5 rounded-full border-2 border-slate-400 border-t-transparent animate-spin" />
             Synchronizing room registers...
           </div>
         )}
 
         {/* Section: Live Rooms */}
         <section className={sectionClass}>
-          <div className="mb-4">
-            <h2 className="text-base font-bold tracking-tight text-slate-800 flex items-center gap-2">
+          <div className="mb-5">
+            <h2 className="text-sm font-bold tracking-tight text-slate-800 flex items-center gap-2">
               Community Live Hub
               {liveRooms.length > 0 && (
-                <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-semibold text-emerald-600">
+                <span className="rounded bg-emerald-500/10 px-1.5 py-0.5 text-[11px] font-bold text-emerald-600 border border-emerald-200/40">
                   {liveRooms.length} Active
                 </span>
               )}
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-[11px] text-slate-400 mt-0.5">
               Real-time available conversation circles. Jump right in.
             </p>
           </div>
@@ -290,8 +311,8 @@ const RoomsHistory = () => {
             {liveRooms.length > 0 ? (
               liveRooms.map(renderRoomCard)
             ) : (
-              <div className="col-span-full py-8 text-center rounded-xl border border-dashed border-slate-200/80 bg-slate-50/30">
-                <p className="text-xs text-slate-400">No rooms are currently live.</p>
+              <div className="col-span-full py-10 text-center rounded-md border border-dashed border-slate-200 bg-slate-50/50">
+                <p className="text-[10px] text-slate-400 italic">No rooms are currently live.</p>
               </div>
             )}
           </div>
@@ -299,11 +320,11 @@ const RoomsHistory = () => {
 
         {/* Section: Past Rooms */}
         <section className={sectionClass}>
-          <div className="mb-4">
-            <h2 className="text-base font-bold tracking-tight text-slate-800">
+          <div className="mb-5">
+            <h2 className="text-sm font-bold tracking-tight text-slate-800">
               History Logs
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-[11px] text-slate-400 mt-0.5">
               Review completed panel recordings and participant indexes.
             </p>
           </div>
@@ -312,8 +333,8 @@ const RoomsHistory = () => {
             {pastRooms.length > 0 ? (
               pastRooms.map(renderRoomCard)
             ) : (
-              <div className="col-span-full py-8 text-center rounded-xl border border-dashed border-slate-200/80 bg-slate-50/30">
-                <p className="text-xs text-slate-400">No previous sessions found.</p>
+              <div className="col-span-full py-10 text-center rounded-md border border-dashed border-slate-200 bg-slate-50/50">
+                <p className="text-[10px] text-slate-400 italic">No previous sessions found.</p>
               </div>
             )}
           </div>

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { API_BASE_URL } from "@/lib/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import obriveLogo from "../../assets/images/logos/obrive-main-logo.svg";
+import obriveLogo from "../../assets/images/logos/obrive-logo.svg";
 import Image from "next/image";
 
 const CommunityPage = () => {
@@ -31,7 +31,7 @@ useEffect(() => {
       image   : `https://randomuser.me/api/portraits/${ index % 2 === 0 ? "men" : "women" }/${(index % 50) + 1}.jpg`,
       x       : Math.random() * 100,
       y       : Math.random() * 100,
-      size    : 40 + Math.random() * 80,
+      size    : 40 + Math.random() * 50,
       blur    : Math.random() * 4,
       opacity : 0.3 + Math.random() * 0.7,
       z       : Math.floor(Math.random() * 20),
@@ -136,8 +136,8 @@ useEffect(() => {
         height={50}
         className="rounded-full object-cover border-2 border-amber-100 shadow-xl"
         style={{
-          width: `calc(${avatar.size}px * 0.5)`,
-          height: `calc(${avatar.size}px * 0.5)`,
+          width: `calc(${avatar.size}px)`,
+          height: `calc(${avatar.size}px)`,
           filter: `blur(${avatar.blur}px)`,
           opacity: avatar.opacity,
           transform: `rotate(${avatar.rotation}deg)`,
@@ -154,14 +154,14 @@ useEffect(() => {
         <Image
           src={obriveLogo}
           alt="Obrive Logo"
-          width={100}
-          height={50}
+          width={70}
+          height={40}
         />
 
         </div>
-        <nav className="flex gap-6 text-sm font-medium">
+        {/* <nav className="flex gap-6 text-sm font-medium">
           <a href="#" className="border-2 border-black px-5 py-3 rounded-full  hover:text-white hover:bg-black">explore</a>
-        </nav>
+        </nav> */}
       </header>
       
       {/* 1. FIXED SWAPPING TEXT CONTAINER */}
@@ -204,10 +204,10 @@ useEffect(() => {
         <div style={{ transitionDelay: '300ms' }} className={`mt-4 pointer-events-auto transition-all duration-750 ease-out ${ hasTriggered  ? "opacity-100 translate-y-0 blur-none scale-100"  : "opacity-0 translate-y-8 blur-sm scale-95"  }`}>
             <button
               type="button"
-              className="px-6 py-3 bg-white hover:text-white hover:bg-black text-[#076d47] font-bold rounded-full shadow-lg hover:bg-opacity-90 active:scale-95 transition-transform cursor-pointer"
+              className="px-6 py-3 bg-white hover:text-white hover:bg-black text-[#074139] font-bold rounded-full shadow-lg hover:bg-opacity-90 active:scale-95 transition-transform cursor-pointer"
               onClick={() => {
                 if (me) {
-                  router.push("/community/rooms");
+                  router.push("/community-forum/rooms");
                   return;
                 }
 
@@ -229,7 +229,7 @@ useEffect(() => {
             <div className="w-full max-w-md rounded-[28px] border border-black/10 bg-white p-6 text-left shadow-[0_30px_80px_rgba(0,0,0,0.22)]">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <div className="inline-flex rounded-full border border-[#076d47]/15 bg-[#076d47]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#076d47]">
+                  <div className="inline-flex rounded-full border border-[#074139]/15 bg-[#074139]/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#074139]">
                     Login required
                   </div>
                   <h2 className="mt-4 text-2xl font-black tracking-tight text-gray-950">
@@ -258,7 +258,7 @@ useEffect(() => {
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
                     placeholder="Enter your email"
-                    className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-gray-950 outline-none transition focus:border-[#076d47]"
+                    className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-gray-950 outline-none transition focus:border-[#074139]"
                   />
                 </label>
 
@@ -274,7 +274,7 @@ useEffect(() => {
                       }
                     }}
                     placeholder="Enter your password"
-                    className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-gray-950 outline-none transition focus:border-[#076d47]"
+                    className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-gray-950 outline-none transition focus:border-[#074139]"
                   />
                 </label>
 
@@ -289,7 +289,7 @@ useEffect(() => {
                     type="button"
                     onClick={handleLogin}
                     disabled={submitting}
-                    className="inline-flex flex-1 items-center justify-center rounded-full bg-[#076d47] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#055c3c] disabled:cursor-not-allowed disabled:opacity-70"
+                    className="inline-flex flex-1 items-center justify-center rounded-full bg-[#074139] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#055c3c] disabled:cursor-not-allowed disabled:opacity-70"
                   >
                     {submitting ? "Logging in..." : "Login and continue"}
                   </button>
@@ -320,7 +320,7 @@ useEffect(() => {
       <div className="h-screen w-full pointer-events-none invisible"></div>
 
       {/* 4. SCREEN 2: Second Screen (Green Background) */}
-      <div className="h-screen w-full bg-[#076d47] z-10 flex flex-col justify-center items-center relative">
+      <div className="h-screen w-full bg-[#c3ead3] z-10 flex flex-col justify-center items-center relative">
         {/* <h1 className="text-4xl md:text-6xl font-black lowercase tracking-tight text-center px-4 text-white">
           join live voice chats
         </h1> */}

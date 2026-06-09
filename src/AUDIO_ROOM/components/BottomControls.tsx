@@ -15,13 +15,8 @@ import {
   LogOut,
   Trash2,
 } from "lucide-react";
-
-import {
-  apiFetch,
-} from "@/lib/api";
-import {
-  useSocket,
-} from "@/context/SocketContext";
+import { apiFetch } from "@/lib/api";
+import { useSocket } from "@/context/SocketContext";
 import livekitService from "@/AUDIO_ROOM/livekit/services/livekit.service";
 
 interface BottomControlsProps {
@@ -33,28 +28,14 @@ interface BottomControlsProps {
     role: string;
     isMuted?: boolean;
   }[];
-  
-
-  role:
-    | "admin"
-    | "host"
-    | "moderator"
-    | "speaker"
-    | "listener";
-
+  role: "admin" | "host" | "moderator" | "speaker" | "listener";
   isChatOpen?: boolean;
-
   isMicEnabled?: boolean;
   isMuted?: boolean;
-
-  setIsChatOpen?: (
-    value: boolean
-  ) => void;
+  setIsChatOpen?: (value: boolean) => void;
 }
 
-
-
-const BottomControls = ({
+const BottomControls = ({ 
   roomId,
   role,
   userId,
@@ -64,798 +45,221 @@ const BottomControls = ({
   isMuted = true,
   setIsChatOpen,
 }: BottomControlsProps) => {
-  const {
-    socket,
-  } = useSocket();
-
+  const { socket } = useSocket();
   const [showModerationMenu, setShowModerationMenu] = useState(false);
-  const [micActive, setMicActive] =
-    useState(
-      isMicEnabled ||
-      !isMuted
-    );
+  const [micActive, setMicActive] = useState(isMicEnabled || !isMuted);
 
-  const canSpeak =
-    role !== "listener";
+  const canSpeak = role !== "listener";
+  const isModerator = role === "moderator" || role === "host" || role === "admin";
 
-  const isModerator =
-    role === "moderator" ||
-    role === "host" ||
-    role === "admin";
-
-  const moderationParticipants =
-    participants.filter(
-      (participant) => {
-        const participantRole =
-          participant.role
-            ?.toLowerCase();
-
-        return (
-          participant.id !==
-            userId &&
-          participantRole !==
-            "listener"
-        );
-      }
-    );
-
-  console.log(
-  "Current Role:",
-  role
-);
+  const moderationParticipants = participants.filter((participant) => {
+    const participantRole = participant.role?.toLowerCase();
+    return participant.id !== userId && participantRole !== "listener";
+  });
 
   useEffect(() => {
-    setMicActive(
-      isMicEnabled ||
-      !isMuted
-    );
-  }, [
-    isMicEnabled,
-    isMuted,
-  ]);
+    setMicActive(isMicEnabled || !isMuted);
+  }, [isMicEnabled, isMuted]);
 
-
-
-const handleMicToggle =
-  async () => {
-
-    if (
-      !socket ||
-      !userId ||
-      !canSpeak
-    ) {
-      return;
-    }
+  const handleMicToggle = async () => {
+    if (!socket || !userId || !canSpeak) return;
 
     try {
-      const nextMuted =
-        micActive;
+      const nextMuted = micActive;
 
-      // ==========================
-      // TURN MIC ON
-      // ==========================
-
-      if (
-        !micActive
-      ) {
-
-        await livekitService
-          .enableMicrophone();
-
+      if (!micActive) {
+        await livekitService.enableMicrophone();
+      } else {
+        await livekitService.disableMicrophone();
       }
 
-      // ==========================
-      // TURN MIC OFF
-      // ==========================
+      setMicActive(!nextMuted);
 
-      else {
-
-        await livekitService
-          .disableMicrophone();
-
-      }
-
-      setMicActive(
-        !nextMuted
-      );
-
-      // ==========================
-      // SOCKET UPDATE
-      // ==========================
-
-        socket.emit(
-          "audio_mic_toggle",
-          {
-            roomId: Number(roomId),
-            userId,
-            isMuted: nextMuted,
-          }
-        );
-
-    } catch (
-      error
-    ) {
-
-      console.error(
-        "Mic toggle failed:",
-        error
-      );
-    }
-  };
-
-
-// const handleMicToggle =
-//   () => {
-//     if (
-//       !socket ||
-//       !userId ||
-//       !canSpeak
-//     ) {
-//       return;
-//     }
-
-//     socket.emit(
-//       "audio_mic_toggle",
-//       {
-//         roomId:
-//           Number(roomId),
-//         userId,
-//         !isMicEnabled:
-//           !!isMicEnabled,
-//       }
-//     );
-//   };
-
-  
-
-
-const handleEndRoom =
-  async () => {
-    try {
-      const response =
-        await apiFetch(
-          "/audio-room/end-room",
-          {
-            method:
-              "POST",
-
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-
-            body:
-              JSON.stringify(
-                {
-                  roomId,
-                  userId,
-                }
-              ),
-          }
-        );
-
-      const data =
-        await response.json();
-
-      if (
-        !response.ok
-      ) {
-        throw new Error(
-          data.message ||
-            "Failed to end room"
-        );
-      }
-
-      console.log(
-        "✅ Room Ended:",
-        data
-      );
-
-      window.location.href =
-        "/audio-room";
-    } catch (
-      error
-    ) {
-      console.error(
-        "❌ End Room Error:",
-        error
-      );
-    }
-  };
-
-const handleLeaveRoom =
-  async () => {
-    try {
-      // const userId = 1;
-
-      const response =
-        await apiFetch(
-          "/audio-room/leave-room",
-          {
-            method:
-              "POST",
-
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-
-            body:
-              JSON.stringify(
-                {
-                  roomId,
-                  userId,
-                }
-              ),
-          }
-        );
-
-      const data =
-        await response.json();
-
-      if (
-        !response.ok
-      ) {
-        throw new Error(
-          data.message ||
-            "Failed to leave room"
-        );
-      }
-
-      console.log(
-        "✅ Left Room:",
-        data
-      );
-
-      window.location.href =
-        "/audio-room";
-    } catch (
-      error
-    ) {
-      console.error(
-        "❌ Leave Room Error:",
-        error
-      );
-    }
-  };
-
-
-
-  const handleRaiseHand =
-  async () => {
-    try {
-      const response =
-        await apiFetch(
-          "/audio-room/raise-hand",
-          {
-            method:
-              "POST",
-
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-
-            body:
-              JSON.stringify({
-                roomId:
-                  Number(roomId),
-
-                userId,
-              }),
-          }
-        );
-
-      const data =
-        await response.json();
-
-      if (
-        !response.ok
-      ) {
-        throw new Error(
-          data.message
-        );
-      }
-
-      console.log(
-        "✋ Hand Raised:",
-        data
-      );
-    } catch (
-      error
-    ) {
-      console.error(
-        "Raise Hand Error:",
-        error
-      );
-    }
-  };
-
-// ==========================
-// MODERATION HANDLERS
-// ==========================
-
-const handleMuteSpeaker =
-  (speakerId: number) => {
-    if (!socket) return;
-
-    socket.emit("mute_speaker", {
-      roomId: Number(roomId),
-      userId: speakerId,
-    });
-
-    console.log(
-      `🔇 Muting user ${speakerId}`
-    );
-    setShowModerationMenu(false);
-  };
-
-const handleUnmuteSpeaker =
-  (speakerId: number) => {
-    if (!socket) return;
-
-    socket.emit("unmute_speaker", {
-      roomId: Number(roomId),
-      userId: speakerId,
-    });
-
-    console.log(
-      `🔊 Unmuting user ${speakerId}`
-    );
-    setShowModerationMenu(false);
-  };
-
-const handleDowngradeSpeaker =
-  (speakerId: number) => {
-    if (!socket) return;
-
-    socket.emit(
-      "downgrade_to_listener",
-      {
+      socket.emit("audio_mic_toggle", {
         roomId: Number(roomId),
-        userId: speakerId,
-      }
-    );
-
-    console.log(
-      `👤 Downgrading user ${speakerId} to listener`
-    );
-    setShowModerationMenu(false);
+        userId,
+        isMuted: nextMuted,
+      });
+    } catch (error) {
+      console.error("Mic toggle failed:", error);
+    }
   };
 
-const handleRemoveParticipant =
-  (participantId: number) => {
+  const handleEndRoom = async () => {
+    try {
+      const response = await apiFetch("/audio-room/room-ends", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ roomId, userId }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Failed to end room");
+
+      window.location.href = "/audio-room";
+    } catch (error) {
+      console.error("End Room Error:", error);
+    }
+  };
+
+  const handleLeaveRoom = async () => {
+    try {
+      const response = await apiFetch("/audio-room/leave-room", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ roomId, userId }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Failed to leave room");
+
+      window.location.href = "/audio-room";
+    } catch (error) {
+      console.error("Leave Room Error:", error);
+    }
+  };
+
+  const handleRaiseHand = async () => {
+    try {
+      const response = await apiFetch("/audio-room/raise-hand", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ roomId: Number(roomId), userId }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+      console.log("✋ Hand Raised:", data);
+    } catch (error) {
+      console.error("Raise Hand Error:", error);
+    }
+  };
+
+  const handleMuteSpeaker = (speakerId: number) => {
     if (!socket) return;
-
-    socket.emit("remove_participant", {
-      roomId: Number(roomId),
-      userId: participantId,
-    });
-
-    console.log(
-      `❌ Removing user ${participantId} from room`
-    );
+    socket.emit("mute_speaker", { roomId: Number(roomId), userId: speakerId });
     setShowModerationMenu(false);
   };
 
+  const handleUnmuteSpeaker = (speakerId: number) => {
+    if (!socket) return;
+    socket.emit("unmute_speaker", { roomId: Number(roomId), userId: speakerId });
+    setShowModerationMenu(false);
+  };
+
+  const handleDowngradeSpeaker = (speakerId: number) => {
+    if (!socket) return;
+    socket.emit("downgrade_to_listener", { roomId: Number(roomId), userId: speakerId });
+    setShowModerationMenu(false);
+  };
+
+  const handleRemoveParticipant = (participantId: number) => {
+    if (!socket) return;
+    socket.emit("remove_participant", { roomId: Number(roomId), userId: participantId });
+    setShowModerationMenu(false);
+  };
 
   return (
-    <div
-      className="
-        border-t
-        border-slate-200/60
-        bg-white/40
-        backdrop-blur-md
-        px-5
-        py-2
-      "
-    >
-      <div className="flex items-center justify-center gap-4 flex-wrap">
-        {/* <div className="text-xs text-red-600 font-bold">
-              Role: {role}
-        </div> */}
-        {/* Mic Button */}
-        {canSpeak && (
-          <button
-            onClick={handleMicToggle}
-            className={`
-              flex
-              h-12
-              w-12
-              items-center
-              justify-center
-              rounded-full
-              transition-all
-              shadow-sm
-
-              ${
-                !micActive
-                  ? "bg-red-100 border border-red-200"
-                  : "bg-green-100 border border-green-200"
-              }
-            `}
-          >
-            {!micActive ? (
-              <MicOff
-                size={22}
-                className="text-red-600"
-              />
-            ) : (
-              <Mic
-                size={22}
-                className="text-green-600"
-              />
-            )}
+    <div className="w-full bg-white px-1.5 py-1 sm:px-4 border-t border-black/[0.03]">
+      <div className="flex items-center justify-between gap-1.5 sm:gap-4 max-w-5xl mx-auto">
+        
+        {/* Left Side: Secondary actions */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition active:scale-95 shadow-xs">
+            <Smile size={18} />
           </button>
-        )}
 
-        {/* Reaction */}
-        <button
-          className="
-            flex
-            h-12
-            w-12
-            items-center
-            justify-center
-            rounded-full
-            border
-            border-slate-200
-            bg-white/50
-            shadow-sm
-            transition
-            hover:bg-white
-          "
-        >
-          <Smile
-            size={22}
-            className="text-slate-700"
-          />
-        </button>
-
-        {/* Raise Hand */}
-        {role === "listener" && (
-          <button
-            onClick={handleRaiseHand}
-            className="
-              flex
-              h-12
-              w-12
-              items-center
-              justify-center
-              rounded-full
-              border
-              border-amber-200
-              bg-amber-100
-              shadow-sm
-              transition
-              hover:bg-amber-200
-            "
-          >
-            <Hand
-              size={22}
-              className="text-amber-700"
-            />
-          </button>
-        )}
-
-        {/* Moderator Controls */}
-        {isModerator && (
-          <div className="relative">
-            <button
-              onClick={() =>
-                setShowModerationMenu(
-                  !showModerationMenu
-                )
-              }
-              className="
-                flex
-                h-12
-                w-12
-                items-center
-                justify-center
-                rounded-full
-                border
-                border-sky-200
-                bg-sky-100
-                shadow-sm
-                transition
-                hover:bg-sky-200
-              "
-            >
-              <Shield
-                size={22}
-                className="text-sky-700"
-              />
+          {role === "listener" && (
+            <button onClick={handleRaiseHand} className="flex h-9 w-9 items-center justify-center rounded-lg border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 transition active:scale-95 shadow-xs">
+              <Hand size={18} />
             </button>
+          )}
 
-            {/* Moderation Dropdown Menu */}
-            {showModerationMenu && (
-              <div
-                className="
-                  absolute
-                  bottom-16
-                  left-0
-                  bg-white
-                  border
-                  border-slate-200
-                  rounded-lg
-                  shadow-lg
-                  p-2
-                  z-50
-                  w-56
-                "
-              >
-                <div
-                  className="
-                    text-sm
-                    font-semibold
-                    text-slate-700
-                    mb-3
-                    px-2
-                  "
-                >
-                  Moderation Controls
-                </div>
+          {isModerator && (
+            <div className="relative">
+              <button onClick={() => setShowModerationMenu(!showModerationMenu)} className={`flex h-9 w-9 items-center justify-center rounded-lg border transition active:scale-95 shadow-xs ${showModerationMenu ? "border-sky-300 bg-sky-100 text-sky-800" : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>
+                <Shield size={18} />
+              </button>
 
-                <div
-                  className="
-                    space-y-2
-                  "
-                >
-                  {moderationParticipants.length ===
-                  0 ? (
-                    <div
-                      className="
-                        px-2
-                        py-3
-                        text-xs
-                        text-slate-500
-                      "
-                    >
-                      No speakers available
-                    </div>
-                  ) : (
-                    moderationParticipants.map(
-                      (
-                        participant
-                      ) => (
-                        <div
-                          key={
-                            participant.id
-                          }
-                          className="
-                            rounded
-                            border
-                            border-slate-200
-                            p-2
-                          "
-                        >
-                          <div className="mb-2">
-                            <div className="text-xs font-semibold text-slate-700">
-                              {
-                                participant.name
-                              }
+              {showModerationMenu && (
+                <div className="absolute bottom-12 left-0 bg-white border border-slate-200/80 rounded-xl shadow-xl p-2 z-50 w-60 max-h-64 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-bottom-2 duration-150">
+                  <div className="text-[8px] font-bold tracking-wider text-slate-400 uppercase px-2 py-1 mb-1">Moderation Panel</div>
+                  <div className="space-y-1.5">
+                    {moderationParticipants.length === 0 ? (
+                      <div className="px-2 py-3 text-[8px] text-slate-400 text-center font-medium">No speakers connected</div>
+                    ) : (
+                      <div className="space-y-1">
+                        {moderationParticipants.map((participant) => (
+                          <div key={participant.id} className="rounded-lg border border-slate-100 bg-slate-50/50 p-2">
+                            <div className="mb-1.5">
+                              <div className="text-[8px] font-bold text-slate-700 truncate">{participant.name}</div>
+                              <div className="text-[8px] uppercase font-bold tracking-wide text-slate-400 mt-0.5">{participant.role}</div>
                             </div>
-                            <div className="text-[10px] uppercase text-slate-400">
-                              {
-                                participant.role
-                              }
+                            <div className="grid grid-cols-2 gap-1">
+                              {participant.isMuted ? (
+                                <button type="button" onClick={() => handleUnmuteSpeaker(participant.id)} className="flex items-center justify-center gap-1 rounded bg-white border border-slate-200 py-1 text-[8px] font-semibold text-green-700 hover:bg-green-50">
+                                  <Volume2 size={11} /> Unmute
+                                </button>
+                              ) : (
+                                <button type="button" onClick={() => handleMuteSpeaker(participant.id)} className="flex items-center justify-center gap-1 rounded bg-white border border-slate-200 py-1 text-[8px] font-semibold text-red-600 hover:bg-red-50">
+                                  <VolumeX size={11} /> Mute
+                                </button>
+                              )}
+                              <button type="button" onClick={() => handleDowngradeSpeaker(participant.id)} className="flex items-center justify-center gap-1 rounded bg-white border border-slate-200 py-1 text-[8px] font-semibold text-amber-700 hover:bg-amber-50">
+                                <LogOut size={11} /> Demote
+                              </button>
+                              <button type="button" onClick={() => handleRemoveParticipant(participant.id)} className="col-span-2 flex items-center justify-center gap-1 rounded bg-red-50 border border-red-100 py-1 text-[8px] font-bold text-red-600 hover:bg-red-100">
+                                <Trash2 size={11} /> Evict From Room
+                              </button>
                             </div>
                           </div>
-
-                          <div className="grid grid-cols-2 gap-1">
-                            {participant.isMuted ? (
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handleUnmuteSpeaker(
-                                    participant.id
-                                  )
-                                }
-                                className="
-                                  flex
-                                  items-center
-                                  justify-center
-                                  gap-1
-                                  rounded
-                                  border
-                                  border-green-200
-                                  bg-green-50
-                                  px-2
-                                  py-1
-                                  text-[10px]
-                                  text-green-700
-                                  hover:bg-green-100
-                                "
-                              >
-                                <Volume2
-                                  size={12}
-                                />
-                                Unmute
-                              </button>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handleMuteSpeaker(
-                                    participant.id
-                                  )
-                                }
-                                className="
-                                  flex
-                                  items-center
-                                  justify-center
-                                  gap-1
-                                  rounded
-                                  border
-                                  border-red-200
-                                  bg-red-50
-                                  px-2
-                                  py-1
-                                  text-[10px]
-                                  text-red-700
-                                  hover:bg-red-100
-                                "
-                              >
-                                <VolumeX
-                                  size={12}
-                                />
-                                Mute
-                              </button>
-                            )}
-
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleDowngradeSpeaker(
-                                  participant.id
-                                )
-                              }
-                              className="
-                                flex
-                                items-center
-                                justify-center
-                                gap-1
-                                rounded
-                                border
-                                border-amber-200
-                                bg-amber-50
-                                px-2
-                                py-1
-                                text-[10px]
-                                text-amber-700
-                                hover:bg-amber-100
-                              "
-                            >
-                              <LogOut
-                                size={12}
-                              />
-                              Listen
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleRemoveParticipant(
-                                  participant.id
-                                )
-                              }
-                              className="
-                                col-span-2
-                                flex
-                                items-center
-                                justify-center
-                                gap-1
-                                rounded
-                                border
-                                border-red-300
-                                bg-red-100
-                                px-2
-                                py-1
-                                text-[10px]
-                                text-red-700
-                                hover:bg-red-200
-                              "
-                            >
-                              <Trash2
-                                size={12}
-                              />
-                              Remove
-                            </button>
-                          </div>
-                        </div>
-                      )
-                    )
-                  )}
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-        )}
+              )}
+            </div>
+          )}
+        </div>
 
-        {/* Chat Toggle */}
-        <button
-          onClick={() => setIsChatOpen?.(!isChatOpen)}
-          className={`
-            flex
-            h-12
-            w-12
-            items-center
-            justify-center
-            rounded-full
-            shadow-sm
-            transition
-            hover:bg-blue-300
+        {/* Center: Primary Call Controls */}
+        {/* FIXED: Changed flex layout constraints to keep these side-by-side on mobile without squishing */}
+        <div className="flex items-center gap-1.5 sm:gap-3 flex-1 justify-center sm:flex-initial">
+          {canSpeak && (
+            <button 
+              onClick={handleMicToggle} 
+              className={`flex h-9 sm:h-10 px-2.5 sm:px-4 items-center justify-center gap-1.5 rounded-lg sm:rounded-xl font-bold text-xs transition-all active:scale-95 shadow-xs shrink-0 ${
+                !micActive ? "bg-red-500 hover:bg-red-600 text-white" : "bg-[#076d47] hover:bg-[#055235] text-white"
+              }`}
+            >
+              {!micActive ? <MicOff size={15} /> : <Mic size={15} />}
+              <span className="hidden sm:inline">{!micActive ? "Muted" : "Mute Mic"}</span>
+            </button>
+          )}
 
-            ${
-              isChatOpen
-                ? "border border-blue-200 bg-blue-100"
-                : "border border-slate-200 bg-blue-200 hover:bg-white"
-            }
-          `}
-        >
-          <MessageCircle
-            size={22}
-            className={
-              isChatOpen
-                ? "text-blue-600"
-                : "text-slate-700"
-            }
-          />
-        </button>
+          <button 
+            onClick={handleLeaveRoom} 
+            className="flex h-9 sm:h-10 px-2.5 sm:px-4 items-center justify-center gap-1.5 rounded-lg sm:rounded-xl border border-red-200 bg-red-50 font-bold text-xs text-red-600 hover:bg-red-100 transition active:scale-95 shadow-xs shrink-0"
+          >
+            <PhoneOff size={15} />
+            <span className="hidden sm:inline">Leave Space</span>
+          </button>
+        </div>
 
-        {/* End Room */}
-{role ===
-  "host" && (
-  <button
-    onClick={
-      handleEndRoom
-    }
-    className="
-      flex
-      h-12
-      w-12
-      items-center
-      justify-center
-      rounded-full
-      border
-      border-red-300
-      bg-red-600
-      shadow-sm
-      transition
-      hover:bg-red-700
-    "
-  >
-    <Square
-      size={22}
-      className="text-white"
-    />
-  </button>
-)}
+        {/* Right Side: Interface adjustments */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button onClick={() => setIsChatOpen?.(!isChatOpen)} className={`flex h-9 w-9 items-center justify-center rounded-lg border transition active:scale-95 shadow-xs ${isChatOpen ? "border-[#076d47]/30 bg-[#076d47]/5 text-[#076d47]" : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>
+            <MessageCircle size={18} />
+          </button>
 
-        {/* Leave Room */}
-        <button
-        onClick={ handleLeaveRoom }
-          className="
-            flex
-            h-12
-            w-12
-            items-center
-            justify-center
-            rounded-full
-            border
-            border-red-200
-            bg-red-100
-            shadow-sm
-            transition
-            hover:bg-red-200
-          "
-        >
-          <PhoneOff
-            size={22}
-            className="text-red-700"
-          />
-        </button>
+          {role === "host" && (
+            <button onClick={handleEndRoom} className="flex h-9 w-9 items-center justify-center rounded-lg border border-red-200 bg-white text-red-600 hover:bg-red-50 transition active:scale-95 shadow-xs" title="End Session">
+              <Square size={14} className="fill-red-600" />
+            </button>
+          )}
+        </div>
+
       </div>
     </div>
   );

@@ -5,7 +5,7 @@ import ParticipantCard from "./ParticipantCard";
 
 interface Participant {
   id: number;
-  name: string;
+  name: string; 
   role: string;
   isMuted?: boolean;
   isSpeaking?: boolean;
@@ -26,96 +26,44 @@ const ParticipantSection = ({
   currentUserId,
   canModerate = false,
 }: ParticipantSectionProps) => {
-  const uniqueParticipants =
-    Array.from(
-      new Map(
-        participants.map(
-          (
-            participant
-          ) => [
-            participant.id,
-            participant,
-          ]
-        )
-      ).values()
-    );
+  const uniqueParticipants = Array.from(
+    new Map(participants.map((p) => [p.id, p])).values()
+  );
 
   return (
-    <section
-      className="
-        rounded-[8px]
-        border
-        border-slate-200/70
-        bg-white/40
-        backdrop-blur-sm
-        p-5
-        shadow-sm
-      "
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between mb-5">
-        <div>
-          <h2 className="text-[10px] font-semibold text-slate-800">
-            {title}
-          </h2>
-
-          <p className="text-[8px] text-slate-500 mt-1">
-            {uniqueParticipants.length} participants
-          </p>
-        </div>
+    <section className="w-full">
+      {/* Sub-Header: Ultra-clean and compact text alignment */}
+      <div className="flex items-baseline gap-2 mb-3 px-1">
+        <h2 className="text-[9px] font-bold tracking-wider text-slate-500 uppercase">
+          {title}
+        </h2>
+        <span className="text-[10px] font-medium text-slate-400">
+          • {uniqueParticipants.length}
+        </span>
       </div>
 
-      {/* Empty State */}
+      {/* Empty View State */}
       {uniqueParticipants.length === 0 ? (
-        <div
-          className="
-            flex
-            items-center
-            justify-center
-            rounded-3xl
-            border
-            border-dashed
-            border-slate-200
-            bg-slate-50/50
-            py-10
-          "
-        >
-          <p className="text-sm text-slate-400">
+        <div className="flex items-center justify-center rounded-xl border border-dashed border-slate-200/60 bg-slate-50/30 py-6">
+          <p className="text-[9px] text-slate-400 font-medium">
             No participants available
           </p>
         </div>
       ) : (
-        /* Grid */
-        <div
-          className="
-            grid
-            grid-cols-2
-            sm:grid-cols-3
-            md:grid-cols-4
-            lg:grid-cols-5
-            xl:grid-cols-6
-            gap-4
-          "
-        >
-          {uniqueParticipants.map(
-            (participant) => (
+        /* FIXED: Changed from an expansive grid to a dense, fluid flex-wrap pattern.
+          This pulls items tight against one another, preserving vertical layout real estate.
+        */
+        <div className="flex flex-wrap gap-x-3 gap-y-4 px-1">
+          {uniqueParticipants.map((participant) => (
+            <div key={participant.id} className="shrink-0 w-[72px] sm:w-[80px]">
               <ParticipantCard
-                key={participant.id}
-                participant={
-                  participant
-                }
-                roomId={
-                  roomId
-                }
-                currentUserId={
-                  currentUserId
-                }
-                canModerate={
-                  canModerate
-                }
+                participant={participant}
+                roomId={roomId}
+                currentUserId={currentUserId}
+                canModerate={canModerate}
               />
-            )
-          )}
+            </div>
+          ))}
         </div>
       )}
     </section>

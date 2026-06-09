@@ -3,15 +3,15 @@
 import { ReactNode, useState } from "react";
 import { SocketProvider } from "@/context/SocketContext";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { Nunito } from "next/font/google";
+import { Michroma } from "next/font/google";
 import { apiFetch } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-const nunito = Nunito({
+const michroma = Michroma({
   subsets: ["latin"],
-  weight: ["400", "500", "700"],
+  weight: "400",
   display: "swap",
   preload: true,
 });
@@ -68,7 +68,7 @@ export default function AudioRoomLayout({
   if (loading) {
     return (
       <div
-        className={`${nunito.className} min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(7,109,71,0.08),transparent_28%),radial-gradient(circle_at_top_right,rgba(15,23,42,0.06),transparent_24%),linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)] text-slate-950`}
+        className={`${michroma.className} min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(7,109,71,0.08),transparent_28%),radial-gradient(circle_at_top_right,rgba(15,23,42,0.06),transparent_24%),linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)] text-slate-950`}
       >
         <div className="flex min-h-screen items-center justify-center px-4">
           <div className="rounded-[28px] border border-black/10 bg-white/90 px-8 py-10 shadow-[0_30px_80px_rgba(0,0,0,0.08)] backdrop-blur">
@@ -84,7 +84,7 @@ export default function AudioRoomLayout({
   if (isBlocked) {
     return (
       <div
-        className={`${nunito.className} min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(7,109,71,0.08),transparent_28%),radial-gradient(circle_at_top_right,rgba(15,23,42,0.06),transparent_24%),linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)] text-slate-950`}
+        className={`${michroma.className} min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(7,109,71,0.08),transparent_28%),radial-gradient(circle_at_top_right,rgba(15,23,42,0.06),transparent_24%),linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)] text-slate-950`}
       >
         <div className="flex min-h-screen items-center justify-center px-4">
           <div className="w-full max-w-md rounded-[28px] border border-black/10 bg-white/90 p-8 shadow-[0_30px_80px_rgba(0,0,0,0.08)] backdrop-blur">
@@ -106,7 +106,7 @@ export default function AudioRoomLayout({
   if (!me) {
     return (
       <div
-        className={`${nunito.className} min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(7,109,71,0.08),transparent_28%),radial-gradient(circle_at_top_right,rgba(15,23,42,0.06),transparent_24%),linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)] text-slate-950`}
+        className={`${michroma.className} min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(7,109,71,0.08),transparent_28%),radial-gradient(circle_at_top_right,rgba(15,23,42,0.06),transparent_24%),linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)] text-slate-950`}
       >
         <div className="flex min-h-screen items-center justify-center px-4 py-10">
           <div className="w-full max-w-md rounded-[28px] border border-black/10 bg-white/92 p-8 shadow-[0_30px_80px_rgba(0,0,0,0.08)] backdrop-blur">
@@ -175,7 +175,7 @@ export default function AudioRoomLayout({
 
   return (
     <SocketProvider>
-      <div className={`${nunito.className} min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(7,109,71,0.08),transparent_28%),radial-gradient(circle_at_top_right,rgba(15,23,42,0.06),transparent_24%),linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)] text-slate-950`}>
+      <div className={`${michroma.className} min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(7,109,71,0.08),transparent_28%),radial-gradient(circle_at_top_right,rgba(15,23,42,0.06),transparent_24%),linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)] text-slate-950`}>
         {children}
       </div>
     </SocketProvider>

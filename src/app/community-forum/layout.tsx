@@ -1,9 +1,9 @@
 import { ReactNode } from "react";
-import { Nunito } from "next/font/google";
+import { Michroma } from "next/font/google";
 
-const nunito = Nunito({
+const michroma = Michroma({
   subsets: ["latin"],
-  weight: ["400", "500", "700"],
+  weight: "400",
   display: "swap",
   preload: true,
 });
@@ -17,7 +17,7 @@ export default function CommunityLayout({
 }: CommunityLayoutProps) {
   return (
     <section
-      className={`${nunito.className} min-h-screen bg-[#effbf0] text-slate-950`}
+      className={`${michroma.className} min-h-screen bg-[#effbf0] text-slate-950`}
     >
       {children}
     </section>

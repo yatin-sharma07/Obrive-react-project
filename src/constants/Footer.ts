@@ -33,7 +33,7 @@ export const GROUPS = [
     items: [
       { label: "Obrive Resources", href: "/resources" },
       { label: "Obrive Help Desk", href: "/support/help-center" },
-      { label: "Community Forum", href: "/community" },
+      { label: "Community Forum", href: "/community-forum" },
       { label: "Obrive Legal", href: "/legal" },
     ],
   },
