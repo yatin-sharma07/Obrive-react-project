@@ -4,11 +4,7 @@ const express =
 const router =
   express.Router();
 
-const {
-  endRoomController,
-} = require(
-  "./roomEnd.controller"
-);
+const { endRoomController,} = require( "./roomEnd.controller");
 
 const auth = require("../../../middleware/auth");
 const zodValidate = require("../../../middleware/zodValidate");

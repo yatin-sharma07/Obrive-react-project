@@ -87,7 +87,7 @@ const BottomControls = ({
 
   const handleEndRoom = async () => {
     try {
-      const response = await apiFetch("/audio-room/room-ends", {
+      const response = await apiFetch("/audio-room//end-room", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ roomId, userId }),
@@ -96,11 +96,16 @@ const BottomControls = ({
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Failed to end room");
 
-      window.location.href = "/audio-room";
+      // window.location.href = "/community-forum/room-ends";
     } catch (error) {
       console.error("End Room Error:", error);
     }
+          window.location.href = "/audio-room/room-ends";
   };
+
+
+
+  // app.use( "/api/audio-room", require( "./src/modules/AUDIO_ROOM/room-end/roomEnd.routes"));
 
   const handleLeaveRoom = async () => {
     try {
@@ -113,7 +118,7 @@ const BottomControls = ({
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Failed to leave room");
 
-      window.location.href = "/audio-room";
+      window.location.href = "/community-forum/rooms";
     } catch (error) {
       console.error("Leave Room Error:", error);
     }
