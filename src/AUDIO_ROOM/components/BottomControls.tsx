@@ -96,11 +96,11 @@ const BottomControls = ({
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Failed to end room");
 
-      // window.location.href = "/community-forum/room-ends";
+      window.location.href = "/audio-room/room-ends";
     } catch (error) {
       console.error("End Room Error:", error);
     }
-          window.location.href = "/audio-room/room-ends";
+          // window.location.href = "/audio-room/room-ends";
   };
 
 
