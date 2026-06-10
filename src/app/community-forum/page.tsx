@@ -80,7 +80,7 @@ useEffect(() => {
         // ignore errors refreshing user cache
       }
 
-      router.push("/community/rooms");
+      router.push("/community-forum/rooms");
     } catch (loginError: any) {
       setError(loginError?.message || "Login failed");
     } finally {
