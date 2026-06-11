@@ -148,33 +148,35 @@ const RoomsHistory = () => {
   // ======================================================
   // END ROOM
   // ======================================================
-  const handleEndRoom = async (roomId: number) => {
-    try {
-      if (!me?.id) return;
-
-      const response = await apiFetch("/audio-room/end-room", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          roomId,
-          userId: me.id,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to end room");
-      }
-
-      console.log("✅ Room Ended:", data);
-      refreshRoomsList();
-    } catch (err) {
-      console.error("❌ Error ending room:", err);
+const handleEndRoom = async (roomId: number) => {
+  try {
+    if (!me?.id) {
+      alert("Session signature expired. Please re-authenticate.");
+      return;
     }
-  };
+
+    // Call the dedicated dashboard bypass route
+    const response = await apiFetch("/audio-room/admin/end-room", { 
+      method: "POST",
+      body: JSON.stringify({ 
+        roomId: roomId, // Coerced cleanly on backend by Zod definition array
+        userId: me.id 
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || `System rejected action with status: ${response.status}`);
+    }
+
+    console.log("✅ Room successfully terminated via admin context:", data);
+    refreshRoomsList();
+  } catch (err) {
+    console.error("❌ History Dashboard action failure:", err);
+    alert(err instanceof Error ? err.message : "Failed to terminate targeted audio session.");
+  }
+};
 
   // ======================================================
   // ROOM CARD RENDERING BLOCK

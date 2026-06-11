@@ -96,10 +96,10 @@ const CreateRoom = () => {
   // MEMOIZED ROLE OPTIONS MATRIX
   // ======================================================
   const roleOptions = useMemo(() => ({
-    Host: ["Host", "Moderator", "HR", "other"],
-    Moderator: ["Host", "Moderator", "HR", "other"],
-    Speakers: ["Host", "Moderator", "HR", "other"],
-    Joinees: ["Host", "Moderator", "HR", "Employee", "Client", "Guests"],
+    Host: ["Admin", "Moderator", "HR", "other"],
+    Moderator: ["Admin", "Moderator", "HR", "other"],
+    Speakers: ["Admin", "Moderator", "HR", "other"],
+    Joinees: ["Admin", "Moderator", "HR", "Employee", "Client", "Guests"],
   }), []);
 
   // ======================================================

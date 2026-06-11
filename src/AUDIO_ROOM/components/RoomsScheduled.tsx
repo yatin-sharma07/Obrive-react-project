@@ -200,7 +200,7 @@ const ScheduledRooms = () => {
 
                   {/* Interactive Control Blocks */}
                   <div className="flex items-center justify-end gap-1.5">
-                    <button
+                    {/* <button
                       onClick={() => handleGenerateLink(room.id)}
                       className={buttonClass}
                       title="Copy invite link"
@@ -213,7 +213,7 @@ const ScheduledRooms = () => {
                       className={buttonClass}
                     >
                       Notify
-                    </button>
+                    </button> */}
 
                     <button
                       onClick={() => handleStartNow(room.id)}

@@ -33,6 +33,7 @@ const AudioRoomPage = () => {
   }, [currentUserId]);
 
   useEffect(() => {
+
     if (!userLoading && (userError || !currentUserId)) {
       router.replace("/employee-login");
     }
@@ -130,6 +131,12 @@ const AudioRoomPage = () => {
 
       const response = await apiFetch(`/audio-room/room-details/${roomId}`);
       const data = await response.json();
+      const roomStatus = data?.data?.room?.status || data?.room?.status;
+
+      if (roomStatus === "ended") {
+        router.replace("/audio-room/room-ends");
+        return;
+      }
 
       if (!response.ok) {
         throw new Error(data.message);

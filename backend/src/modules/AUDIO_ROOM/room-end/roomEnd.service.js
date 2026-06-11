@@ -1,60 +1,36 @@
 const { prisma } = require("../../../../prisma");
 
-const endRoomService = async (
-  payload,
-  userId
-) => {
+const endRoomService = async (payload, userId, userRole) => {
   const { roomId } = payload;
 
-  // ==========================
-  // FIND ROOM
-  // ==========================
-
-  const room =
-    await prisma.room_configs.findUnique(
-      {
-        where: {
-          id: Number(roomId),
-        },
-      }
-    );
+  const room = await prisma.room_configs.findUnique({
+    where: {
+      id: Number(roomId),
+    },
+  });
 
   if (!room) {
-    throw new Error(
-      "Room not found"
-    );
+    throw new Error("Room target parameters not found.");
   }
 
-  // ==========================
-  // VERIFY USER IS HOST
-  // ==========================
+ 
+  const hasGlobalPrivileges = userRole === "admin" || userRole === "supervisor";
+  const isRoomHost = room.createdBy === userId;
 
-  if (room.createdBy !== userId) {
-    throw new Error(
-      "Only the host can end the room"
-    );
+  if (!hasGlobalPrivileges && !isRoomHost) {
+    throw new Error("Only the active host creator or an administrator can end this session.");
   }
 
-  // ==========================
-  // UPDATE STATUS
-  // ==========================
-
-  const updatedRoom =
-    await prisma.room_configs.update(
-      {
-        where: {
-          id: Number(roomId),
-        },
-
-        data: {
-          roomStatus:
-            "ended",
-
-          endTime:
-            new Date(),
-        },
-      }
-    );
+ 
+  const updatedRoom = await prisma.room_configs.update({
+    where: {
+      id: Number(roomId),
+    },
+    data: {
+      roomStatus: "ended",
+      endTime: new Date(),
+    },
+  });
 
   return updatedRoom;
 };

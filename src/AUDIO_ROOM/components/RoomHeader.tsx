@@ -5,7 +5,7 @@ import { Users, Radio } from "lucide-react";
 
 interface RoomHeaderProps {
   title?: string;
-  description?: string;
+  description?: string; 
   participantCount?: number;
 }
 
