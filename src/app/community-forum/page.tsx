@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-
 import { API_BASE_URL } from "@/lib/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import obriveLogo from "../../assets/images/logos/obrive-logo.svg";
@@ -149,7 +148,10 @@ useEffect(() => {
 </div>
 
       <header className="fixed top-0 left-0 w-full z-50 px-6 md:px-15 py-6 md:py-8 flex justify-between items-center bg-transparent pointer-events-auto">
-        <div className="font-black tracking-tight text-xl">
+        <div 
+        className="font-black tracking-tight text-xl pointer-events-auto cursor-pointer"
+        onClick={() => router.push("/")}
+        >
 
         <Image
           src={obriveLogo}
